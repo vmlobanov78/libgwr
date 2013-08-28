@@ -126,6 +126,8 @@ GwrTextView::Model::Model()
 {
     d_gtk_text_buffer   =   gtk_text_buffer_new(gtk_text_tag_table_new());
     d_text_tag_helper   =   GWR_NEW( TextTagHelper, d_gtk_text_buffer );
+
+    a_count             = 0;
 }
 GwrTextView::Model::~Model()
 {
@@ -135,6 +137,7 @@ GwrTextView::Model::clear()
 {
     GtkTextIter         iter_start, iter_end;
     //..........................................................................
+    a_count = 0;
     gtk_text_buffer_get_start_iter  (buffer(), &iter_start);                    // get start of buffer
     gtk_text_buffer_get_end_iter    (buffer(), &iter_end);                      // get end of buffer
 
@@ -145,11 +148,15 @@ GwrTextView::Model::append(
     const   gchar     *   _txt,
             guint32       _tag)
 {
+    GtkTextMark     *   mark = NULL;
     GtkTextIter         iter_start, iter_end;
     gint                offset_start;
     GSList          *   slist       = NULL;
     //..........................................................................
-    d_text_tag_helper->build_tag_list(&slist, _tag);                            // build GtkTextTag* list
+    a_count++;
+
+    // build GtkTextTag* list
+    d_text_tag_helper->build_tag_list(&slist, _tag);
 
     gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // get end of buffer iter   = start of our text
     offset_start = gtk_text_iter_get_offset(&iter_end);                         // get end of buffer offset = start of our text
@@ -176,11 +183,13 @@ GwrTextView::Model::append(
 //
 //  ############################################################################
 GwrTextView::View::View(
-    GtkTextBuffer   *   _buffer,
-    gboolean            _editable)
+    Control     *   _control,
+    gboolean        _editable)
 {
-    g_return_if_fail( _buffer );
-    a_text_buffer           = _buffer;
+    g_return_if_fail( _control );
+
+    a_control               = _control;
+    a_text_buffer           = control()->model()->buffer();
 
     d_gtk_text_view         =   gtk_text_view_new_with_buffer(a_text_buffer);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(d_gtk_text_view), _editable);
@@ -228,6 +237,7 @@ void
 GwrTextView::View::scroll_to_end()
 {
     GtkTextIter iter;
+    /*
     //..........................................................................
     gtk_text_buffer_get_end_iter(a_text_buffer, &iter);
 
@@ -238,6 +248,7 @@ GwrTextView::View::scroll_to_end()
         FALSE,
         (gdouble)0.0,
         (gdouble)0.0);
+    */
 }
 //  ----------------------------------------------------------------------------
 void
@@ -372,8 +383,9 @@ GwrTextView::View::Sgn_key_release_event(
     GdkEvent    *   _event    ,
     gpointer        _data)
 {
-    View                        *   THIS    = NULL;
-    GdkEventKey                 *   ek      = NULL;
+    static  gchar                   str[256];
+            View                *   THIS    = NULL;
+            GdkEventKey         *   ek      = NULL;
     //..........................................................................
     THIS    =   (View*)_data;
     ek      =   (GdkEventKey*)_event;
@@ -388,6 +400,12 @@ GwrTextView::View::Sgn_key_release_event(
     {
         THIS->find_text();
         goto lab_end;
+    }
+
+    if ( ek->keyval == GDK_KEY_m )
+    {
+        sprintf(str, "lines:%i\n", gtk_text_buffer_get_line_count(THIS->a_text_buffer));
+        THIS->control()->model()->append( str, 0);
     }
 
     //  ........................................................................
@@ -439,12 +457,10 @@ lab_end:
 //  GwrTextView::Control
 //
 //  ############################################################################
-GwrTextView::Control::Control(
-    Model   *   _model,
-    View    *   _view)
+GwrTextView::Control::Control(gboolean _editable)
 {
-    d_model =   _model;
-    d_view  =   _view;
+    d_model     = GWR_NEW( Model );
+    d_view      = GWR_NEW( View, this , _editable );
 }
 GwrTextView::Control::~Control()
 {
@@ -456,9 +472,7 @@ GwrTextView::Control::~Control()
 //  ############################################################################
 GwrTextView::GwrTextView(gboolean _editable)
 {
-    d_model     = GWR_NEW( Model );
-    d_view      = GWR_NEW( View, d_model->buffer() , _editable );
-    d_control   = GWR_NEW( Control, model(), view() );
+    d_control   = GWR_NEW( Control, _editable );
 }
 
 GwrTextView::~GwrTextView()

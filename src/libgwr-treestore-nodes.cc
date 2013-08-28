@@ -1254,7 +1254,6 @@ PNode::visibility_changed()
 
     gboolean        v_old   = FALSE;
     gboolean        v_new   = FALSE;
-    gboolean        p_shown = FALSE;
     //  ........................................................................
     //  init retvals
     Store::s_ret_guint32_x2.u1  = 0;
@@ -1275,7 +1274,6 @@ PNode::visibility_changed()
     //  ........................................................................
     b       =   brothers();
     p       =   parent();
-    p_shown =   p->shown();
 
     this->flags_set_visibility( v_new );                                        //  update visibility
 

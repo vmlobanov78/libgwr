@@ -163,11 +163,11 @@ class GwrTextView
         GtkTextTagTable     *   d_gtk_text_tag_table;
         GtkTextBuffer       *   d_gtk_text_buffer;
         TextTagHelper       *   d_text_tag_helper;
-
+        guint32                 a_count;
         //  ====================================================================
         //  methods
         //  ====================================================================
-        private:
+        public:
         inline  GtkTextBuffer   *   buffer()
                                     {
                                         return d_gtk_text_buffer;
@@ -212,10 +212,16 @@ class GwrTextView
         //  members
         //  ====================================================================
         private:
+        Control         *   a_control;
+
+        private:
         gboolean            a_is_shown;
         //  ====================================================================
         //  methods
         //  ====================================================================
+        private:
+        inline  Control     *       control()     { return a_control;   }
+
         private:
         inline  GtkTextBuffer   *   buffer()
                                     {
@@ -264,7 +270,7 @@ class GwrTextView
         static  gboolean    Sgn_entry_find_key_release_event  (GtkWidget*, GdkEvent*, gpointer);
 
         public:
-        View(GtkTextBuffer*, gboolean _editable = FALSE);
+        View(Control*, gboolean _editable);
        ~View();
 
     };
@@ -296,7 +302,7 @@ class GwrTextView
         //  methods
         //  ====================================================================
         public:
-         Control(Model*, View*);
+         Control(gboolean _editable);
         ~Control();
 
         private:
@@ -333,14 +339,18 @@ class GwrTextView
                                     view()->set_color_bg(_color);
                                 }
 
+        inline  void            search_entry_show(gboolean _bsh)
+                                {
+                                    view()->find_entry_show(_bsh);
+                                }
+
+
     };
 
     //  ========================================================================
     //  members
     //  ========================================================================
     private:
-    Model       *   d_model;
-    View        *   d_view;
     Control     *   d_control;
     //  ========================================================================
     //  metohds
@@ -350,8 +360,6 @@ class GwrTextView
     virtual ~GwrTextView();
     //..........................................................................
     public:
-    inline  Model   *   model()     { return d_model;   }
-    inline  View    *   view()      { return d_view;    }
     inline  Control *   control()   { return d_control; }
     //..........................................................................
     public:
@@ -387,7 +395,7 @@ class GwrTextView
 
     inline  void            search_entry_show(gboolean _bsh)
                             {
-                                view()->find_entry_show(_bsh);
+                                control()->search_entry_show(_bsh);
                             }
 
 };
