@@ -52,6 +52,7 @@
 #include	"libgwr-counter.h"
 #include	"libgwr-collection.h"
 #include	"libgwr-str.h"
+#include	"libgwr-env.h"
 #include	"libgwr-stack.h"
 #include	"libgwr-spacer.h"
 #include	"libgwr-object.h"
@@ -81,52 +82,6 @@ inline  void            P_set_logger(Logger* _logger, guint32 _channel)
     GA_libgwr_logger_channel    = _channel;
 }
 
-//  ............................................................................
-GWR_NAMESPACE_START(chr)
-
-extern  gboolean    is_dec_digit(gchar c);
-extern  gboolean    is_hex_digit(gchar c);
-
-extern  gboolean    ascii_dec_to_u32(gchar _c, guint32* _u32);
-extern  gboolean    ascii_dec_to_i32(gchar _c, gint32*  _i32);
-
-extern  gboolean    ascii_hex_to_u32(gchar _c, guint32* _u32);
-extern  gboolean    ascii_hex_to_i32(gchar _c, gint32*  _i32);
-
-#ifdef G_HAVE_GINT64
-extern  gboolean    ascii_dec_to_u64(gchar _c, guint64* _u64);
-extern  gboolean    ascii_dec_to_i64(gchar _c, gint64*  _i64);
-
-extern  gboolean    ascii_hex_to_u64(gchar _c, guint64* _u64);
-extern  gboolean    ascii_hex_to_i64(gchar _c, gint64*  _i64);
-#endif  // G_HAVE_GINT64
-
-GWR_NAMESPACE_END(chr)
-//  ............................................................................
-GWR_NAMESPACE_START(str)
-
-inline  gboolean        eq(const gchar* _a, const char* _b)
-        {
-            return ( ! strcmp(_a,_b) );
-        }
-
-extern  gchar       *   dequote(const gchar* _str);
-
-extern  gboolean        ascii_dec_to_u32(const gchar* _str, gint32*  _i32);
-extern  gboolean        ascii_dec_to_i32(const gchar* _str, gint32*  _i32);
-
-extern  gboolean        ascii_hex_to_u32(const gchar* _str, gint32*  _i32);
-extern  gboolean        ascii_hex_to_i32(const gchar* _str, gint32*  _i32);
-
-#ifdef G_HAVE_GINT64
-extern  gboolean        ascii_dec_to_u64(const gchar* _str, gint64*  _i64);
-extern  gboolean        ascii_dec_to_i64(const gchar* _str, gint64*  _i64);
-
-extern  gboolean        ascii_hex_to_u64(const gchar* _str, gint64*  _i64);
-extern  gboolean        ascii_hex_to_i64(const gchar* _str, gint64*  _i64);
-#endif  // G_HAVE_GINT64
-
-GWR_NAMESPACE_END(str)
 //  ............................................................................
 //  GLib extensions
 extern  guint32     g_ptr_array_find_first_free_index   (GPtrArray*, gboolean   _allocate = TRUE            );

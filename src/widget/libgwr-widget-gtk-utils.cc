@@ -67,7 +67,7 @@ void    gtk_paned_set_space_repartition(
     w2  =   GTK_WIDGET(l->next->data);
 
     gtk_widget_get_allocation(w1, &al1);                                        //  allocations
-    gtk_widget_get_allocation(w1, &al2);
+    gtk_widget_get_allocation(w2, &al2);
     gtk_widget_get_allocation(GTK_WIDGET(_paned), &al);
 
     if ( GTK_IS_HPANED(_paned) )                                                //  pointers on width or height, dependending on _paned is hpaned or vpaned

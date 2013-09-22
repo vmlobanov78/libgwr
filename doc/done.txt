@@ -1,0 +1,8 @@
+--------------------------------------------------------------------------------
+2013.08
+~~~>    introduced search feature in GwrTextView
+~~~>    corrected bug on search feature in GwrTextView when buffer change
+        ( GtkTextIter -> GtkTextMark )
+--------------------------------------------------------------------------------
+2013.09
+~~~>    introduced CTRL-z for clearing the textview

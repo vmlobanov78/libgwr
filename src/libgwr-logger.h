@@ -70,9 +70,6 @@ class Logger
     //	Types
     //=========================================================================
     public:
-    typedef void (*LogFunction)(Channel*, const char* _format, ...);
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public:
     enum eLogFlavour
     {
         eLogInf         = 0x00  ,
@@ -83,122 +80,85 @@ class Logger
         eLogTkw         = 0x04  ,
         eLogTke         = 0x05
     };
-    //=========================================================================
-    //	Structs
-    //=========================================================================
-    /**
-      *
-      **************************************************************************
-
-      \class  SubChannel
-
-      **************************************************************************
-      *
-      * \brief
-      *
-      * Channel
-      *     |
-      *     +----- SubChannel #1
-      *     |
-      *     +----- SubChannel #2
-      *     |
-      *     +----- etc...
-      *
-      */
+    /// ************************************************************************
+    //!
+    //! \class  SubChannel
+    //!
+    //! \brief  Channel
+    //!         |
+    //!         +----- SubChannel #1
+    //!         |
+    //!         +----- SubChannel #2
+    //!         |
+    //!         +----- etc...
+    //!
+    /// ************************************************************************
     private:
     class SubChannel
     {
         private:
         gchar               *   d_header;
-        TextAttributes          a_att;
         gboolean                a_muted;
+        TextAttributes          a_att;
+        gchar                   a_att_str[16];
 
         public:
                 SubChannel(const gchar* _header, TextAttributes _att) :
-                    a_att(_att), a_muted(FALSE)
+                    a_muted(FALSE), a_att(_att)
                 {
-                    g_return_if_fail( _header );
-                    d_header    = g_strdup(_header);
+                    d_header    = _header ? g_strdup(_header) : NULL;
+
+                    bzero( (void*)a_att_str, 16 );
+                    libgwr::text::G_console_add_attributes(a_att_str, _att);
                 }
         virtual ~SubChannel()
                 {
-                    g_free(d_header);
+                    g_free_safe(d_header);
                 }
 
-        inline  const   gchar *     get_header()
-        {
-            return d_header;
-        }
-        inline  void                mute()
-        {
-            a_muted = TRUE;
-        }
-        inline  void                unmute()
-        {
-            a_muted = FALSE;
-        }
-        inline  gboolean            is_muted()
-        {
-            return a_muted;
-        }
+        inline  const   gchar *     get_header()    {   return d_header;        }
+        inline  void                mute()          {   a_muted = TRUE;         }
+        inline  void                unmute()        {   a_muted = FALSE;        }
+        inline  gboolean            is_muted()      {   return a_muted;         }
         //----------------------------------------------------------------------
-        inline  guint32             flags()
-        {
-            return a_att.flags();
-        }
-        inline  guint32             fgcol()
-        {
-            return a_att.fgcol();
-        }
-        inline  guint32             bgcol()
-        {
-            return a_att.bgcol();
-        }
-        inline  const gchar *   get_console_attributes()
-        {
-            return ta::get_console_attributes(a_att);
-        }
-
+        inline  guint32             flags()         {   return a_att.flags();   }
+        inline  guint32             fgcol()         {   return a_att.fgcol();   }
+        inline  guint32             bgcol()         {   return a_att.bgcol();   }
+        inline  const gchar *       get_console_attributes()
+                                    {
+                                        return a_att_str;
+                                    }
     };
-    /**
-      *
-      **************************************************************************
-
-      \class  Channel
-
-      **************************************************************************
-      *
-      * \brief
-      *
-      * Logger
-      *     |
-      *     +----- Channel #1
-      *     |
-      *     +----- Channel #2
-      *     |
-      *     +----- etc...
-      *
-      */
+    /// ************************************************************************
+    //!
+    //! \class  Channel
+    //!
+    //! \brief  Logger
+    //!         |
+    //!         +----- Channel #1
+    //!         |
+    //!         +----- Channel #2
+    //!         |
+    //!         +----- etc...
+    //!
+    /// ************************************************************************
     private:
     class Channel
     {
         private:
-        gint            a_index;
+        guint32             a_index;
 
-        SubChannel  **  d_subchannels;
-        guint32         a_subchannels_card;
-
-        LogFunction *   d_log_function;
+        SubChannel      **  d_subchannels;
+        guint32             a_subchannels_card;
 
         gchar           *   d_header;
         gboolean            a_output_console;
         GwrTextView     *   a_gwr_text_view;
         int                 a_fd;
         int                 a_fd_bin;
-        svipc::MsgQueue *   a_mq;
 
         public:
-        Channel(gboolean _create_default = TRUE);
+        Channel(guint32 _index, gboolean _create_default = TRUE);
         ~Channel();
         //----------------------------------------------------------------------
         void                set_header              (const gchar* _header);
@@ -211,12 +171,10 @@ class Logger
         int                 get_output_fd           ();
         void                set_output_fd_bin       (int);
         int                 get_output_fd_bin       ();
-        void                set_output_mq           (svipc::MsgQueue* _mq);
-        svipc::MsgQueue*    get_output_mq           ();
         //----------------------------------------------------------------------
         inline  guint32         create_subchannel(const gchar* _header, TextAttributes _att)
                                 {
-                                    g_return_val_if_fail( a_subchannels_card < 10, 3 );
+                                    g_return_val_if_fail( a_subchannels_card < 20, 3 );
 
                                     d_subchannels[a_subchannels_card] = GWR_NEW_CAST( SubChannel, _header, _att );
 
@@ -240,58 +198,27 @@ class Logger
                                     return subchannel(_flavour)->is_muted();
                                 }
     };
-    /**
-      *
-      **************************************************************************
-
-      \class  MqData
-
-      **************************************************************************
-      *
-      * \brief  Helper for logging with svipc mq
-      *
-      */
-    public:
-    struct   MqData
-    {
-        guchar  a_channel;
-        guchar  a_subchan;
-        gchar   a_txt[510];
-    };
-
-    public:
-    static      guint32     mq_data_chan(MqData* _mqd)  { return (guint32)(_mqd->a_channel);    }
-    static      guint32     mq_data_sub (MqData* _mqd)  { return (guint32)(_mqd->a_subchan);    }
-    static      gchar   *   mq_data_txt (MqData* _mqd)  { return _mqd->a_txt;                   }
-    static      int         mq_data_len (MqData* _mqd)  { return 512;                           }
-    static      void        mq_data_fill(MqData* _mqd, guint32 _channel, guint32 _subchan, const gchar* _str)
-                            {
-                                _mqd->a_channel   =   (guchar)_channel;
-                                _mqd->a_subchan   =   (guchar)_subchan;
-                                //memcpy(a_txt, _str, 1024);
-                                g_strlcpy(_mqd->a_txt, _str, 508);
-                                //*( (guint32*)(a_txt[1020]) ) = 0;
-                                _mqd->a_txt[508] = 0;
-                                _mqd->a_txt[509] = 0;
-                            }
     //=========================================================================
     //	Members
     //=========================================================================
     private:
-    gint            a_channel_card;
+    guint32         a_channel_card;
     Channel     **  d_channel;
     //=========================================================================
     //	Methods
     //=========================================================================
+    //--------------------------------------------------------------------------
+    //  ()~()
+    //--------------------------------------------------------------------------
     public:
-    Logger(gint _channel_card)
+    Logger(guint32 _channel_card)
     {
         a_channel_card  = _channel_card;
         d_channel       = (Channel**)g_try_malloc0( sizeof(Channel*) * _channel_card );
     }
     ~Logger()
     {
-        gint i = 0;
+        guint32 i = 0;
         //.....................................................................
         for( i = 0 ; i != channel_card() ; i++ )
             if ( channel(i) )
@@ -299,117 +226,90 @@ class Logger
 
         g_free(d_channel);
     }
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public:
-    inline  gint            channel_card()
-    {
-        return a_channel_card;
-    }
-    inline  Channel *       channel(gint _channel)
-    {
-        return d_channel[_channel];
-    }
-    inline  const gchar *   header(gint _channel)
-    {
-        return channel(_channel)->get_header();
-    }
+    //--------------------------------------------------------------------------
+    //  get / set
     //--------------------------------------------------------------------------
     public:
-    inline  void            channel_mute(gint _channel, eLogFlavour _flavour)
+    inline  guint32         channel_card()
                             {
+                                return a_channel_card;
+                            }
+    inline  Channel *       channel(guint32 _channel)
+                            {
+                                g_return_val_if_fail( ( _channel < a_channel_card ), NULL );
+                                return d_channel[_channel];
+                            }
+    inline  const gchar *   header(guint32 _channel)
+                            {
+                                g_return_val_if_fail( ( _channel < a_channel_card ), NULL );
+                                return channel(_channel)->get_header();
+                            }
+    //--------------------------------------------------------------------------
+    //  mute / unmute / clear
+    //--------------------------------------------------------------------------
+    public:
+    inline  void            channel_mute    (guint32 _channel, eLogFlavour _flavour)
+                            {
+                                g_return_if_fail( ( _channel < a_channel_card ) );
                                 channel(_channel)->mute   (_flavour);
                             }
-    inline  void            channel_unmute(gint _channel, eLogFlavour _flavour)
+    inline  void            channel_unmute  (guint32 _channel, eLogFlavour _flavour)
                             {
+                                g_return_if_fail( ( _channel < a_channel_card ) );
                                 channel(_channel)->unmute (_flavour);
                             }
-    inline  void            channel_clear(gint _channel)
-    {
-        GwrTextView     *   gtv     = NULL;
-        Channel         *   c       = NULL;
-        //.........................................................................
-        c   =   channel(_channel);
-        g_return_if_fail(c);
-        //  ....................................................................
-        //  console
-        if ( c->get_output_console() )
-        {
-            printf("clear\n");
-        }
-        //  ....................................................................
-        //  GwrTextView
-        gtv = c->get_output_gwr_text_view();
-        if ( gtv )
-        {
-            gtv->clear();
-        }
-    }
+    inline  void            channel_clear   (guint32 _channel)
+                            {
+                                GwrTextView     *   gtv     = NULL;
+                                Channel         *   c       = NULL;
+                                //..............................................
+                                g_return_if_fail( ( _channel < a_channel_card ) );
+                                c   =   channel(_channel);
+                                g_return_if_fail(c);
+                                //  ............................................
+                                //  console
+                                if ( c->get_output_console() )
+                                {
+                                    printf("clear\n");
+                                }
+                                //  ............................................
+                                //  GwrTextView
+                                gtv = c->get_output_gwr_text_view();
+                                if ( gtv )
+                                {
+                                    gtv->clear();
+                                }
+                            }
+    //--------------------------------------------------------------------------
+    //  add / remove channels
     //--------------------------------------------------------------------------
     private:
-    inline  gboolean        p_channel_create(
-                                gboolean            _create_defaults                        ,
-                                gint                _channel                                ,
-                                const gchar*        _header             = "(no header)"     ,
+    gboolean        p_channel_create(
+                                gboolean            _create_defaults            ,
+                                guint32             _channel                                ,
+                                const gchar*        _header             = NULL              ,
                                 gboolean            _output_console     = TRUE              ,
                                 GwrTextView*        _output_textview    = NULL              ,
                                 int                 _output_fd          = NULL              ,
-                                int                 _output_fd_bin      = NULL              ,
-                                svipc::MsgQueue*    _output_mq          = NULL)
-    {
-        g_return_val_if_fail( _channel >=  0,                                   FALSE );
-        g_return_val_if_fail( _channel <= channel_card(),                       FALSE );
-        g_return_val_if_fail( ! channel(_channel),                              FALSE );
-        g_return_val_if_fail(       _output_console     || ( _output_textview != NULL )
-                                ||  ( _output_fd != 0 ) || ( _output_fd_bin != 0 )
-                                ||  ( _output_mq != NULL ),
-                            FALSE );
-
-        d_channel[_channel] = GWR_NEW(Channel, _create_defaults);
-
-        channel(_channel)->set_header(_header);
-        channel(_channel)->set_output_console       (_output_console);
-        channel(_channel)->set_output_gwr_text_view (_output_textview);
-        channel(_channel)->set_output_fd            (_output_fd);
-        channel(_channel)->set_output_fd_bin        (_output_fd_bin);
-        channel(_channel)->set_output_mq            (_output_mq);
-
-        return TRUE;
-    }
+                                int                 _output_fd_bin      = 0                 );
     public:
-    inline  gboolean        channel_create(
-                                gint                _channel                                ,
-                                const gchar*        _header             = "(no header)"     ,
+    gboolean        channel_create(
+                                guint32             _channel                                ,
+                                const gchar*        _header             = NULL              ,
                                 gboolean            _output_console     = TRUE              ,
                                 GwrTextView*        _output_textview    = NULL              ,
                                 int                 _output_fd          = NULL              ,
-                                int                 _output_fd_bin      = 0                 ,
-                                svipc::MsgQueue*    _output_mq          = NULL)
-    {
-        return p_channel_create(TRUE, _channel, _header, _output_console, _output_textview, _output_fd, _output_fd_bin, _output_mq);
-    }
-    inline  gboolean        channel_create_nodefaults(
-                                gint                _channel                                ,
-                                const gchar*        _header             = "(no header)"     ,
+                                int                 _output_fd_bin      = 0                 );
+    gboolean        channel_create_nodefaults(
+                                guint32             _channel                                ,
+                                const gchar*        _header             = NULL              ,
                                 gboolean            _output_console     = TRUE              ,
                                 GwrTextView*        _output_textview    = NULL              ,
                                 int                 _output_fd          = 0                 ,
-                                int                 _output_fd_bin      = 0                 ,
-                                svipc::MsgQueue*    _output_mq          = NULL)
-    {
-        return p_channel_create(FALSE, _channel, _header, _output_console, _output_textview, _output_fd, _output_fd_bin, _output_mq);
-    }
-
-    inline  gboolean        channel_release(gint _channel)
-    {
-        g_return_val_if_fail( _channel >=  0,               FALSE );
-        g_return_val_if_fail( _channel <= channel_card(),   FALSE );
-        g_return_val_if_fail( channel(_channel),            FALSE );
-
-        delete d_channel[_channel];
-        d_channel[_channel] = NULL;
-
-        return TRUE;
-    }
+                                int                 _output_fd_bin      = 0                 );
+    gboolean        channel_release(guint32 _channel);
+    //--------------------------------------------------------------------------
+    //  log
     //--------------------------------------------------------------------------
     static char			s1  [4096];
     static char			s2  [4096];
@@ -419,13 +319,13 @@ class Logger
     {
         va_list             val;
         GwrTextView     *   gtv     = NULL;
-        int                 fd      = 0;
-        svipc::MsgQueue *   mq      = NULL;
+        //int                 fd      = 0;
         Channel         *   c       = NULL;
         SubChannel      *   s       = NULL;
         //.........................................................................
         c   =   channel(_channel);
         g_return_if_fail(c);
+
         s   = c->subchannel(_subchannel);
         g_return_if_fail(s);
 
@@ -433,15 +333,32 @@ class Logger
             return;
 
         va_start(val, _format); vsprintf(s1, _format, val); va_end(val);
-
         //  ....................................................................
         //  console
         if ( c->get_output_console() )
         {
-            if ( (c->get_header())[0] )                                         // NOTE optim for gkconfig
-                sprintf(s2, "%s:%s%s:\033[0m%s\n", c->get_header(), s->get_console_attributes(), s->get_header(), s1);
+            if ( c->get_header() )
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s:%s%s:\033[0m%s\n", c->get_header(), s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s:\033[0m%s\n", c->get_header(), s1);
+                }
+            }
             else
-                sprintf(s2, "%s%s:\033[0m%s\n", s->get_console_attributes(), s->get_header(), s1);
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s%s:\033[0m%s\n", s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s\n", s1);
+                }
+            }
             printf(s2);
         }
         //  ....................................................................
@@ -450,25 +367,26 @@ class Logger
         if ( gtv )
         {
             // channel header
-            if ( (c->get_header())[0] )                                         // NOTE optim for gkconfig
+            if ( c->get_header() )
             {
                 sprintf(s2, "%s:", c->get_header());
-                gtv->append     (s2, libgwr::TextAttributes());
+                gtv->append     (s2, libgwr::TextAttributes().flags());
             }
-            /*
-            // subchannel header                                                // NOTE optim for gkconfig
-            sprintf(s2, "%s:", s->get_header());
-            gtv->append     (s2, s->flags());
+
+            // subchannel header
+            if ( s->get_header() )
+            {
+                sprintf(s2, "%s:", s->get_header());
+                gtv->append         (s2, s->flags());
+            }
 
             // text
             sprintf(s2, "%s\n", s1);
-            gtv->append(s2 , libgwr::TextAttributes());
-            */
-            sprintf(s2, "%s:%s\n", s->get_header(), s1);
-            gtv->append(s2, s->flags());
+            gtv->append         (s2 , s->flags());
         }
         //  ....................................................................
         //  Stream
+    /*
         fd = c->get_output_fd();
         if ( fd )
         {
@@ -490,20 +408,12 @@ class Logger
 
             buffer[0]                   = (guint8)_channel;
             buffer[1]                   = (guint8)_subchannel;
-            ////*( (guint16*)(&buffer[2]) ) = (guint16)len;
+            //// *( (guint16*)(&buffer[2]) ) = (guint16)len;
 
             write(fd, buffer, 4);
             write(fd, s2, (size_t)len);
         }
-        //  ....................................................................
-        //  svipc::MsgQueue
-        mq = c->get_output_mq();
-        if ( mq )
-        {
-            svipc::MQData<MqData>   mqd;                                        // _EBUG_ mqd() doesnt work ! g++ bug
-            mq_data_fill(mqd.data(), _channel, _subchannel, s1);
-            mq->send(0, &mqd);
-        }
+        */
     }
 };
 

@@ -804,11 +804,6 @@ Store::ext_iter_from_path(
 
     node = node_root()->children()->find_sub_node(_path);
 
-    if ( ! node )
-    {
-        printf("here\n");
-    }
-
     g_return_val_if_fail( node, FALSE );
 
 	ITER_FROM_NODE(this, _iter_out, node);

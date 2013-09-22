@@ -1,0 +1,15 @@
+--------------------------------------------------------------------------------
+
+2012.05.13
+
+    Notes on version 1.0:
+
+    Version 1.0 is the last version where treestore will use only internal
+    visibility.
+    - it will ask user's DataInterface implementation through the IVisible()
+      pure virtual, but _ONLY_ when adding nodes
+    - internal visibility managing is kept, for optimizations purpose.
+    - so :
+        - user has to keep synchronization between impl and internal visibility
+          through the "row-showed" and the "row-hided" signals.
+        - ext_iter_show() and ext_iter_hide() will disappear.

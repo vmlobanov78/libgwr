@@ -1,0 +1,11 @@
+--------------------------------------------------------------------------------
+
+2012.02.10
+
+*   add a "clear" in the contextual menu of GtkTextView
+
+--------------------------------------------------------------------------------
+2013.08
+~~~>    introduced search feature in GwrTextView
+~~~>    corrected bug on search feature in GwrTextView when buffer change
+        ( GtkTextIter -> GtkTextMark )

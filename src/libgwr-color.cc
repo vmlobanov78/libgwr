@@ -41,32 +41,65 @@
 //  ............................................................................
 #include    "libgwr.h"
 //  ............................................................................
-namespace libgwr
-{
-namespace color
-{
+GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(color)
 
+static  libgwr::Color   *   Colors[LIBGWR_COLOR_CARD_MAX];
+//  ............................................................................
+GWR_NAMESPACE_START(console)
+                                                                            /*
+	Console text format : <ESC>[{attr};{fg};{bg}m
+
+    * {attr} needs to be one of the following :
+        ...
+
+    * {fg} needs to be one of the following :
+        30 Black
+        31 Red
+        32 Green
+        33 Yellow
+        34 Blue
+        35 Magenta
+        36 Cyan
+        37 White
+
+    * {bg} needs to be one of the following:
+        40 Black
+        41 Red
+        42 Green
+        43 Yellow
+        44 Blue
+        45 Magenta
+        46 Cyan
+        47 White
+                                                                            */
 //! Color 'Std' returns Grn
-const   gchar   *   g_console_colors_fg[LIBGWR_COLOR_DEFINED_CARD]     =
+const   gchar   *   Fg[1+8]     =
                     {
                         "32",
-                        "30", "31", "32", "33", "34", "35", "36", "37",
-                        "32", "32", "32", "32", "32", "32", "32", "32",
-                        "32", "32", "32"
+                        "30", "31", "32", "33", "34", "35", "36", "37"
                     };
 //! Color 'Std' returns Blk
-const   gchar   *   g_console_colors_bg[LIBGWR_COLOR_DEFINED_CARD]     =
+const   gchar   *   Bg[1+8]     =
                     {
                         "40",
-                        "40", "41", "42", "43", "44", "45", "46", "47",
-                        "40", "40", "40", "40", "40", "40", "40", "40",
-                        "40", "40", "40"
+                        "40", "41", "42", "43", "44", "45", "46", "47"
                     };
 
-libgwr::Color   *   Colors[LIBGWR_COLOR_CARD_MAX];
-guint32             Card   = LIBGWR_COLOR_DEFINED_CARD;
+GWR_NAMESPACE_END(console)
+//  ............................................................................
+const gchar *   Name(guint32 _index)
+{
+    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, Colors[Red]->name() );
+    return Colors[_index]->name();
+}
+const gchar *   Html(guint32 _index)
+{
+    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, Colors[Red]->html() );
+    return Colors[_index]->html();
+}
 
-//==============================================================================
+
 class ColorStatic
 {
     public:
@@ -110,16 +143,14 @@ ColorStatic::~ColorStatic()
 
     guint32 i = 0;
 
-    for ( i = 0 ; i != color::Card ; i++ )
+    for ( i = 0 ; i != LIBGWR_COLOR_DEFINED_CARD ; i++ )
         delete Colors[i];
 }
 
+GWR_NAMESPACE_END(color)
+GWR_NAMESPACE_END(libgwr)
+//  ............................................................................
+static  libgwr::color::ColorStatic Dummy;
 
 
-}   // namespace color
-
-static  ColorStatic  Dummy;
-
-
-}   // namespace libgwr
 

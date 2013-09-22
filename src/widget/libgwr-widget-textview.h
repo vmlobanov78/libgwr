@@ -249,12 +249,9 @@ class GwrTextView
         private:
         gchar           *   d_find_text;
         gchar           *   d_find_text_ck;
-        GtkTextIter         a_find_iter_start;
-        GtkTextIter         a_find_iter_match_start;
-        GtkTextIter         a_find_iter_match_end;
+        GtkTextMark     *   d_mark_find_start;
 
-        void                _find_text_wrap_start_iter();
-        gboolean            _find_text_find();
+        void                _find_text_set_mark_find_start_at_buffer_top();
         gboolean            _find_text_and_select();
 
         public:
@@ -263,6 +260,7 @@ class GwrTextView
         void                find_entry_show(gboolean);
         void                find_entry_show_toggle();
 
+        void                clear();
         //  ====================================================================
         //  signals
         //  ====================================================================
@@ -312,6 +310,7 @@ class GwrTextView
         inline  void            clear()
                                 {
                                     model()->clear();
+                                    view()->clear();
                                 }
         inline  GtkTextBuffer * get_gtk_text_buffer()
                                 {

@@ -38,12 +38,15 @@
 #ifndef     __LIBGWR_TEXT_STYLE_H__
 #define     __LIBGWR_TEXT_STYLE_H__
 
-//  ...........................................................................
-namespace libgwr
-{
+//  ............................................................................
+GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(text)
+//  ............................................................................
 
-namespace ts
-{
+
+//      01234567 012345637 01234567 012345637
+//      fg color  bg color <----  style ---->
+
 /*
 	Console text format : <ESC>[{attr};{fg};{bg}m
 
@@ -63,44 +66,10 @@ namespace ts
         ...
 */
 
-enum
-{
-    // console styles
-    Std     =   0x000   ,
-    Rst     =   0x001   ,
-    Bld     =   0x002   ,
-    Dim     =   0x004   ,
-    Und     =   0x008   ,
-    Blk     =   0x010   ,
-    Rev     =   0x020   ,
-    Hid     =   0x040   ,
 
-    // GTK+ styles
-    Ita     =   0x080   ,
-    Stk     =   0x100   ,
 
-    // Color specification
-    Fg      =   0x200   ,
-    Bg      =   0x400
-};
-
-inline gchar * g_add_console_styles(gchar* p, guint32 _style)
-{
-    if ( _style & (!Fg) & (!Bg) )
-    {
-        if ( _style & Rst ) {   *(p++) = '0'; *(p++) = ';'; };
-        if ( _style & Bld ) {   *(p++) = '1'; *(p++) = ';'; };
-        if ( _style & Dim ) {   *(p++) = '2'; *(p++) = ';'; };
-        if ( _style & Und ) {   *(p++) = '3'; *(p++) = ';'; };
-        if ( _style & Blk ) {   *(p++) = '5'; *(p++) = ';'; };
-        if ( _style & Rev ) {   *(p++) = '7'; *(p++) = ';'; };
-        if ( _style & Hid ) {   *(p++) = '9'; *(p++) = ';'; };
-    }
-
-    return p;
-}
-
-}   // namespace ts
-}   // namespace libgwr
+GWR_NAMESPACE_END(text)
+GWR_NAMESPACE_END(libgwr)
+//  ............................................................................
 
 #endif  // __LIBGWR_TEXT_STYLE_H__

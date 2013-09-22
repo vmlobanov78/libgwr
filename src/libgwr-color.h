@@ -39,71 +39,8 @@
 
 #ifndef     __LIBGWR_COLOR_H__
 #define     __LIBGWR_COLOR_H__
-//  ...........................................................................
-namespace libgwr
-{
-
-class   Color;
-
-namespace color
-{
-/*
-	Console text format : <ESC>[{attr};{fg};{bg}m
-
-    * {attr} needs to be one of the following :
-        ...
-
-    * {fg} needs to be one of the following :
-        30 Black
-        31 Red
-        32 Green
-        33 Yellow
-        34 Blue
-        35 Magenta
-        36 Cyan
-        37 White
-
-    * {bg} needs to be one of the following:
-        40 Black
-        41 Red
-        42 Green
-        43 Yellow
-        44 Blue
-        45 Magenta
-        46 Cyan
-        47 White
-*/
-
-enum
-{
-    Std     =       0   ,
-    Blk     =       1   ,
-    Red     =       2   ,
-    Grn     =       3   ,
-    Yel     =       4   ,
-    Blu     =       5   ,
-    Mag     =       6   ,
-    Cya     =       7   ,
-    Whi     =       8   ,
-    Ora     =       9   ,
-    Grn1    =       10  ,
-    Greyd   =       11  ,
-    Grey9   =       12  ,
-    Greyc   =       13  ,
-    Blu1    =       14  ,
-    Turq1   =       15  ,
-    Grey6   =       16
-};
-
-extern  const   gchar   *   g_console_colors_fg[LIBGWR_COLOR_DEFINED_CARD];
-extern  const   gchar   *   g_console_colors_bg[LIBGWR_COLOR_DEFINED_CARD];
-
-extern  Color       *   Colors[LIBGWR_COLOR_CARD_MAX];
-extern  guint32         Card;
-
-}   // namespace color
-
-using namespace color;
+//  ............................................................................
+GWR_NAMESPACE_START(libgwr)
 
 class Color
 {
@@ -134,49 +71,70 @@ class Color
 
 };
 
-namespace color
-{
+//  ............................................................................
+GWR_NAMESPACE_START(color)
 
-inline  const gchar *   Name(guint32 _index)
+enum
 {
-    g_return_val_if_fail( _index < Card, Colors[Red]->name() );
-    return Colors[_index]->name();
-}
-inline  const gchar *   Html(guint32 _index)
+    Std     =        0  ,
+
+    Blk     =        1  ,                                                       //  -+
+    Red     =        2  ,                                                       //   |
+    Grn     =        3  ,                                                       //   |
+    Yel     =        4  ,                                                       //   |--> terminal colors
+    Blu     =        5  ,                                                       //   |
+    Mag     =        6  ,                                                       //   |
+    Cya     =        7  ,                                                       //   |
+    Whi     =        8  ,                                                       //  -+
+
+    Ora     =        9  ,
+    Grn1    =       10  ,
+    Greyd   =       11  ,
+    Grey9   =       12  ,
+    Greyc   =       13  ,
+    Blu1    =       14  ,
+    Turq1   =       15  ,
+    Grey6   =       16
+};
+
+extern  const gchar *   Name(guint32 _index);
+extern  const gchar *   Html(guint32 _index);
+
+//  ............................................................................
+GWR_NAMESPACE_START(console)
+
+extern  const   gchar   *       Fg[1+8];
+extern  const   gchar   *       Bg[1+8];
+
+GWR_NAMESPACE_END(console)
+//  ............................................................................
+inline  gchar   *           G_console_add_fg(gchar* p, guint32 _index)
 {
-    g_return_val_if_fail( _index < Card, Colors[Red]->html() );
-    return Colors[_index]->html();
-}
-inline  gchar   *       g_add_console_fg_color(gchar* p, guint32 _index)
-{
-    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, p );
-    *(p++) = g_console_colors_fg[_index][0];
-    *(p++) = g_console_colors_fg[_index][1];
-    *(p++) = ';';
+    if ( _index <= 8 )
+    {
+        *(p++) = libgwr::color::console::Fg[_index][0];
+        *(p++) = libgwr::color::console::Fg[_index][1];
+        return p;
+    }
+
+    *(p++) = libgwr::color::console::Fg[libgwr::color::Std][0];
+    *(p++) = libgwr::color::console::Fg[libgwr::color::Std][1];
     return p;
 }
-inline  gchar   *       g_add_console_bg_color(gchar* p, guint32 _index)
+inline  gchar   *           G_console_add_bg(gchar* p, guint32 _index)
 {
-    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, p );
-    *(p++) = g_console_colors_bg[_index][0];
-    *(p++) = g_console_colors_bg[_index][1];
-    *(p++) = ';';
+    if ( _index <= 8 )
+    {
+        *(p++) = libgwr::color::console::Bg[_index][0];
+        *(p++) = libgwr::color::console::Bg[_index][1];
+        return p;
+    }
+
+    *(p++) = libgwr::color::console::Bg[libgwr::color::Std][0];
+    *(p++) = libgwr::color::console::Bg[libgwr::color::Std][1];
     return p;
 }
-
-inline guint32 New(const gchar* _name, const gchar* _html)
-{
-    g_return_val_if_fail( Card < LIBGWR_COLOR_CARD_MAX, Red );
-
-    Colors[Card] = GWR_NEW_CAST( Color, _name, _html );
-
-    return Card++;
-}
-
-}   // namespace color
-
-
-
-}   // libgwr
+GWR_NAMESPACE_END(color)
+GWR_NAMESPACE_END(libgwr)
 
 #endif

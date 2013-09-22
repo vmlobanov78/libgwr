@@ -97,17 +97,17 @@ GwrTextView::TextTagHelper::build_tag_list(
     // get GSList value
     slist   =   *(_slist);
 
-    if ( _flags & ts::Und )   slist = g_slist_append(slist, d_tag_und);
-    if ( _flags & ts::Bld )   slist = g_slist_append(slist, d_tag_bld);
-    if ( _flags & ts::Ita )   slist = g_slist_append(slist, d_tag_ita);
-    if ( _flags & ts::Stk )   slist = g_slist_append(slist, d_tag_stk);
+    if ( _flags & libgwr::text::attributes::Und  )   slist = g_slist_append(slist, d_tag_und);
+    if ( _flags & libgwr::text::attributes::Bld  )   slist = g_slist_append(slist, d_tag_bld);
+    if ( _flags & libgwr::text::attributes::Ita  )   slist = g_slist_append(slist, d_tag_ita);
+    if ( _flags & libgwr::text::attributes::Stk  )   slist = g_slist_append(slist, d_tag_stk);
 
-    if ( _flags & ts::Fg )
+    if ( _flags & libgwr::text::attributes::FgColor )
     {
         slist = g_slist_append(slist, (gpointer)get_tag_color_fg( (_flags & 0xFF000000) >> 24 ) );
     }
 
-    if ( _flags & ts::Bg )
+    if ( _flags & libgwr::text::attributes::BgColor )
     {
         slist = g_slist_append(slist, (gpointer)get_tag_color_bg( (_flags & 0x00FF0000) >> 16 ) );
     }
@@ -148,7 +148,6 @@ GwrTextView::Model::append(
     const   gchar     *   _txt,
             guint32       _tag)
 {
-    GtkTextMark     *   mark = NULL;
     GtkTextIter         iter_start, iter_end;
     gint                offset_start;
     GSList          *   slist       = NULL;
@@ -161,11 +160,11 @@ GwrTextView::Model::append(
     gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // get end of buffer iter   = start of our text
     offset_start = gtk_text_iter_get_offset(&iter_end);                         // get end of buffer offset = start of our text
 
-    gtk_text_buffer_insert(buffer(), &iter_end, _txt, -1);
+    gtk_text_buffer_insert(buffer(), &iter_end, _txt, -1);                      // insert text
 
-    gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // get end of buffer iter = end of our text
+    gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // iter_end has changed, have to recompute it
 
-    gtk_text_buffer_get_iter_at_offset(buffer(), &iter_start, offset_start);    // iters change, have to recompute the start iter
+    gtk_text_buffer_get_iter_at_offset(buffer(), &iter_start, offset_start);    // iter_start
 
     slist = g_slist_nth(slist, 0);
     while( slist )
@@ -216,6 +215,8 @@ GwrTextView::View::View(
 
     d_find_text             = NULL;
     d_find_text_ck          = NULL;
+
+    d_mark_find_start       = NULL;
 }
 GwrTextView::View::~View()
 {
@@ -236,7 +237,7 @@ GwrTextView::View::scroll(GtkTextIter* _iter)
 void
 GwrTextView::View::scroll_to_end()
 {
-    GtkTextIter iter;
+    //GtkTextIter iter;
     /*
     //..........................................................................
     gtk_text_buffer_get_end_iter(a_text_buffer, &iter);
@@ -295,39 +296,74 @@ GwrTextView::View::find_entry_show_toggle()
 {
     find_entry_show( a_is_shown ? FALSE : TRUE );
 }
+//  ----------------------------------------------------------------------------
 void
-GwrTextView::View::_find_text_wrap_start_iter()
+GwrTextView::View::clear()
 {
-    gtk_text_buffer_get_start_iter(
-        a_text_buffer           ,
-        &a_find_iter_start    );
+    _find_text_set_mark_find_start_at_buffer_top();
 }
 //  ----------------------------------------------------------------------------
-gboolean
-GwrTextView::View::_find_text_find()
+void
+GwrTextView::View::_find_text_set_mark_find_start_at_buffer_top()
 {
-    return gtk_text_iter_forward_search(
-            &a_find_iter_start                  ,
-            d_find_text                         ,
-            (GtkTextSearchFlags)0               ,
-            &a_find_iter_match_start            ,
-            &a_find_iter_match_end              ,
-            NULL                                );                              // search until end of buffer
+    GtkTextIter iter;
+    //..........................................................................
+    if ( d_mark_find_start )
+    {
+        gtk_text_buffer_delete_mark( buffer(), d_mark_find_start );
+    }
+
+    gtk_text_buffer_get_start_iter(
+        buffer()                    ,
+        &iter                       );
+
+
+    d_mark_find_start   =   gtk_text_buffer_create_mark(
+                                buffer()                ,
+                                "find-start"            ,
+                                &iter                   ,
+                                TRUE                    );
 }
 gboolean
 GwrTextView::View::_find_text_and_select()
 {
-    if ( ! _find_text_find() )
+    gboolean        b                   = FALSE;
+    GtkTextIter     iter;
+    GtkTextIter     iter_match_start;
+    GtkTextIter     iter_match_end;
+    //  ........................................................................
+    //  compute the iter from which to search
+    g_return_val_if_fail( d_mark_find_start, FALSE );
+
+    gtk_text_buffer_get_iter_at_mark(
+        buffer()                ,
+        &iter                   ,
+        d_mark_find_start);
+
+    b = gtk_text_iter_forward_search(
+            &iter                               ,
+            d_find_text                         ,
+            (GtkTextSearchFlags)0               ,
+            &iter_match_start                   ,
+            &iter_match_end                     ,
+            NULL                                );                              // search until end of buffer
+
+    if ( ! b )
         return FALSE;
 
-    scroll( &a_find_iter_match_start );
+    scroll( &iter_match_start );
 
     gtk_text_buffer_select_range(
         a_text_buffer               ,
-        &a_find_iter_match_start    ,
-        &a_find_iter_match_end      );
+        &iter_match_start           ,
+        &iter_match_end             );
 
-    a_find_iter_start = a_find_iter_match_end;
+    gtk_text_buffer_delete_mark( buffer(), d_mark_find_start );
+    d_mark_find_start   =   gtk_text_buffer_create_mark(
+                                buffer()                ,
+                                "find-start"            ,
+                                &iter_match_end         ,
+                                TRUE                    );
 
     return TRUE;
 }
@@ -343,34 +379,43 @@ GwrTextView::View::find_text(
         {
             ck = g_utf8_collate_key(_st, -1);
             if ( strcmp( d_find_text_ck, ck ) == 0 )
-                goto lab_find_next;
-
-            goto lab_find_first;
+            {
+                delete ck;
+                goto lab_find_text_next_occurence;
+            }
+            delete ck;
+            goto lab_find_text_first_occurence;
         }
         else
         {
-            goto lab_find_first;
+            goto lab_find_text_first_occurence;
         }
     }
     else
     {
         if ( d_find_text_ck )
-            goto lab_find_next;
+            goto lab_find_text_next_occurence;
 
         return;
     }
     //  ........................................................................
-lab_find_first:
+    //  start search from top of buffer
+lab_find_text_first_occurence:
+
+    g_free_safe( d_find_text    );
+    g_free_safe( d_find_text_ck );
 
     d_find_text       = g_strdup(_st);
     d_find_text_ck    = g_utf8_collate_key(d_find_text, -1);
-    _find_text_wrap_start_iter();
+
+    _find_text_set_mark_find_start_at_buffer_top();
     //  ........................................................................
-lab_find_next:
+    //  continue search from last search result
+lab_find_text_next_occurence:
 
     if ( ! _find_text_and_select() )
     {
-        _find_text_wrap_start_iter();
+        _find_text_set_mark_find_start_at_buffer_top();
         _find_text_and_select();
     }
 }
@@ -389,6 +434,12 @@ GwrTextView::View::Sgn_key_release_event(
     //..........................................................................
     THIS    =   (View*)_data;
     ek      =   (GdkEventKey*)_event;
+
+    if ( ( ek->keyval == GDK_KEY_z ) && ( ek->state & GDK_CONTROL_MASK ) )
+    {
+        THIS->control()->clear();
+        goto lab_end;
+    }
 
     if ( ( ek->keyval == GDK_KEY_f ) && ( ek->state & GDK_CONTROL_MASK ) )
     {
@@ -411,7 +462,7 @@ GwrTextView::View::Sgn_key_release_event(
     //  ........................................................................
 lab_end:
     //  allow other handlers
-    return FALSE;
+    return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
 }
 //  ----------------------------------------------------------------------------
 //  View::Sgn_entry_find_key_release_event()

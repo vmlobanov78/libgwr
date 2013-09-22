@@ -3,9 +3,8 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="libgwr" />
-		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="core/headers/;core/;widget/;widget/headers/;build/;Treestore/;doc/;" />
+		<Option virtualFolders="core/headers/;core/;widget/;build/;Treestore/;doc/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="obj/Debug/gwr" prefix_auto="1" extension_auto="1" />
@@ -39,19 +38,20 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wno-unused-but-set-variable" />
 			<Add option="`pkg-config --cflags gtk+-2.0`" />
 		</Compiler>
 		<Unit filename="build/Makefile">
 			<Option virtualFolder="build/" />
+		</Unit>
+		<Unit filename="doc/done.txt">
+			<Option virtualFolder="doc/" />
 		</Unit>
 		<Unit filename="doc/notes.txt">
 			<Option virtualFolder="doc/" />
 		</Unit>
 		<Unit filename="doc/todo.txt">
 			<Option virtualFolder="doc/" />
-		</Unit>
-		<Unit filename="include/libgwr-spacer.h">
-			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-chrono.h">
 			<Option virtualFolder="core/headers/" />
@@ -69,6 +69,12 @@
 			<Option virtualFolder="core/" />
 		</Unit>
 		<Unit filename="src/libgwr-common.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-counter.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-env.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-logger.cc">
@@ -89,10 +95,10 @@
 		<Unit filename="src/libgwr-object.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
-		<Unit filename="src/libgwr-pipe.cc">
-			<Option virtualFolder="core/" />
-		</Unit>
 		<Unit filename="src/libgwr-pipe.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-spacer.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-stack.h">
@@ -101,16 +107,7 @@
 		<Unit filename="src/libgwr-str.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
-		<Unit filename="src/libgwr-svipc.cc">
-			<Option virtualFolder="core/" />
-		</Unit>
-		<Unit filename="src/libgwr-svipc.h">
-			<Option virtualFolder="core/headers/" />
-		</Unit>
 		<Unit filename="src/libgwr-text-attributes.h">
-			<Option virtualFolder="core/headers/" />
-		</Unit>
-		<Unit filename="src/libgwr-text-style.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-treestore-custom.cc">
@@ -141,36 +138,24 @@
 			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-gtk-utils.h">
-			<Option virtualFolder="widget/headers/" />
+			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-menu.cc">
 			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-menu.h">
-			<Option virtualFolder="widget/headers/" />
+			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-textview.cc">
 			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-textview.h">
-			<Option virtualFolder="widget/headers/" />
+			<Option virtualFolder="widget/" />
 		</Unit>
 		<Extensions>
-			<envvars />
 			<code_completion />
 			<debugger />
-			<lib_finder>
-				<lib name="gtk+-2.0" />
-			</lib_finder>
-			<DoxyBlocks>
-				<comment_style block="0" line="0" />
-				<doxyfile_project />
-				<doxyfile_build />
-				<doxyfile_warnings />
-				<doxyfile_output />
-				<doxyfile_dot />
-				<general />
-			</DoxyBlocks>
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

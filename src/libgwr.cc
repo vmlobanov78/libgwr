@@ -44,19 +44,35 @@ GWR_NAMESPACE_START(libgwr)
 Logger  *   GD_libgwr_logger            = NULL;
 guint32     GA_libgwr_logger_channel    = 0;
 
-namespace ta
-{
-gchar   g_console_attributes[32];
-}
-
-
 //  ****************************************************************************
 //
 //  chr utilities
 //
 //  ****************************************************************************
-GWR_NAMESPACE_START(chr)
+namespace chr
+{
+//  ----------------------------------------------------------------------------
+//  0-9  : 48 -> 57
+static      guchar  s_ascii_is_shell_variable_character[256]   =
+{
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //    0
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   16
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   32
+      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   0,   0,   0,   0,   0,   0,     //   48
+      0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   64
+      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   1,     //   80
+      0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   96
+      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   0,     //  112
 
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //  128+
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0
+};
 //  ----------------------------------------------------------------------------
 //  0-9  : 48 -> 57
 static      guchar  s_ascii_is_dec[256]   =
@@ -103,6 +119,11 @@ static      guchar  s_ascii_is_hex[256]   =
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255
 };
+
+gboolean    is_shell_variable_character(gchar _c)
+{
+    return ( s_ascii_is_shell_variable_character[ (guchar)_c ] );
+}
 
 gboolean    is_dec_digit(gchar _c)
 {
@@ -167,11 +188,9 @@ gboolean    ascii_hex_to_i32(gchar _c, gint32* _i32)
     *(_i32) = (gint32)0;
     return FALSE;
 }
-
 //  ============================================================================
 //  64 bits related
 //  ============================================================================
-#ifdef  G_HAVE_GINT64
 //  ----------------------------------------------------------------------------
 //  libgwr::chr::ascii_dec_to_u64
 //  ----------------------------------------------------------------------------
@@ -248,14 +267,15 @@ gboolean    ascii_hex_to_i64(gchar _c, gint64* _i64)
     *(_i64) = (gint64)0;
     return FALSE;
 }
-#endif  //  G_HAVE_GINT64
-GWR_NAMESPACE_END(chr)
+
+}
 //  ****************************************************************************
 //
 //  str utilities
 //
 //  ****************************************************************************
-GWR_NAMESPACE_START(str)
+namespace str
+{
 //  ----------------------------------------------------------------------------
 static  guint32     s_u32_10_power[] =
 {
@@ -595,7 +615,6 @@ gboolean    ascii_hex_to_i32(const gchar* _str, gint32* _i32)
 //  ============================================================================
 //  64 bits related
 //  ============================================================================
-#ifdef G_HAVE_GINT64
 //  ----------------------------------------------------------------------------
 //  guint64 max = + 18 446 744 073 709 551 615 : max = 10 ^ 19
 static  guint64 s_u64_10_power[20] =
@@ -927,9 +946,122 @@ gboolean    ascii_hex_to_i64(const gchar* _str, gint64* _i64)
     *(_i64) = (gint64)u64t;
     return TRUE;
 }
-#endif  //  G_HAVE_GINT64
 
-GWR_NAMESPACE_END(str)
+}
+//  ****************************************************************************
+//
+//  Env utilities
+//
+//  ****************************************************************************
+namespace  env
+{
+
+const gchar*
+replace_shell_variables(const gchar*  _str)
+{
+    static  gchar       str [1024];
+    static  gchar       var [256];
+            gchar   *   val = NULL;
+
+            gchar   *   p   = NULL;
+            gchar   *   q   = NULL;
+            gchar   *   r   = NULL;
+
+            gchar       c   = 0;
+    //..........................................................................
+    bzero(str, 1024);
+    p   =   const_cast< gchar* > ( _str );
+    r   =   str;
+    //  ........................................................................
+lab_loop:
+    c = * ( p++ );
+
+    //  detect end of string
+    if ( ! c )
+    {
+        * ( r++ ) = c;
+        goto lab_end;
+    }
+
+    //  detect '$'
+    if ( c != '$' )
+    {
+        * ( r++ ) = c;
+        goto lab_loop;
+    }
+    //  ........................................................................
+    //  '$' detected
+    q   =   var;
+
+    c   = * ( p++ );
+
+    if ( ! c )                                                                  //  '$'\000
+    {
+        * ( r++ ) = '$';
+        * ( r++ ) = c;
+        goto lab_end;
+    }
+
+    if ( libgwr::chr::is_dec_digit(c) )                                         //  shell VARS dont begin with [0-9]
+    {
+        * ( r++ ) = '$';
+        * ( r++ ) = c;
+        goto lab_loop;
+    }
+
+    if ( ! libgwr::chr::is_shell_variable_character(c) )                        //  not a shell var char
+    {
+        * ( r++ ) = '$';
+        * ( r++ ) = c;
+        goto lab_loop;
+    }
+
+    * ( q++ )   = c;                                                            //  store first char of VAR
+
+    //  ........................................................................
+lab_var_loop:
+    c   = * ( p++ );
+
+    if ( ! c )
+        goto lab_var_replace_and_end;
+
+    if ( ! libgwr::chr::is_shell_variable_character(c) )
+        goto lab_var_replace;
+
+    * ( q++ )   = c;
+    goto lab_var_loop;
+
+    //  ........................................................................
+lab_var_replace:
+    * ( q )     = 0;                                                            //  terminate VAR string
+
+    val = getenv(var);
+
+    if (  ! val )                                                               //  no VAR in environment
+        strcat(r, "$???");
+    else
+        strcat(r, val);
+
+    r   = str + strlen(str);
+    * ( r++ )   = c;                                                            //  append c
+    goto lab_loop;
+    //  ........................................................................
+lab_var_replace_and_end:
+    * ( q )     = 0;                                                            //  terminate VAR string
+
+    val = getenv(var);
+
+    if (  ! val )                                                               //  no VAR in environment
+        strcat(r, "$???");
+    else
+        strcat(r, val);
+
+lab_end:
+    return str;
+
+}
+
+}
 //  ****************************************************************************
 //
 //  GLib extensions

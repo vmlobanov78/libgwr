@@ -5,8 +5,6 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Gnome Universal Logger Library                                          *
-    *                                                                           *
     *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -63,8 +61,8 @@ namespace NAME                                                                  
 #include    "libgwr-macro-bits.h"
 #include    "libgwr-macro-console.h"
 
-#define GTK_EVENT_KEY_PROPAGATE         FALSE
-#define GTK_EVENT_KEY_DONT_PROPAGATE    TRUE
+#define LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES      FALSE
+#define LIBGWR_GTK_EVENT_KEY_PROPAGATE_NO       TRUE
 
 
 
