@@ -77,6 +77,12 @@
 		<Unit filename="src/libgwr-env.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
+		<Unit filename="src/libgwr-logger-channel.hi">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-logger-subchannel.hi">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
 		<Unit filename="src/libgwr-logger.cc">
 			<Option virtualFolder="core/" />
 		</Unit>
@@ -105,6 +111,9 @@
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-str.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-t-array.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-text-attributes.h">

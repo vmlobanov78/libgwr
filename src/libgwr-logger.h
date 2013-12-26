@@ -61,9 +61,17 @@ using namespace widget;
     #define GWR_TKW(format, ...)
     #define GWR_TKE(format, ...)
 #endif
-//  ............................................................................
-class Logger
+
+/// ****************************************************************************
+//!
+//! \class  Logger
+//!
+//! \brief  Logger
+//!
+/// ****************************************************************************
+class   Logger
 {
+    public:
     class   Channel;
     class   SubChannel;
     //=========================================================================
@@ -80,130 +88,16 @@ class Logger
         eLogTkw         = 0x04  ,
         eLogTke         = 0x05
     };
-    /// ************************************************************************
-    //!
-    //! \class  SubChannel
-    //!
-    //! \brief  Channel
-    //!         |
-    //!         +----- SubChannel #1
-    //!         |
-    //!         +----- SubChannel #2
-    //!         |
-    //!         +----- etc...
-    //!
-    /// ************************************************************************
-    private:
-    class SubChannel
-    {
-        private:
-        gchar               *   d_header;
-        gboolean                a_muted;
-        TextAttributes          a_att;
-        gchar                   a_att_str[16];
-
-        public:
-                SubChannel(const gchar* _header, TextAttributes _att) :
-                    a_muted(FALSE), a_att(_att)
-                {
-                    d_header    = _header ? g_strdup(_header) : NULL;
-
-                    bzero( (void*)a_att_str, 16 );
-                    libgwr::text::G_console_add_attributes(a_att_str, _att);
-                }
-        virtual ~SubChannel()
-                {
-                    g_free_safe(d_header);
-                }
-
-        inline  const   gchar *     get_header()    {   return d_header;        }
-        inline  void                mute()          {   a_muted = TRUE;         }
-        inline  void                unmute()        {   a_muted = FALSE;        }
-        inline  gboolean            is_muted()      {   return a_muted;         }
-        //----------------------------------------------------------------------
-        inline  guint32             flags()         {   return a_att.flags();   }
-        inline  guint32             fgcol()         {   return a_att.fgcol();   }
-        inline  guint32             bgcol()         {   return a_att.bgcol();   }
-        inline  const gchar *       get_console_attributes()
-                                    {
-                                        return a_att_str;
-                                    }
-    };
-    /// ************************************************************************
-    //!
-    //! \class  Channel
-    //!
-    //! \brief  Logger
-    //!         |
-    //!         +----- Channel #1
-    //!         |
-    //!         +----- Channel #2
-    //!         |
-    //!         +----- etc...
-    //!
-    /// ************************************************************************
-    private:
-    class Channel
-    {
-        private:
-        guint32             a_index;
-
-        SubChannel      **  d_subchannels;
-        guint32             a_subchannels_card;
-
-        gchar           *   d_header;
-        gboolean            a_output_console;
-        GwrTextView     *   a_gwr_text_view;
-        int                 a_fd;
-        int                 a_fd_bin;
-
-        public:
-        Channel(guint32 _index, gboolean _create_default = TRUE);
-        ~Channel();
-        //----------------------------------------------------------------------
-        void                set_header              (const gchar* _header);
-        const gchar*        get_header              ();
-        void                set_output_console      (gboolean _b);
-        gboolean            get_output_console      ();
-        void                set_output_gwr_text_view(GwrTextView* _gtv);
-        GwrTextView*        get_output_gwr_text_view();
-        void                set_output_fd           (int);
-        int                 get_output_fd           ();
-        void                set_output_fd_bin       (int);
-        int                 get_output_fd_bin       ();
-        //----------------------------------------------------------------------
-        inline  guint32         create_subchannel(const gchar* _header, TextAttributes _att)
-                                {
-                                    g_return_val_if_fail( a_subchannels_card < 20, 3 );
-
-                                    d_subchannels[a_subchannels_card] = GWR_NEW_CAST( SubChannel, _header, _att );
-
-                                    return a_subchannels_card++;
-                                }
-        inline  SubChannel  *   subchannel(guint32 _index)
-                                {
-                                    g_return_val_if_fail( _index < a_subchannels_card, NULL );
-                                    return d_subchannels[_index];
-                                }
-        inline  void            unmute(guint32 _flavour)
-                                {
-                                    subchannel(_flavour)->unmute();
-                                }
-        inline  void            mute(guint32 _flavour)
-                                {
-                                    subchannel(_flavour)->mute();
-                                }
-        inline  gboolean        is_muted(guint32 _flavour)
-                                {
-                                    return subchannel(_flavour)->is_muted();
-                                }
-    };
+    //=========================================================================
+    //	Inner classes
+    //=========================================================================
+    #include    "libgwr-logger-subchannel.hi"
+    #include    "libgwr-logger-channel.hi"
     //=========================================================================
     //	Members
     //=========================================================================
     private:
-    guint32         a_channel_card;
-    Channel     **  d_channel;
+    TArrayP < Channel >     *   d_channels;
     //=========================================================================
     //	Methods
     //=========================================================================
@@ -211,38 +105,22 @@ class Logger
     //  ()~()
     //--------------------------------------------------------------------------
     public:
-    Logger(guint32 _channel_card)
-    {
-        a_channel_card  = _channel_card;
-        d_channel       = (Channel**)g_try_malloc0( sizeof(Channel*) * _channel_card );
-    }
-    ~Logger()
-    {
-        guint32 i = 0;
-        //.....................................................................
-        for( i = 0 ; i != channel_card() ; i++ )
-            if ( channel(i) )
-                delete (Object<Channel>*)channel(i);
-
-        g_free(d_channel);
-    }
+             Logger(guint32 _channel_card_max, guint32 _channel_reallocs = 10);
+    virtual ~Logger();
     //--------------------------------------------------------------------------
     //  get / set
     //--------------------------------------------------------------------------
     public:
-    inline  guint32         channel_card()
-                            {
-                                return a_channel_card;
-                            }
     inline  Channel *       channel(guint32 _channel)
                             {
-                                g_return_val_if_fail( ( _channel < a_channel_card ), NULL );
-                                return d_channel[_channel];
+                                return d_channels->p2_get( _channel );
                             }
     inline  const gchar *   header(guint32 _channel)
                             {
-                                g_return_val_if_fail( ( _channel < a_channel_card ), NULL );
-                                return channel(_channel)->get_header();
+                                Channel* c = NULL;
+                                //..............................................
+                                c = d_channels->p2_get(_channel);
+                                return  c ? c->get_header() : NULL;
                             }
     //--------------------------------------------------------------------------
     //  mute / unmute / clear
@@ -250,21 +128,26 @@ class Logger
     public:
     inline  void            channel_mute    (guint32 _channel, eLogFlavour _flavour)
                             {
-                                g_return_if_fail( ( _channel < a_channel_card ) );
-                                channel(_channel)->mute   (_flavour);
+                                Channel* c = NULL;
+                                //..............................................
+                                c = d_channels->p2_get(_channel);
+
+                                c->mute(_flavour);
                             }
     inline  void            channel_unmute  (guint32 _channel, eLogFlavour _flavour)
                             {
-                                g_return_if_fail( ( _channel < a_channel_card ) );
-                                channel(_channel)->unmute (_flavour);
+                                Channel* c = NULL;
+                                //..............................................
+                                c = d_channels->p2_get(_channel);
+
+                                c->unmute(_flavour);
                             }
     inline  void            channel_clear   (guint32 _channel)
                             {
                                 GwrTextView     *   gtv     = NULL;
                                 Channel         *   c       = NULL;
                                 //..............................................
-                                g_return_if_fail( ( _channel < a_channel_card ) );
-                                c   =   channel(_channel);
+                                c   =   d_channels->p2_get(_channel);
                                 g_return_if_fail(c);
                                 //  ............................................
                                 //  console
@@ -286,23 +169,29 @@ class Logger
     private:
     gboolean        p_channel_create(
                                 gboolean            _create_defaults            ,
-                                guint32             _channel                                ,
-                                const gchar*        _header             = NULL              ,
-                                gboolean            _output_console     = TRUE              ,
-                                GwrTextView*        _output_textview    = NULL              ,
-                                int                 _output_fd          = NULL              ,
-                                int                 _output_fd_bin      = 0                 );
+                                guint32             _channel                    ,
+                                guint32             _subchannel_card_max        ,
+                                guint32             _subchannel_reallocs        ,
+                                const gchar*        _header                     ,
+                                gboolean            _output_console             ,
+                                GwrTextView*        _output_textview            ,
+                                int                 _output_fd                  ,
+                                int                 _output_fd_bin              );
     public:
     gboolean        channel_create(
                                 guint32             _channel                                ,
-                                const gchar*        _header             = NULL              ,
+                                const gchar*        _header                                 ,
+                                guint32             _subchannel_card_max=10                 ,
+                                guint32             _subchannel_reallocs=10                 ,
                                 gboolean            _output_console     = TRUE              ,
                                 GwrTextView*        _output_textview    = NULL              ,
                                 int                 _output_fd          = NULL              ,
                                 int                 _output_fd_bin      = 0                 );
     gboolean        channel_create_nodefaults(
                                 guint32             _channel                                ,
-                                const gchar*        _header             = NULL              ,
+                                const gchar*        _header                                 ,
+                                guint32             _subchannel_card_max=10                 ,
+                                guint32             _subchannel_reallocs=10                 ,
                                 gboolean            _output_console     = TRUE              ,
                                 GwrTextView*        _output_textview    = NULL              ,
                                 int                 _output_fd          = 0                 ,
@@ -327,6 +216,11 @@ class Logger
         g_return_if_fail(c);
 
         s   = c->subchannel(_subchannel);
+        if ( ! s )
+        {
+            printf("tt\n");
+            return;
+        }
         g_return_if_fail(s);
 
         if ( s->is_muted() )
@@ -415,6 +309,18 @@ class Logger
         }
         */
     }
+};
+
+
+/// ****************************************************************************
+//!
+//! \class  LogServer
+//!
+//! \brief  Logs server
+//!
+/// ****************************************************************************
+class   LogServer
+{
 };
 
 GWR_NAMESPACE_END(libgwr)

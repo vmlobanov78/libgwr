@@ -99,7 +99,6 @@ const gchar *   Html(guint32 _index)
     return Colors[_index]->html();
 }
 
-
 class ColorStatic
 {
     public:
@@ -111,7 +110,7 @@ ColorStatic::ColorStatic()
     using namespace color;
 
     // no color
-    Colors[Std]     =   GWR_NEW_CAST( Color, "Std"  ,   "#000000"   );          //!< This color wont be used in GwrTextTagHelper
+    Colors[Std]     =   GWR_NEW_CAST( Color, "Std"  ,   "#FFFFFF"   );          //!< This color wont be used in GwrTextTagHelper
 
     // console colors
     Colors[Blk]     =   GWR_NEW_CAST( Color, "Blk"  ,   "#000000"   );
@@ -151,6 +150,17 @@ GWR_NAMESPACE_END(color)
 GWR_NAMESPACE_END(libgwr)
 //  ............................................................................
 static  libgwr::color::ColorStatic Dummy;
+//  ............................................................................
+GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(color)
 
+void            SetStdColor(const gchar* _html)
+{
+    Colors[libgwr::color::Std]->set_html( _html );
+}
+
+GWR_NAMESPACE_END(color)
+GWR_NAMESPACE_END(libgwr)
+//  ............................................................................
 
 

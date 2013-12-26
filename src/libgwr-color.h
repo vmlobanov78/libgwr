@@ -55,6 +55,14 @@ class Color
     gchar   *   d_html;
 
     public:
+    void        set_html(const gchar* _html)
+                {
+                    g_free_safe( d_html );
+                    d_html = g_strdup( _html );
+                }
+
+
+    public:
             Color(const gchar* _name, const gchar* _html)
             {
                 d_name  = g_strdup(_name);
@@ -99,7 +107,7 @@ enum
 
 extern  const gchar *   Name(guint32 _index);
 extern  const gchar *   Html(guint32 _index);
-
+extern  void            SetStdColor(const gchar* _html);
 //  ............................................................................
 GWR_NAMESPACE_START(console)
 

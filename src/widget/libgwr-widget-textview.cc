@@ -115,8 +115,6 @@ GwrTextView::TextTagHelper::build_tag_list(
     // set GSList modified value
     *(_slist)   = slist;
 }
-
-
 //  ############################################################################
 //
 //  GwrTextView::Model
