@@ -38,8 +38,9 @@
 #ifndef __LIBGWR_STR_H__
 #define __LIBGWR_STR_H__
 
-namespace libgwr
-{
+#include    <string.h>
+
+GWR_NAMESPACE_START(libgwr)
 
 //  ............................................................................
 GWR_NAMESPACE_START(chr)
@@ -63,29 +64,31 @@ GWR_NAMESPACE_END(chr)
 //  ............................................................................
 GWR_NAMESPACE_START(str)
 
-inline  gboolean        eq(const gchar* _a, const char* _b)
-        {
-            return ( ! strcmp(_a,_b) );
-        }
+extern  void            set     ( gchar*& _str, const gchar* _s );
+extern  void            append  ( gchar*& _str, ... );
+extern  void            concat  ( gchar*& _str, ... );
 
-  void            toto();
+inline  gboolean        eq(const gchar* _a, const char* _b)
+{
+    return ( ! strcmp(_a,_b) );
+}
 
 extern  gchar       *   dequote(const gchar* _str);
 
-extern  gboolean        ascii_dec_to_u32(const gchar* _str, gint32*  _i32);
+extern  gboolean        ascii_dec_to_u32(const gchar* _str, guint32* _i32);
 extern  gboolean        ascii_dec_to_i32(const gchar* _str, gint32*  _i32);
 
-extern  gboolean        ascii_hex_to_u32(const gchar* _str, gint32*  _i32);
+extern  gboolean        ascii_hex_to_u32(const gchar* _str, guint32* _i32);
 extern  gboolean        ascii_hex_to_i32(const gchar* _str, gint32*  _i32);
 
-extern  gboolean        ascii_dec_to_u64(const gchar* _str, gint64*  _i64);
+extern  gboolean        ascii_dec_to_u64(const gchar* _str, guint64* _i64);
 extern  gboolean        ascii_dec_to_i64(const gchar* _str, gint64*  _i64);
 
-extern  gboolean        ascii_hex_to_u64(const gchar* _str, gint64*  _i64);
+extern  gboolean        ascii_hex_to_u64(const gchar* _str, guint64* _i64);
 extern  gboolean        ascii_hex_to_i64(const gchar* _str, gint64*  _i64);
 
 GWR_NAMESPACE_END(str)
 
-}   //  namespace libgwr
+GWR_NAMESPACE_END(libgwr)
 
-#endif //__LIBGWR_STR_H__
+#endif                                                                          //__LIBGWR_STR_H__

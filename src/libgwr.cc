@@ -55,23 +55,23 @@ namespace chr
 //  0-9  : 48 -> 57
 static      guchar  s_ascii_is_shell_variable_character[256]   =
 {
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //    0
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   16
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   32
-      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   0,   0,   0,   0,   0,   0,     //   48
-      0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   64
-      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   1,     //   80
-      0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   96
-      1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   0,     //  112
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //    0
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   16
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //   32
+    1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   0,   0,   0,   0,   0,   0,     //   48
+    0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   64
+    1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   1,     //   80
+    0,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   1,   1,   1,   1,   1,     //   96
+    1,   1,   1,   1,   1,   1,   1,   1,       1,   1,   1,   0,   0,   0,   0,   0,     //  112
 
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //  128+
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,     //  128+
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,       0,   0,   0,   0,   0,   0,   0,   0
 };
 //  ----------------------------------------------------------------------------
 //  0-9  : 48 -> 57
@@ -80,7 +80,7 @@ static      guchar  s_ascii_is_dec[256]   =
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //    0
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   16
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   32
-      0,   1,   2,   3,   4,   5,   6,   7,       8,   9, 255, 255, 255, 255, 255, 255,     //   48
+    0,   1,   2,   3,   4,   5,   6,   7,       8,   9, 255, 255, 255, 255, 255, 255,     //   48
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   64
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   80
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   96
@@ -104,7 +104,7 @@ static      guchar  s_ascii_is_hex[256]   =
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //    0
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   16
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   32
-      0,   1,   2,   3,   4,   5,   6,   7,       8,   9, 255, 255, 255, 255, 255, 255,     //   48
+    0,   1,   2,   3,   4,   5,   6,   7,       8,   9, 255, 255, 255, 255, 255, 255,     //   48
     255,  10,  11,  12,  13,  14,  15, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   64
     255, 255, 255, 255, 255, 255, 255, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   80
     255,  10,  11,  12,  13,  14,  15, 255,     255, 255, 255, 255, 255, 255, 255, 255,     //   96
@@ -310,7 +310,7 @@ static  guint32     s_u32_16_power[] =
 //! \brief  Dequote a string ( remove leading and trailing ' and " )
 gchar   *  dequote(const gchar* _str)
 {
-            gchar       quote   = 0;
+    gchar       quote   = 0;
     const   gchar   *   start   = NULL;
     const   gchar   *   end     = NULL;
     //..........................................................................
@@ -330,7 +330,7 @@ gchar   *  dequote(const gchar* _str)
         _GWR_BREAK_;
 
     return g_strndup( 1 + _str, (gsize)(end - start) );
- }
+}
 //  ----------------------------------------------------------------------------
 //  libgwr::str::ascii_dec_to_u32
 //  ----------------------------------------------------------------------------
@@ -344,17 +344,17 @@ gboolean    ascii_dec_to_u32(const gchar* _str, guint32* _u32)
     //  maximum i32 possible = + 2 147 483 647 in decimal representation = (1) + 10 = 11 chr maxi
     //  maximum u32 possible = + 4 294 967 295 in decimal representation = (1) + 10 = 11 chr maxi
 
-            gint        len         = 0;
+    gint        len         = 0;
     const   guint32     u32M        = 0xFFFFFFFF;
 
-            guint32     i           = 0;
-            guint32     u32t        = 0;                                        //  temporary u32 ( for intermediate calculation )
-            guint32     u32r        = 0;                                        //  temporary r32 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint32     u32t        = 0;                                        //  temporary u32 ( for intermediate calculation )
+    guint32     u32r        = 0;                                        //  temporary r32 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
-            gboolean    sign        = FALSE;
-            //gboolean    negative    = FALSE;
+    gboolean    sign        = FALSE;
+    //gboolean    negative    = FALSE;
     //  ........................................................................
     if ( ! _str )                                                               //  NULL input string !
         goto lab_failure;
@@ -371,25 +371,25 @@ gboolean    ascii_dec_to_u32(const gchar* _str, guint32* _u32)
 
     switch ( _str[0] )
     {
-        case '-'    :
-            //sign        = TRUE;
-            //negative    = TRUE;
-            //if ( len == 1 )
-            //    return FALSE;
+    case '-'    :
+        //sign        = TRUE;
+        //negative    = TRUE;
+        //if ( len == 1 )
+        //    return FALSE;
+        goto lab_failure;
+        break;
+
+    case '+'    :
+        sign        = TRUE;
+        if ( len == 1 )
             goto lab_failure;
-            break;
+        //  negative = FALSE;                                               //  already initialized !
+        break;
 
-        case '+'    :
-            sign        = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
-            break;
-
-        default     :
-            if ( len == 11 )                                                    //  no sign : 11 chr is too much
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
+    default     :
+        if ( len == 11 )                                                    //  no sign : 11 chr is too much
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
         break;
     }
 
@@ -435,18 +435,18 @@ gboolean    ascii_dec_to_i32(const gchar* _str, gint32* _i32)
     //  maximum i32 possible = + 2 147 483 647 in decimal representation = (1) + 10 = 11 chr maxi
     //  maximum u32 possible = + 4 294 967 295 in decimal representation = (1) + 10 = 11 chr maxi
 
-            gint        len         = 0;
+    gint        len         = 0;
     const   guint32     u32_i32m    = 0x80000000;
     const   guint32     u32_i32M    = 0x7FFFFFFF;
 
-            guint32     i           = 0;
-            guint32     u32t        = 0;                                        //  temporary u32 ( for intermediate calculation )
-            guint32     u32r        = 0;                                        //  temporary u32 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint32     u32t        = 0;                                        //  temporary u32 ( for intermediate calculation )
+    guint32     u32r        = 0;                                        //  temporary u32 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
-            gboolean    sign        = FALSE;
-            gboolean    negative    = FALSE;
+    gboolean    sign        = FALSE;
+    gboolean    negative    = FALSE;
     //  ........................................................................
     if ( ! _str )                                                               //  NULL input string !
         goto lab_failure;
@@ -463,24 +463,24 @@ gboolean    ascii_dec_to_i32(const gchar* _str, gint32* _i32)
 
     switch ( _str[0] )
     {
-        case '-'    :
-            sign        = TRUE;
-            negative    = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            break;
+    case '-'    :
+        sign        = TRUE;
+        negative    = TRUE;
+        if ( len == 1 )
+            goto lab_failure;
+        break;
 
-        case '+'    :
-            sign        = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
-            break;
+    case '+'    :
+        sign        = TRUE;
+        if ( len == 1 )
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
+        break;
 
-        default     :
-            if ( len == 11 )                                                    //  no sign : 11 chr is too much
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
+    default     :
+        if ( len == 11 )                                                    //  no sign : 11 chr is too much
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
         break;
     }
 
@@ -536,11 +536,11 @@ gboolean    ascii_hex_to_u32(const gchar* _str, guint32* _u32)
 {
     //  u32Max  = 0xFFFFFFFF = (2) + 10  = 12 chr maximum
 
-            gint        len         = 0;
+    gint        len         = 0;
 
-            guint32     i           = 0;
-            guint32     u32t        = 0;                                        //  temporary u64 ( for intermediate calculation )
-            guint32     u32r        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint32     u32t        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint32     u32r        = 0;                                        //  temporary u64 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
@@ -552,7 +552,7 @@ gboolean    ascii_hex_to_u32(const gchar* _str, guint32* _u32)
 
     if ( ! len )                                                                //  empty input string !
         goto lab_failure;
-   //  ........................................................................
+    //  ........................................................................
     if ( len > 12 )                                                             //  too much chr
         goto lab_failure;
 
@@ -567,7 +567,7 @@ gboolean    ascii_hex_to_u32(const gchar* _str, guint32* _u32)
     p2      = _str + len;                                                       //  p2 = terminal 0 of the string
 
     goto lab_loop;
-   //  ........................................................................
+    //  ........................................................................
 lab_no_0x:
     if ( len > 10 )                                                             //  no 0x => 10 chr maxi
         goto lab_failure;
@@ -673,17 +673,17 @@ gboolean    ascii_dec_to_u64(const gchar* _str, guint64* _u64)
     //  maximum i64 possible = +  9 223 372 036 854 775 807 in decimal representation = (1) + 19 = 20 chr maxi
     //  maximum u64 possible = + 18 446 744 073 709 551 615 in decimal representation = (1) + 20 = 21 chr maxi
 
-            gint        len         = 0;
+    gint        len         = 0;
     const   guint64     u64M        = 0xFFFFFFFFFFFFFFFF;
 
-            guint32     i           = 0;
-            guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
-            guint64     u64r        = 0;                                        //  temporary r64 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint64     u64r        = 0;                                        //  temporary r64 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
-            gboolean    sign        = FALSE;
-            //gboolean    negative    = FALSE;
+    gboolean    sign        = FALSE;
+    //gboolean    negative    = FALSE;
     //  ........................................................................
     if ( ! _str )                                                               //  NULL input string !
         goto lab_failure;
@@ -700,25 +700,25 @@ gboolean    ascii_dec_to_u64(const gchar* _str, guint64* _u64)
 
     switch ( _str[0] )
     {
-        case '-'    :
-            //sign        = TRUE;
-            //negative    = TRUE;
-            //if ( len == 1 )
-            //    return FALSE;
+    case '-'    :
+        //sign        = TRUE;
+        //negative    = TRUE;
+        //if ( len == 1 )
+        //    return FALSE;
+        goto lab_failure;
+        break;
+
+    case '+'    :
+        sign        = TRUE;
+        if ( len == 1 )
             goto lab_failure;
-            break;
+        //  negative = FALSE;                                               //  already initialized !
+        break;
 
-        case '+'    :
-            sign        = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
-            break;
-
-        default     :
-            if ( len == 20 )                                                    //  no sign : 20 chr is too much
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
+    default     :
+        if ( len == 20 )                                                    //  no sign : 20 chr is too much
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
         break;
     }
 
@@ -764,18 +764,18 @@ gboolean    ascii_dec_to_i64(const gchar* _str, gint64* _i64)
     //  maximum i64 possible = +  9 223 372 036 854 775 807 in decimal representation = (1) + 19 = 20 chr maxi
     //  maximum u64 possible = + 18 446 744 073 709 551 615 in decimal representation = (1) + 20 = 21 chr maxi
 
-            gint        len         = 0;
+    gint        len         = 0;
     const   guint64     u64_i64m    = 0x8000000000000000;
     const   guint64     u64_i64M    = 0x7FFFFFFFFFFFFFFF;
 
-            guint32     i           = 0;
-            guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
-            guint64     u64r        = 0;                                        //  temporary r64 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint64     u64r        = 0;                                        //  temporary r64 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
-            gboolean    sign        = FALSE;
-            gboolean    negative    = FALSE;
+    gboolean    sign        = FALSE;
+    gboolean    negative    = FALSE;
     //  ........................................................................
     if ( ! _str )                                                               //  NULL input string !
         goto lab_failure;
@@ -792,24 +792,24 @@ gboolean    ascii_dec_to_i64(const gchar* _str, gint64* _i64)
 
     switch ( _str[0] )
     {
-        case '-'    :
-            sign        = TRUE;
-            negative    = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            break;
+    case '-'    :
+        sign        = TRUE;
+        negative    = TRUE;
+        if ( len == 1 )
+            goto lab_failure;
+        break;
 
-        case '+'    :
-            sign        = TRUE;
-            if ( len == 1 )
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
-            break;
+    case '+'    :
+        sign        = TRUE;
+        if ( len == 1 )
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
+        break;
 
-        default     :
-            if ( len == 20 )                                                    //  no sign : 20 chr is too much
-                goto lab_failure;
-            //  negative = FALSE;                                               //  already initialized !
+    default     :
+        if ( len == 20 )                                                    //  no sign : 20 chr is too much
+            goto lab_failure;
+        //  negative = FALSE;                                               //  already initialized !
         break;
     }
 
@@ -870,11 +870,11 @@ lab_failure:
 //! format : [:xdigit:] ( this kind of procedure that should be coded in asm )
 gboolean    ascii_hex_to_u64(const gchar* _str, guint64* _u64)
 {
-            gint        len         = 0;
+    gint        len         = 0;
 
-            guint32     i           = 0;
-            guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
-            guint64     u64r        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint32     i           = 0;
+    guint64     u64t        = 0;                                        //  temporary u64 ( for intermediate calculation )
+    guint64     u64r        = 0;                                        //  temporary u64 ( for intermediate calculation )
 
     const   gchar   *   p1          = NULL;
     const   gchar   *   p2          = NULL;
@@ -886,7 +886,7 @@ gboolean    ascii_hex_to_u64(const gchar* _str, guint64* _u64)
 
     if ( ! len )                                                                //  empty input string !
         goto lab_failure;
-   //  ........................................................................
+    //  ........................................................................
     if ( len > 18 )                                                             //  too much chr
         goto lab_failure;
 
@@ -901,7 +901,7 @@ gboolean    ascii_hex_to_u64(const gchar* _str, guint64* _u64)
     p2      = _str + len;                                                       //  p2 = terminal 0 of the string
 
     goto lab_loop;
-   //  ........................................................................
+    //  ........................................................................
 lab_no_0x:
     if ( len > 16 )                                                             //  no 0x => 16 chr maxi
         goto lab_failure;
@@ -933,7 +933,7 @@ lab_failure:
 //  libgwr::str::ascii_hex_to_i64
 //  ----------------------------------------------------------------------------
 //! \name   ascii_hex_to_i64
-//!-9,223,372,036,854,775,808
+//!
 //! \brief  try to get a i64 integer from a 0-terminated string.
 //! format : [:xdigit:] ( this kind of procedure that should be coded in asm )
 gboolean    ascii_hex_to_i64(const gchar* _str, gint64* _i64)
@@ -945,6 +945,130 @@ gboolean    ascii_hex_to_i64(const gchar* _str, gint64* _i64)
 
     *(_i64) = (gint64)u64t;
     return TRUE;
+}
+//  ----------------------------------------------------------------------------
+//  libgwr::str::set
+//  ----------------------------------------------------------------------------
+//! \namespace  libgwr::str
+//! \fn         set
+//!
+//! \brief  Replace a gchar* with a newly allocated gchar*, Old gchar* will be
+//!         freed.
+//!
+//! \param[in,out]  _str    The gchar* that will be replaced ( NULL ALLOWED ).
+//! \param[in]      va_list The gchar* to copy ( NULL ALLOWED ).
+void        set(gchar*& _str, const gchar* _s)
+{
+    gchar       *   old = NULL;
+    //  ........................................................................
+    old = _str;
+
+    _str = _s ? g_strdup( _s ) : NULL;
+
+    g_free_safe( old );
+}
+//  ----------------------------------------------------------------------------
+//  libgwr::str::append
+//  ----------------------------------------------------------------------------
+//! \namespace  libgwr::str
+//! \fn         append
+//!
+//! \brief  Replace a gchar* by itself + a concatenation of newly allocated
+//!         gchar*. Old gchar* will be freed. NULL sentinel.
+//!
+//! \param[in,out]  _str    The gchar* that will be replaced ( NULL NOT ALLOWED ).
+//! \param[in]      va_list The gchar* to copy.
+void        append(gchar*& _str, ...)
+{
+    va_list         vl;
+    const   gchar       *   p       = NULL;
+    gchar       *   u       = NULL;
+    gchar       *   v       = NULL;
+    gchar       *   old     = NULL;
+    //  ........................................................................
+    g_return_if_fail( _str );
+
+    old     = _str;
+    u       = _str;
+
+    va_start( vl, _str );
+
+    p = va_arg(vl, const gchar*);
+    while ( p )
+    {
+        v = u;
+        u = g_strconcat( u, p , NULL );
+        g_free( v );
+        p = va_arg(vl, const gchar*);
+    }
+    va_end(vl);
+
+    _str = u;
+}
+//  ----------------------------------------------------------------------------
+//  libgwr::str::concat
+//  ----------------------------------------------------------------------------
+//! \namespace  libgwr::str
+//! \fn         concat
+//!
+//! \brief  Replace a gchar* by a concatenation of newly allocated gchar*. Old
+//!         gchar* will be freed. NULL sentinel.
+//!
+//! \param[in,out]  _str    The gchar* that will be replaced ( NULL ALLOWED ).
+//! \param[in]      va_list The gchar* to copy.
+void        concat(gchar*& _str, ...)
+{
+    va_list         vl;
+    const   gchar       *   p       = NULL;
+    gchar       *   u       = NULL;
+    gchar       *   old     = NULL;
+    //  ........................................................................
+    old     = _str;
+
+    va_start( vl, _str );
+
+    p = va_arg(vl, const gchar*);
+    g_return_if_fail( p );
+    libgwr::str::set( u, p );
+
+    p = va_arg(vl, const gchar*);
+    while ( p )
+    {
+        libgwr::str::append( u, p , NULL);
+        p = va_arg(vl, const gchar*);
+    }
+    va_end(vl);
+
+    _str = u;
+
+    g_free_safe( old );
+}
+
+}
+//  ****************************************************************************
+//
+//  hash
+//
+//  ****************************************************************************
+namespace hash
+{
+//  ----------------------------------------------------------------------------
+//  libgwr::hash::DJB
+//  ----------------------------------------------------------------------------
+//! \name   DJB
+//!
+//! \brief  DJB Hash Function by Professor Daniel J. Bernstein
+tDJB    DJB(const gchar* _str)
+{
+    guint32     hash    = 5381;
+    gchar   *   pc      = (gchar*)_str;
+
+    while ( *pc != 0 )
+    {
+        hash = ( (hash << 5 ) + hash ) + (guint32)( *pc++ );
+    }
+
+    return hash;
 }
 
 }
@@ -961,13 +1085,13 @@ replace_shell_variables(const gchar*  _str)
 {
     static  gchar       str [1024];
     static  gchar       var [256];
-            gchar   *   val = NULL;
+    gchar   *   val = NULL;
 
-            gchar   *   p   = NULL;
-            gchar   *   q   = NULL;
-            gchar   *   r   = NULL;
+    gchar   *   p   = NULL;
+    gchar   *   q   = NULL;
+    gchar   *   r   = NULL;
 
-            gchar       c   = 0;
+    gchar       c   = 0;
     //..........................................................................
     bzero(str, 1024);
     p   =   const_cast< gchar* > ( _str );
@@ -1064,6 +1188,11 @@ lab_end:
 }
 //  ****************************************************************************
 //
+//  Divers
+//
+//  ****************************************************************************
+//  ****************************************************************************
+//
 //  GLib extensions
 //
 //  ****************************************************************************
@@ -1099,5 +1228,4 @@ gboolean    g_ptr_array_set                     (GPtrArray* _array, guint32  _in
 }
 
 GWR_NAMESPACE_END(libgwr)
-
 

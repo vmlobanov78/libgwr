@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libgwr-treestore" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="core/headers/;core/;Treestore/;" />
+		<Option show_notes="0">
+			<notes>
+				<![CDATA[This is a reduced version ( excerpt ) of libgwr, containing only the necessary classes for libgwr::GwrTreestore.]]>
+			</notes>
+		</Option>
+		<Build>
+			<Target title="Debug">
+				<Option output="obj/Debug/gwr-GwrTreestore" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-Wno-unused-label" />
+					<Add option="-ggdb" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wno-unused-but-set-variable" />
+			<Add option="`pkg-config --cflags gtk+-2.0`" />
+		</Compiler>
+		<Unit filename="src/libgwr-common.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-define-optim.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-macro-bits.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-macro-console.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-macro.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-object.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-stack.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-t-array.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-t-m-array-p.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-custom.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-gobject.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-gtmi.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-node-blocks.hi">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-nodes.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-nodes.hi">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore.h">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

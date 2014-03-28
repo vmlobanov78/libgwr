@@ -60,174 +60,174 @@ static void store_finalize(GObject *object);
 
 //=============================================================================
 
-    //!
-    //! store_init:
-    //!
-    //! This is called everytime a new custom list object instance is created
-    //!   (we do that in store_new).
-    //!
+//!
+//! store_init:
+//!
+//! This is called everytime a new custom list object instance is created
+//!   (we do that in store_new).
+//!
 
 //=============================================================================
 static void
 store_init(
-Store *store)
+    Store *store)
 {
-	// default sort settings
-	store->set_sort_type(eSortAscending);
-	store->set_sort_type(eSortNone);
-	store->set_sort_collate_key_to_use(0);
+    // default sort settings
+    store->set_sort_type(eSortAscending);
+    store->set_sort_type(eSortNone);
+    store->set_sort_collate_key_to_use(0);
 
     store->d_node_root          = NULL;
     store->a_node_root_created  = FALSE;
 
-	// others
-	store->stamp_init();
-	store->node_root_init();
-	store->uid_init();
+    // others
+    store->stamp_init();
+    store->node_root_init();
+    store->uid_init();
 }
 
 //=============================================================================
 
-    //!
-    //! store_class_init:
-    //!
-    //! More boilerplate GObject/GType stuff. Init callback for the type system,
-    //! called once when our new class is created.
-    //!
+//!
+//! store_class_init:
+//!
+//! More boilerplate GObject/GType stuff. Init callback for the type system,
+//! called once when our new class is created.
+//!
 
 //=============================================================================
 static void
 store_class_init(StoreClass *klass)
 {
-  GObjectClass *object_class;
+    GObjectClass *object_class;
 
-  parent_class = (GObjectClass*) g_type_class_peek_parent (klass);
-  object_class = (GObjectClass*) klass;
+    parent_class = (GObjectClass*) g_type_class_peek_parent (klass);
+    object_class = (GObjectClass*) klass;
 
-  object_class->finalize = store_finalize;
+    object_class->finalize = store_finalize;
 }
 
 //=============================================================================
 
-    //!
-    //! store_tree_model_init:
-    //!
-    //! Init callback for the interface registration in store_get_type. Here we
-    //! override the GtkTreeModel interface functions that we implement.
-    //!
+//!
+//! store_tree_model_init:
+//!
+//! Init callback for the interface registration in store_get_type. Here we
+//! override the GtkTreeModel interface functions that we implement.
+//!
 
 //=============================================================================
 static void
 store_tree_model_init (GtkTreeModelIface *iface)
 {
-	iface->get_flags       = Store::get_flags;
-	iface->get_n_columns   = Store::get_n_columns;
-	iface->get_column_type = Store::get_column_type;
-	iface->get_iter        = Store::get_iter;
-	iface->get_path        = Store::get_path;
-	iface->get_value       = Store::get_value;
-	iface->iter_next       = Store::iter_next;
-	iface->iter_children   = Store::iter_children;
-	iface->iter_has_child  = Store::iter_has_child;
-	iface->iter_n_children = Store::iter_n_children;
-	iface->iter_nth_child  = Store::iter_nth_child;
-	iface->iter_parent     = Store::iter_parent;
+    iface->get_flags       = Store::get_flags;
+    iface->get_n_columns   = Store::get_n_columns;
+    iface->get_column_type = Store::get_column_type;
+    iface->get_iter        = Store::get_iter;
+    iface->get_path        = Store::get_path;
+    iface->get_value       = Store::get_value;
+    iface->iter_next       = Store::iter_next;
+    iface->iter_children   = Store::iter_children;
+    iface->iter_has_child  = Store::iter_has_child;
+    iface->iter_n_children = Store::iter_n_children;
+    iface->iter_nth_child  = Store::iter_nth_child;
+    iface->iter_parent     = Store::iter_parent;
 }
 
 
 //=============================================================================
 
-    //!
-    //! store_finalize:
-	//!
-    //! This is called just before an instance is destroyed. Free dynamically
-    //! allocated memory here.
-	//!
+//!
+//! store_finalize:
+//!
+//! This is called just before an instance is destroyed. Free dynamically
+//! allocated memory here.
+//!
 
 //=============================================================================
 static void
 store_finalize(GObject *object)
 {
-	Store					*store  = NULL;
-	//.........................................................................
-	g_return_if_fail ( IS_LIBGWR_TREESTORE(object) );
-	store = LIBGWR_TREESTORE(object);
+    Store					*store  = NULL;
+    //.........................................................................
+    g_return_if_fail ( IS_LIBGWR_TREESTORE(object) );
+    store = LIBGWR_TREESTORE(object);
 
-	//GCMD_INF("Store::finalize()");
+    //GCMD_INF("Store::finalize()");
 
-	// free all records and free all memory used by the list
-	//store->ext_clear();
+    // free all records and free all memory used by the list
+    //store->ext_clear();
 
-	// must chain up - finalize parent
-	(* parent_class->finalize) (object);
+    // must chain up - finalize parent
+    (* parent_class->finalize) (object);
 }
 
 //=============================================================================
 
-    //!
-	//! store_get_type:
-	//!
-	//! Here we register our new type and its interfaces with the type system.
-    //! If you want to implement additional interfaces like GtkTreeSortable, you
-	//! will need to do it here.
-	//!
+//!
+//! store_get_type:
+//!
+//! Here we register our new type and its interfaces with the type system.
+//! If you want to implement additional interfaces like GtkTreeSortable, you
+//! will need to do it here.
+//!
 
 //=============================================================================
 GType
 store_get_type (void)
 {
-	static GType store_type = 0;
+    static GType store_type = 0;
 
-	/* Some boilerplate type registration stuff */
-	if (store_type == 0)
-	{
-		static const GTypeInfo store_info =
-		{
-			sizeof (StoreClass),
-			NULL,                                         /* base_init */
-			NULL,                                         /* base_finalize */
-			(GClassInitFunc) store_class_init,
-			NULL,                                         /* class finalize */
-			NULL,                                         /* class_data */
-			sizeof (Store),
-			0,                                           /* n_preallocs */
-			(GInstanceInitFunc) store_init
-		};
-		static const GInterfaceInfo tree_model_info =
-		{
-			(GInterfaceInitFunc) store_tree_model_init,
-			NULL,
-			NULL
-		};
+    /* Some boilerplate type registration stuff */
+    if (store_type == 0)
+    {
+        static const GTypeInfo store_info =
+        {
+            sizeof (StoreClass),
+            NULL,                                         /* base_init */
+            NULL,                                         /* base_finalize */
+            (GClassInitFunc) store_class_init,
+            NULL,                                         /* class finalize */
+            NULL,                                         /* class_data */
+            sizeof (Store),
+            0,                                           /* n_preallocs */
+            (GInstanceInitFunc) store_init
+        };
+        static const GInterfaceInfo tree_model_info =
+        {
+            (GInterfaceInitFunc) store_tree_model_init,
+            NULL,
+            NULL
+        };
 
-		/* First register the new derived type with the GObject type system */
-		store_type = g_type_register_static (G_TYPE_OBJECT, "CustomList",
-		&store_info, (GTypeFlags)0);
+        /* First register the new derived type with the GObject type system */
+        store_type = g_type_register_static (G_TYPE_OBJECT, "CustomList",
+                                             &store_info, (GTypeFlags)0);
 
-		/* Now register our GtkTreeModel interface with the type system */
-		g_type_add_interface_static (store_type, GTK_TYPE_TREE_MODEL, &tree_model_info);
-	}
+        /* Now register our GtkTreeModel interface with the type system */
+        g_type_add_interface_static (store_type, GTK_TYPE_TREE_MODEL, &tree_model_info);
+    }
 
-  return store_type;
+    return store_type;
 }
 
 //=============================================================================
 
-    //!
-    //! store_new:
-    //!
+//!
+//! store_new:
+//!
 
 //=============================================================================
 Store*
 store_new(void)
 {
-  Store *t;
+    Store *t;
 
-  t = (Store*) g_object_new (LIBGWR_TREESTORE_TYPE, NULL);
+    t = (Store*) g_object_new (LIBGWR_TREESTORE_TYPE, NULL);
 
-  g_assert( t != NULL );
+    g_assert( t != NULL );
 
-  return t;
+    return t;
 }
 
 GWR_NAMESPACE_END(treestore)

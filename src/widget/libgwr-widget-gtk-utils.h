@@ -40,16 +40,28 @@
 #define __LIBGWR_WIDGET_GTK_UTILS_H__
 
 //  ............................................................................
-namespace libgwr
-{
-namespace widget
+namespace   libgwr
 {
 
-extern  void    gtk_paned_set_space_repartition(GtkPaned* _paned, guint _first_child_percentage);
+namespace   widget
+{
 
 extern  void    gtk_error_box(const gchar*, ...);
 
+
 }       // namespace widget
+
+namespace   gtk
+{
+
+extern  GtkWidget   *   vbox_new    (gboolean _homogeneous, gint _spacing);
+extern  GtkWidget   *   hbox_new    (gboolean _homogeneous, gint _spacing);
+extern  GtkWidget   *   hpaned_new  ();
+extern  GtkWidget   *   vpaned_new  ();
+extern  void            paned_set_space_repartition(GtkPaned* _paned, guint _first_child_percentage);
+
+}       // namespace gtk
+
 }       // namespace libgwr
 
 #endif //__LIBGWR_WIDGET_GTK_UTILS_H__

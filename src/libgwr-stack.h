@@ -39,64 +39,117 @@
 #define     __LIBGWR_STACK_H__
 //  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
-
-enum eFreeMode
-{
-    e_free_none     = 0,
-    e_free_g_free   = 1,
-    e_free_delete   = 2
-};
-
-//! \class  Stack
+/// ****************************************************************************
 //!
-//! \brief  Simple template stack class.
+//! \class  StackGS
+//!
+//! \brief  Generic and Simple template stack class. Objects are stored in a
+//!         gpointer, so their size must be smaller.
+//!
+/// ****************************************************************************
 template < typename T >
-class Stack
+class StackGS
 {
-    protected:
-    GArray      *   d_array;
-    guint32         a_card;
+protected:
+    GSList          *   d_slist;
+    guint32             a_card;
+    guint32             a_sb;
 
-    public:
+public:
     inline      void        reset   ();
 
     inline      guint32     card    ();
-    inline      void        push    (T _t);
+    inline      void        push    (T   _t);
     inline      gboolean    pop     (T& __t);
     inline      gboolean    peek    (T& __t);
 
-    public:
-    inline    Stack()
+public:
+    StackGS()
     {
-        d_array = g_array_new( FALSE, FALSE, sizeof(T) );
+        g_return_if_fail( sizeof(T) <= sizeof(gpointer) );
+
+        a_sb    = sizeof(T);
+
+        d_slist = NULL;
         a_card  = 0;
     }
-    virtual ~Stack()
+    virtual ~StackGS()
     {
-        g_array_free( d_array, TRUE );
+        g_slist_free( d_slist );
     }
 };
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template        < typename T >
+inline          void
+StackGS< T >::reset()
+{
+    g_slist_free( d_slist );
+    d_slist = NULL;
+    a_card = 0;
+}
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template        < typename T >
+inline          guint32
+StackGS< T >::card()
+{
+    return a_card;
+}
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template        < typename T >
+inline          void
+StackGS< T >::push(T _t)
+{
+    gpointer    p = NULL;
+
+    memcpy( &p, (gpointer)&_t, a_sb );                                          // workaroud gpointer <-> int casts
+
+    d_slist = g_slist_prepend( d_slist, p );                                    // new first node
+    a_card++;
+}
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template        < typename T >
+inline          gboolean
+StackGS< T >::pop(T& __t)
+{
+    if ( ! a_card )
+        return FALSE;
+
+    memcpy( &__t, &d_slist->data, a_sb );                                       // workaroud gpointer <-> int casts
+
+    d_slist = g_slist_delete_link( d_slist, d_slist );                          // remove first node
+
+    a_card--;
+
+    return TRUE;
+}
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template        < typename T >
+inline          gboolean
+StackGS< T >::peek(T& __t)
+{
+    if ( ! a_card )
+        return FALSE;
+
+    memcpy( &__t, &d_slist->data, a_sb );                                       // workaroud gpointer <-> int casts
+
+    return TRUE;
+}
+
+/*
+/// ****************************************************************************
+//!
 //! \class  PStack
 //!
 //! \brief  Simple template stack class. The reset method free all elements in
 //!     the stack.
+//!
+/// ****************************************************************************
 template < typename T >
 class PStack : public libgwr::Stack< T >                                        //  _GWR_TODO_ : use GPtrArray
 {
     public:
     inline      void        reset   (eFreeMode);
 };
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          void
-Stack< T >::reset()
-{
-    if ( ! a_card )
-        return;
-
-    g_array_remove_range( d_array, 0, a_card );
-    a_card = 0;
-}
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          void
@@ -115,52 +168,18 @@ PStack< T >::reset(eFreeMode _fm)
         for ( guint32 i = 0 ; i != this->a_card ; i ++ )
             delete g_array_index( this->d_array, T, i );
 
+lab_reset:
     Stack< T >::reset();
 }
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          guint32
-Stack< T >::card()
+enum eFreeMode
 {
-    return a_card;
-}
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          void
-Stack< T >::push(T _t)
-{
-    g_array_append_val( d_array, _t );
-    a_card++;
-}
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          gboolean
-Stack< T >::pop(T& __t)
-{
-    if ( ! a_card )
-        return FALSE;
-
-    __t = g_array_index( d_array, T, ( a_card - 1 ) );
-
-    g_array_remove_index( d_array, --a_card );
-
-    return TRUE;
-}
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          gboolean
-Stack< T >::peek(T& __t)
-{
-    if ( ! a_card )
-        return FALSE;
-
-    __t = g_array_index( d_array, T, ( a_card - 1 ) );
-
-    return TRUE;
-}
+    e_free_none     = 0,
+    e_free_g_free   = 1,
+    e_free_delete   = 2
+};
 
 
-
+*/
 
 
 

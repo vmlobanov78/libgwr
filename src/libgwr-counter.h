@@ -47,20 +47,32 @@ namespace libgwr
 //! \brief  For counting
 template < typename T > class Counter
 {
-    private:
+private:
     T           a_count;
 
-    public:
-    inline  void    reset()     {   a_count = 0;    }
-    inline  void    inc()       {   a_count++;      }
-    inline  void    dec()       {   a_count--;      }
-    inline  T       get()       {   return a_count; }
+public:
+    inline  void    reset()
+    {
+        a_count = 0;
+    }
+    inline  void    inc()
+    {
+        a_count++;
+    }
+    inline  void    dec()
+    {
+        a_count--;
+    }
+    inline  T       get()
+    {
+        return a_count;
+    }
 
-    public:
-             Counter()
-             {
-                reset();
-             }
+public:
+    Counter()
+    {
+        reset();
+    }
     virtual ~Counter()   {}
 };
 

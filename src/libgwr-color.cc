@@ -44,7 +44,7 @@
 GWR_NAMESPACE_START(libgwr)
 GWR_NAMESPACE_START(color)
 
-static  libgwr::Color   *   Colors[LIBGWR_COLOR_CARD_MAX];
+libgwr::color::Color    *   Colors[LIBGWR_COLOR_CARD_MAX];
 //  ............................................................................
 GWR_NAMESPACE_START(console)
                                                                             /*
@@ -73,70 +73,44 @@ GWR_NAMESPACE_START(console)
         46 Cyan
         47 White
                                                                             */
-//! Color 'Std' returns Grn
-const   gchar   *   Fg[1+8]     =
-                    {
-                        "32",
-                        "30", "31", "32", "33", "34", "35", "36", "37"
-                    };
-//! Color 'Std' returns Blk
-const   gchar   *   Bg[1+8]     =
-                    {
-                        "40",
-                        "40", "41", "42", "43", "44", "45", "46", "47"
-                    };
-
 GWR_NAMESPACE_END(console)
 //  ............................................................................
-const gchar *   Name(guint32 _index)
-{
-    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, Colors[Red]->name() );
-    return Colors[_index]->name();
-}
-const gchar *   Html(guint32 _index)
-{
-    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD, Colors[Red]->html() );
-    return Colors[_index]->html();
-}
-
-class ColorStatic
+class StaticInit
 {
     public:
-     ColorStatic();
-    ~ColorStatic();
+     StaticInit();
+    ~StaticInit();
 };
-ColorStatic::ColorStatic()
+StaticInit::StaticInit()
 {
-    using namespace color;
-
     // no color
-    Colors[Std]     =   GWR_NEW_CAST( Color, "Std"  ,   "#FFFFFF"   );          //!< This color wont be used in GwrTextTagHelper
+    Colors[Std]     =   GWR_NEW_CAST( Color, "Std"  , "#FFFFFF", "32", "40" );
 
     // console colors
-    Colors[Blk]     =   GWR_NEW_CAST( Color, "Blk"  ,   "#000000"   );
-    Colors[Red]     =   GWR_NEW_CAST( Color, "Red"  ,   "#FF0000"   );
-    Colors[Grn]     =   GWR_NEW_CAST( Color, "Grn"  ,   "#007800"   );
-    Colors[Yel]     =   GWR_NEW_CAST( Color, "Yel"  ,   "#FFFF00"   );
-    Colors[Blu]     =   GWR_NEW_CAST( Color, "Blu"  ,   "#0000FF"   );
-    Colors[Mag]     =   GWR_NEW_CAST( Color, "Mag"  ,   "#FF00FF"   );
-    Colors[Cya]     =   GWR_NEW_CAST( Color, "Cya"  ,   "#00FFFF"   );
-    Colors[Whi]     =   GWR_NEW_CAST( Color, "Whi"  ,   "#FFFFFF"   );
+    Colors[Blk]     =   GWR_NEW_CAST( Color, "Blk"  , "#000000", "30", "40" );
+    Colors[Red]     =   GWR_NEW_CAST( Color, "Red"  , "#FF0000", "31", "41" );
+    Colors[Grn]     =   GWR_NEW_CAST( Color, "Grn"  , "#007800", "32", "42" );
+    Colors[Yel]     =   GWR_NEW_CAST( Color, "Yel"  , "#FFFF00", "33", "43" );
+    Colors[Blu]     =   GWR_NEW_CAST( Color, "Blu"  , "#0000FF", "34", "44" );
+    Colors[Mag]     =   GWR_NEW_CAST( Color, "Mag"  , "#FF00FF", "35", "45" );
+    Colors[Cya]     =   GWR_NEW_CAST( Color, "Cya"  , "#00FFFF", "36", "46" );
+    Colors[Whi]     =   GWR_NEW_CAST( Color, "Whi"  , "#FFFFFF", "37", "47" );
 
     // other colors
-    Colors[Ora]     =   GWR_NEW_CAST( Color, "Ora"  ,   "#DC8E00"   );
-    Colors[Grn1]    =   GWR_NEW_CAST( Color, "Grn1" ,   "#00FF00"   );
-    Colors[Greyd]   =   GWR_NEW_CAST( Color, "Greyd",   "#dddddd"   );
-    Colors[Grey9]   =   GWR_NEW_CAST( Color, "Grey9",   "#999999"   );
-    Colors[Greyc]   =   GWR_NEW_CAST( Color, "Greyc",   "#cccccc"   );
-    Colors[Blu1]    =   GWR_NEW_CAST( Color, "Blu1" ,   "#1e90ff"   );
-    Colors[Turq1]   =   GWR_NEW_CAST( Color, "Turq1",   "#00ced1"   );
-    Colors[Grey6]   =   GWR_NEW_CAST( Color, "Grey6",   "#666666"   );
-    Colors[17]      =   GWR_NEW_CAST( Color, "17"  ,    "#000000"   );
-    Colors[18]      =   GWR_NEW_CAST( Color, "18"  ,    "#000000"   );
-    Colors[19]      =   GWR_NEW_CAST( Color, "19"  ,    "#000000"   );
+    Colors[Ora]     =   GWR_NEW_CAST( Color, "Ora"  , "#DC8E00", "32", "40" );
+    Colors[Grn1]    =   GWR_NEW_CAST( Color, "Grn1" , "#00FF00", "32", "40" );
+    Colors[Greyd]   =   GWR_NEW_CAST( Color, "Greyd", "#dddddd", "32", "40" );
+    Colors[Grey9]   =   GWR_NEW_CAST( Color, "Grey9", "#999999", "32", "40" );
+    Colors[Greyc]   =   GWR_NEW_CAST( Color, "Greyc", "#cccccc", "32", "40" );
+    Colors[Blu1]    =   GWR_NEW_CAST( Color, "Blu1" , "#1e90ff", "32", "40" );
+    Colors[Turq1]   =   GWR_NEW_CAST( Color, "Turq1", "#00ced1", "32", "40" );
+    Colors[Grey6]   =   GWR_NEW_CAST( Color, "Grey6", "#666666", "32", "40" );
+    Colors[17]      =   GWR_NEW_CAST( Color, "17"  ,  "#000000", "32", "40" );
+    Colors[18]      =   GWR_NEW_CAST( Color, "18"  ,  "#000000", "32", "40" );
+    Colors[19]      =   GWR_NEW_CAST( Color, "19"  ,  "#000000", "32", "40" );
 };
 
-ColorStatic::~ColorStatic()
+StaticInit::~StaticInit()
 {
     using namespace color;
 
@@ -149,18 +123,7 @@ ColorStatic::~ColorStatic()
 GWR_NAMESPACE_END(color)
 GWR_NAMESPACE_END(libgwr)
 //  ............................................................................
-static  libgwr::color::ColorStatic Dummy;
-//  ............................................................................
-GWR_NAMESPACE_START(libgwr)
-GWR_NAMESPACE_START(color)
-
-void            SetStdColor(const gchar* _html)
-{
-    Colors[libgwr::color::Std]->set_html( _html );
-}
-
-GWR_NAMESPACE_END(color)
-GWR_NAMESPACE_END(libgwr)
+static  libgwr::color::StaticInit Dummy;
 //  ............................................................................
 
 

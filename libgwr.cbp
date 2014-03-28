@@ -38,8 +38,11 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-fno-rtti" />
+			<Add option="-fno-exceptions" />
 			<Add option="-Wno-unused-but-set-variable" />
-			<Add option="`pkg-config --cflags gtk+-2.0`" />
+			<Add option="`pkg-config --cflags gtk+-3.0`" />
 		</Compiler>
 		<Unit filename="build/Makefile">
 			<Option virtualFolder="build/" />
@@ -74,10 +77,19 @@
 		<Unit filename="src/libgwr-counter.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
+		<Unit filename="src/libgwr-define-optim.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
 		<Unit filename="src/libgwr-env.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
+		<Unit filename="src/libgwr-hash.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
 		<Unit filename="src/libgwr-logger-channel.hi">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-logger-log.hi">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-logger-subchannel.hi">
@@ -116,7 +128,13 @@
 		<Unit filename="src/libgwr-t-array.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
+		<Unit filename="src/libgwr-t-m-array-p.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
 		<Unit filename="src/libgwr-text-attributes.h">
+			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/libgwr-text-style.h">
 			<Option virtualFolder="core/headers/" />
 		</Unit>
 		<Unit filename="src/libgwr-treestore-custom.cc">
@@ -128,7 +146,13 @@
 		<Unit filename="src/libgwr-treestore-gtmi.cc">
 			<Option virtualFolder="Treestore/" />
 		</Unit>
+		<Unit filename="src/libgwr-treestore-node-blocks.hi">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
 		<Unit filename="src/libgwr-treestore-nodes.cc">
+			<Option virtualFolder="Treestore/" />
+		</Unit>
+		<Unit filename="src/libgwr-treestore-nodes.hi">
 			<Option virtualFolder="Treestore/" />
 		</Unit>
 		<Unit filename="src/libgwr-treestore.cc">
@@ -142,6 +166,12 @@
 		</Unit>
 		<Unit filename="src/libgwr.h">
 			<Option virtualFolder="core/headers/" />
+		</Unit>
+		<Unit filename="src/widget/libgwr-widget-extensible-header.cc">
+			<Option virtualFolder="widget/" />
+		</Unit>
+		<Unit filename="src/widget/libgwr-widget-extensible-header.h">
+			<Option virtualFolder="widget/" />
 		</Unit>
 		<Unit filename="src/widget/libgwr-widget-gtk-utils.cc">
 			<Option virtualFolder="widget/" />

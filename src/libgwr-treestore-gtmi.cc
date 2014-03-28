@@ -62,63 +62,63 @@ GWR_NAMESPACE_START(treestore)
 
 //=============================================================================
 
-  /**
-	*   Store::get_flags:
-	*
-	*   Tells the rest of the world whether our tree model has any special
-	*   characteristics. In our case, tree iters are non persistent
-	*
-	**/
+/**
+*   Store::get_flags:
+*
+*   Tells the rest of the world whether our tree model has any special
+*   characteristics. In our case, tree iters are non persistent
+*
+**/
 
 //=============================================================================
 GtkTreeModelFlags
 Store::get_flags(GtkTreeModel *tree_model)
 {
-  g_return_val_if_fail (IS_LIBGWR_TREESTORE(tree_model), (GtkTreeModelFlags)0);
+    g_return_val_if_fail (IS_LIBGWR_TREESTORE(tree_model), (GtkTreeModelFlags)0);
 
-  return (GtkTreeModelFlags)0;
+    return (GtkTreeModelFlags)0;
 }
 
 //=============================================================================
 
-  /**
-	*   Store::get_n_columns:
-	*
-	*   \brief This method always return 1. I have not implemented multi-columns
-    *   since I can deduce all the columns and use appropriate GtkCellRenderers
-    *   for the GtkTreeView via DataInterface. But it is possible to
-    *   implement that.
-	*
-	**/
+/**
+*   Store::get_n_columns:
+*
+*   \brief This method always return 1. I have not implemented multi-columns
+  *   since I can deduce all the columns and use appropriate GtkCellRenderers
+  *   for the GtkTreeView via DataInterface. But it is possible to
+  *   implement that.
+*
+**/
 
 //=============================================================================
 gint
 Store::get_n_columns(GtkTreeModel *tree_model)
 {
-  //g_return_val_if_fail (IS_LIBGWR_TREESTORE(tree_model), 0);
+    //g_return_val_if_fail (IS_LIBGWR_TREESTORE(tree_model), 0);
 
-  return 1;
+    return 1;
 }
 
 //=============================================================================
 
-  /**
-	*   Store::get_column_type:
-	*
-	*   Our column is of type G_POINTER
-	*
-	**/
+/**
+*   Store::get_column_type:
+*
+*   Our column is of type G_POINTER
+*
+**/
 
 //=============================================================================
 GType
 Store::get_column_type(
-	GtkTreeModel *treemodel,
-	gint          index)
+    GtkTreeModel *treemodel,
+    gint          index)
 {
-  g_return_val_if_fail (IS_LIBGWR_TREESTORE(treemodel), G_TYPE_INVALID);
-  g_return_val_if_fail (index == 0, G_TYPE_INVALID);
+    g_return_val_if_fail (IS_LIBGWR_TREESTORE(treemodel), G_TYPE_INVALID);
+    g_return_val_if_fail (index == 0, G_TYPE_INVALID);
 
-  return G_TYPE_POINTER;
+    return G_TYPE_POINTER;
 }
 
 //  ----------------------------------------------------------------------------
@@ -130,59 +130,59 @@ Store::get_column_type(
 //  ----------------------------------------------------------------------------
 gboolean
 Store::get_iter(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter,
-	GtkTreePath  *path)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter,
+    GtkTreePath  *path)
 {
-	Store           *   treestore   = NULL;
-	Node            *   node        = NULL;
-	NodeBlock       *   block       = NULL;
-	gint            *   indices     = NULL  ,
+    Store           *   treestore   = NULL;
+    Node            *   node        = NULL;
+    NodeBlock       *   block       = NULL;
+    gint            *   indices     = NULL  ,
                         pos         = 0     ,
                         depth       = 0     ;
     gint                i           = 0;
-	//.........................................................................
-	g_assert( IS_LIBGWR_TREESTORE(treemodel) );
-	treestore = LIBGWR_TREESTORE(treemodel);
+    //.........................................................................
+    g_assert( IS_LIBGWR_TREESTORE(treemodel) );
+    treestore = LIBGWR_TREESTORE(treemodel);
 
     //  convert this assertion to a FALSE return value
     //  because of the "no selected item" bug
-	//  g_assert( path );
+    //  g_assert( path );
     if ( ! path )
     {
         //NODE_WNG("Store::get_iter():NULL GtkTreePath");
         return FALSE;
     }
 
-	indices = gtk_tree_path_get_indices(path);
-	depth   = gtk_tree_path_get_depth(path);
+    indices = gtk_tree_path_get_indices(path);
+    depth   = gtk_tree_path_get_depth(path);
 
-	// get the position
-	pos		= indices[i++];
+    // get the position
+    pos		= indices[i++];
 
-	// ok, get first root node ( first child of the ~root~ node )
-	node	=   treestore->node_root()->children()->node_get(pos);
+    // ok, get first root node ( first child of the ~root~ node )
+    node	=   treestore->node_root()->children()->node_get(pos);
 
-	while ( node )
-	{
-		// path is done ?
-		if ( i == depth )
-		{
-			ITER_FROM_NODE(treestore, iter, node);
-			return TRUE;
-		}
+    while ( node )
+    {
+        // path is done ?
+        if ( i == depth )
+        {
+            ITER_FROM_NODE(treestore, iter, node);
+            return TRUE;
+        }
 
-		// node = node->children()->get_pos( indices[i++] );
-		block   = node->children();
-		pos		= indices[i++];
-		node	= block->node_get(pos);
-	}
+        // node = node->children()->get_pos( indices[i++] );
+        block   = node->children();
+        pos		= indices[i++];
+        node	= block->node_get(pos);
+    }
 
-	//if ( treestore->node_root()->children()->card() != 0 )
+    //if ( treestore->node_root()->children()->card() != 0 )
     //{
-		//GCMD_ERR("Store::get_iter::failed to get iter from path");
+    //GCMD_ERR("Store::get_iter::failed to get iter from path");
     //}
-	return FALSE;
+    return FALSE;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::get_path()
@@ -193,33 +193,33 @@ Store::get_iter(
 //  ----------------------------------------------------------------------------
 GtkTreePath *
 Store::get_path(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter)
 {
     Store           *   treestore   = NULL;
     GtkTreePath     *   path        = NULL;
     Node            *   node        = NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), NULL );
-	treestore = LIBGWR_TREESTORE(treemodel);
-	g_return_val_if_fail ( treestore->iter_is_valid(iter), NULL);
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), NULL );
+    treestore = LIBGWR_TREESTORE(treemodel);
+    g_return_val_if_fail ( treestore->iter_is_valid(iter), NULL);
 
-	path = gtk_tree_path_new();
+    path = gtk_tree_path_new();
 
-	NODE_FROM_ITER(node, iter);
-	g_return_val_if_fail( node              , NULL );
+    NODE_FROM_ITER(node, iter);
+    g_return_val_if_fail( node              , NULL );
     g_return_val_if_fail( node->shown()     , NULL );                           //  node has to be shown
 
-	do
-	{
-		gtk_tree_path_prepend_index(path, node->pos());
-		node = node->parent();
-	}
-	while ( node != treestore->node_root() );
+    do
+    {
+        gtk_tree_path_prepend_index(path, node->pos());
+        node = node->parent();
+    }
+    while ( node != treestore->node_root() );
 
-	//STORE_INF("get_path:%s", gtk_tree_path_to_string(path));
+    //STORE_INF("get_path:%s", gtk_tree_path_to_string(path));
 
-	return path;
+    return path;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::get_value()
@@ -230,30 +230,30 @@ Store::get_path(
 //  ----------------------------------------------------------------------------
 void
 Store::get_value(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter,
-	gint          column,
-	GValue       *value)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter,
+    gint          column,
+    GValue       *value)
 {
     Store   *   treestore   = NULL;
     Node    *   node        = NULL;
-	//.........................................................................
-	if ( ! IS_LIBGWR_TREESTORE(treemodel) )		goto fail;
-	treestore = LIBGWR_TREESTORE(treemodel);
-	if ( ! treestore->iter_is_valid(iter) )					goto fail;
-	//if ( column != 0 )									goto fail;
-	//if ( !value )											goto fail;
+    //.........................................................................
+    if ( ! IS_LIBGWR_TREESTORE(treemodel) )		goto fail;
+    treestore = LIBGWR_TREESTORE(treemodel);
+    if ( ! treestore->iter_is_valid(iter) )					goto fail;
+    //if ( column != 0 )									goto fail;
+    //if ( !value )											goto fail;
 
-	NODE_FROM_ITER(node, iter);
-	if ( ! node )											goto fail;
+    NODE_FROM_ITER(node, iter);
+    if ( ! node )											goto fail;
 
-	g_value_init(value, G_TYPE_POINTER);
-	g_value_set_pointer(value, node->data());
-	return;
+    g_value_init(value, G_TYPE_POINTER);
+    g_value_set_pointer(value, node->data());
+    return;
 
 fail:
-	g_value_init(value, G_TYPE_POINTER);
-	g_value_set_pointer(value, NULL);
+    g_value_init(value, G_TYPE_POINTER);
+    g_value_set_pointer(value, NULL);
 }
 //  ----------------------------------------------------------------------------
 //!	\fn         Store::iter_next()
@@ -264,22 +264,22 @@ fail:
 //  ----------------------------------------------------------------------------
 gboolean
 Store::iter_next(
-	GtkTreeModel  *treemodel,
-	GtkTreeIter   *iter)
+    GtkTreeModel  *treemodel,
+    GtkTreeIter   *iter)
 {
     Store   *   treestore   = NULL;
     Node    *   node		= NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
-	treestore = LIBGWR_TREESTORE(treemodel);
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
+    treestore = LIBGWR_TREESTORE(treemodel);
 
-	g_return_val_if_fail ( treestore->iter_is_valid(iter), FALSE );
+    g_return_val_if_fail ( treestore->iter_is_valid(iter), FALSE );
 
-	NODE_FROM_ITER(node, iter);
+    NODE_FROM_ITER(node, iter);
     g_return_val_if_fail( node              , FALSE);
     g_return_val_if_fail( node->shown()     , FALSE);                           //  node has to be shown
 
-	node = node->next();
+    node = node->next();
 
     if ( ! node )
     {
@@ -289,8 +289,8 @@ Store::iter_next(
 
     g_return_val_if_fail( node->shown()     , FALSE);                           //  node has to be shown
 
-	ITER_FROM_NODE(treestore, iter, node);
-	return TRUE;
+    ITER_FROM_NODE(treestore, iter, node);
+    return TRUE;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::iter_children()
@@ -304,40 +304,40 @@ Store::iter_next(
 //  ----------------------------------------------------------------------------
 gboolean
 Store::iter_children(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter_child,
-	GtkTreeIter  *iter_parent)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter_child,
+    GtkTreeIter  *iter_parent)
 {
-	Store   *   treestore   = NULL;
-	Node    *   node        = NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
-	treestore = LIBGWR_TREESTORE(treemodel);
+    Store   *   treestore   = NULL;
+    Node    *   node        = NULL;
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
+    treestore = LIBGWR_TREESTORE(treemodel);
 
-	g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter_parent), FALSE );
+    g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter_parent), FALSE );
 
-	if ( ! iter_parent )
-	{
-		node = treestore->node_root();
-			g_return_val_if_fail( node, FALSE );
+    if ( ! iter_parent )
+    {
+        node = treestore->node_root();
+        g_return_val_if_fail( node, FALSE );
 
         if ( node->sterile() )
             return FALSE;
 
-		ITER_FROM_NODE(treestore, iter_child, node->children()->node_get(0));
-		return TRUE;
-	}
+        ITER_FROM_NODE(treestore, iter_child, node->children()->node_get(0));
+        return TRUE;
+    }
 
-	NODE_FROM_ITER(node, iter_parent);
-	g_assert(node);
+    NODE_FROM_ITER(node, iter_parent);
+    g_assert(node);
 
-	if ( ! node->sterile() )
-	{
-		ITER_FROM_NODE(treestore, iter_child, node->children()->node_get(0));
-		return TRUE;
-	}
+    if ( ! node->sterile() )
+    {
+        ITER_FROM_NODE(treestore, iter_child, node->children()->node_get(0));
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::iter_has_child()
@@ -349,20 +349,20 @@ Store::iter_children(
 //  ----------------------------------------------------------------------------
 gboolean
 Store::iter_has_child(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter)
 {
-	Store					*treestore  = NULL;
-	Node				*node		= NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
-	treestore = LIBGWR_TREESTORE(treemodel);
-	g_return_val_if_fail ( treestore->iter_is_valid(iter), FALSE );
+    Store					*treestore  = NULL;
+    Node				*node		= NULL;
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
+    treestore = LIBGWR_TREESTORE(treemodel);
+    g_return_val_if_fail ( treestore->iter_is_valid(iter), FALSE );
 
-	NODE_FROM_ITER(node, iter);
-	g_assert(iter);
+    NODE_FROM_ITER(node, iter);
+    g_assert(iter);
 
-	return node->children()->card() != 0 ? TRUE : FALSE;
+    return node->children()->card() != 0 ? TRUE : FALSE;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::iter_n_children()
@@ -374,24 +374,24 @@ Store::iter_has_child(
 //  ----------------------------------------------------------------------------
 gint
 Store::iter_n_children(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter)
 {
-	Store					*treestore  = NULL;
-	Node				*node		= NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), 0 );
-	treestore = LIBGWR_TREESTORE(treemodel);
-	g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter), 0 );
+    Store					*treestore  = NULL;
+    Node				*node		= NULL;
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), 0 );
+    treestore = LIBGWR_TREESTORE(treemodel);
+    g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter), 0 );
 
-	if ( ! iter )
-		node = treestore->node_root();
-	else
-		NODE_FROM_ITER(node, iter);
+    if ( ! iter )
+        node = treestore->node_root();
+    else
+        NODE_FROM_ITER(node, iter);
 
-	g_assert(node);
+    g_assert(node);
 
-	return node->children()->card();
+    return node->children()->card();
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::iter_nth_child()
@@ -405,33 +405,33 @@ Store::iter_n_children(
 //  ----------------------------------------------------------------------------
 gboolean
 Store::iter_nth_child(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter_child,
-	GtkTreeIter  *iter_parent,
-	gint          n)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter_child,
+    GtkTreeIter  *iter_parent,
+    gint          n)
 {
-	Store			*   treestore   = NULL;
-	Node			*   node        = NULL;
-	NodeBlock		*   block       = NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
-	treestore = LIBGWR_TREESTORE(treemodel);
-	g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter_parent), FALSE );
+    Store			*   treestore   = NULL;
+    Node			*   node        = NULL;
+    NodeBlock		*   block       = NULL;
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
+    treestore = LIBGWR_TREESTORE(treemodel);
+    g_return_val_if_fail ( treestore->iter_is_valid_but_may_be_null(iter_parent), FALSE );
 
-	if ( ! iter_parent )
-		node = treestore->node_root();
-	else
-	{
-		NODE_FROM_ITER(node, iter_parent);
-		g_assert( node );
-	}
+    if ( ! iter_parent )
+        node = treestore->node_root();
+    else
+    {
+        NODE_FROM_ITER(node, iter_parent);
+        g_assert( node );
+    }
 
-	block = node->children();
+    block = node->children();
 
-	g_assert( n < block->card() );
+    g_assert( n < block->card() );
 
-	ITER_FROM_NODE(treestore, iter_child, block->node_get(n));
-	return TRUE;
+    ITER_FROM_NODE(treestore, iter_child, block->node_get(n));
+    return TRUE;
 }
 //  ----------------------------------------------------------------------------
 //! \fn         Store::iter_parent()
@@ -442,27 +442,27 @@ Store::iter_nth_child(
 //  ----------------------------------------------------------------------------
 gboolean
 Store::iter_parent(
-	GtkTreeModel *treemodel,
-	GtkTreeIter  *iter_parent,
-	GtkTreeIter  *iter_child)
+    GtkTreeModel *treemodel,
+    GtkTreeIter  *iter_parent,
+    GtkTreeIter  *iter_child)
 {
-	Store					*treestore  = NULL;
-	Node				*node		= NULL;
-	//.........................................................................
-	g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
-	treestore = LIBGWR_TREESTORE(treemodel);
-	g_return_val_if_fail ( treestore->iter_is_valid(iter_child), FALSE );
+    Store					*treestore  = NULL;
+    Node				*node		= NULL;
+    //.........................................................................
+    g_return_val_if_fail ( IS_LIBGWR_TREESTORE(treemodel), FALSE );
+    treestore = LIBGWR_TREESTORE(treemodel);
+    g_return_val_if_fail ( treestore->iter_is_valid(iter_child), FALSE );
 
-	NODE_FROM_ITER(node, iter_child);
-	g_assert( node );
-	g_assert( node->parent() );
+    NODE_FROM_ITER(node, iter_child);
+    g_assert( node );
+    g_assert( node->parent() );
 
-	node = node->parent();
-	g_assert( node );
-	//g_assert( node != treestore->node_root() );
-	ITER_FROM_NODE(treestore, iter_parent, node);
+    node = node->parent();
+    g_assert( node );
+    //g_assert( node != treestore->node_root() );
+    ITER_FROM_NODE(treestore, iter_parent, node);
 
-	return TRUE;
+    return TRUE;
 }
 
 GWR_NAMESPACE_END(treestore)

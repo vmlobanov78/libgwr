@@ -61,6 +61,7 @@ enum
     // attributes : styles ( GTK+ )
     Ita     =   0x00000080  ,
     Stk     =   0x00000100  ,
+    Htm     =   0x00000200  ,
 
     //  attributes : colors
     FgColor =   0x00008000  ,
@@ -82,10 +83,10 @@ GWR_NAMESPACE_END(text)
 //!
 class   TextAttributes
 {
-    private:
+private:
     guint32 a_att;
 
-    public:
+public:
     TextAttributes(
         guint32     _style      =   libgwr::text::attributes::Std   ,
         guint32     _fg_color   =   libgwr::color::Std              ,
@@ -102,10 +103,22 @@ class   TextAttributes
     }
     virtual ~TextAttributes()    {}
 
-    inline  guint32 flags() { return a_att;                             }
-    inline  guint32 style() { return a_att & 0x0000FFFF;                }
-    inline  guint32 fgcol() { return ( a_att & 0xFF000000 ) >> 24;      }
-    inline  guint32 bgcol() { return ( a_att & 0x00FF0000 ) >> 16;      }
+    inline  guint32 flags()
+    {
+        return a_att;
+    }
+    inline  guint32 style()
+    {
+        return a_att & 0x0000FFFF;
+    }
+    inline  guint32 fgcol()
+    {
+        return ( a_att & 0xFF000000 ) >> 24;
+    }
+    inline  guint32 bgcol()
+    {
+        return ( a_att & 0x00FF0000 ) >> 16;
+    }
 
     //inline  operator    guint32()  { return a_att; }
 };
@@ -114,15 +127,43 @@ GWR_NAMESPACE_START(text)
 
 
 
-inline gchar * G_console_add_style(gchar* p, guint32 _style)
+inline gchar * Console_add_style(gchar* p, guint32 _style)
 {
-    if ( _style & libgwr::text::attributes::Rst ) {   *(p++) = '0';  return p;       };
-    if ( _style & libgwr::text::attributes::Bld ) {   *(p++) = '1';  return p;       };
-    if ( _style & libgwr::text::attributes::Dim ) {   *(p++) = '2';  return p;       };
-    if ( _style & libgwr::text::attributes::Und ) {   *(p++) = '3';  return p;       };
-    if ( _style & libgwr::text::attributes::Blk ) {   *(p++) = '5';  return p;       };
-    if ( _style & libgwr::text::attributes::Rev ) {   *(p++) = '7';  return p;       };
-    if ( _style & libgwr::text::attributes::Hid ) {   *(p++) = '9';  return p;       };
+    if ( _style & libgwr::text::attributes::Rst )
+    {
+        *(p++) = '0';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Bld )
+    {
+        *(p++) = '1';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Dim )
+    {
+        *(p++) = '2';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Und )
+    {
+        *(p++) = '3';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Blk )
+    {
+        *(p++) = '5';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Rev )
+    {
+        *(p++) = '7';
+        return p;
+    };
+    if ( _style & libgwr::text::attributes::Hid )
+    {
+        *(p++) = '9';
+        return p;
+    };
 
     *(p++) = '0';
     return p;
@@ -143,14 +184,14 @@ G_console_add_attributes(
     *(_p++) = '['    ;
 
     // Styles
-    _p = libgwr::text::G_console_add_style      ( _p, _ta.style()   );
+    _p = libgwr::text::Console_add_style      ( _p, _ta.style()   );
     *(_p++) = ';'    ;
 
     // Colors
-    _p = libgwr::color::G_console_add_fg        ( _p, _ta.fgcol()   );
+    _p = libgwr::color::Console_add_fg        ( _p, _ta.fgcol()   );
     *(_p++) = ';'    ;
 
-    _p = libgwr::color::G_console_add_bg        ( _p, _ta.bgcol()   );
+    _p = libgwr::color::Console_add_bg        ( _p, _ta.bgcol()   );
     *(_p++) = 'm'    ;
 
     return _p;

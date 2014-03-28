@@ -1,7 +1,7 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-t-array.h                                                        *
+    *   libgwr-m-array-p.h                                                      *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,21 +28,21 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : TArray                                                        *
+    *   Class   : MArrayP                                                       *
     *                                                                           *
     *   Parent  : None                                                          *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef     __LIBGWR_T_ARRAY_H__
-#define     __LIBGWR_T_ARRAY_H__
+#ifndef     __LIBGWR_M_ARRAY_P_H__
+#define     __LIBGWR_M_ARRAY_P_H__
 //  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
 
 /// ****************************************************************************
 //!
-//! \class  TArrayP
+//! \class  MArrayP
 //!
 //! \brief  Simple template <T> array that
 //!         - store pointers on T in an array
@@ -50,8 +50,8 @@ GWR_NAMESPACE_START(libgwr)
 //!         ( GArray and GPtrArray doesnt fit my needs ).
 //!
 /// ****************************************************************************
-template < typename T >
-class TArrayP
+template < typename T, typename S >
+class TMArrayP
 {
     protected:
     guint32         a_tb;                                                       //!< T size in bytes
@@ -88,7 +88,7 @@ class TArrayP
 
     public:
     inline    TArrayP(guint32 _card_max, guint32 _realloc_size)
-        : a_tb( sizeof( T* ) ), a_sm( _card_max ), a_rs( _realloc_size )
+        : a_tb( sizeof( gpointer ) ), a_sm( _card_max ), a_rs( _realloc_size )
     {
         a_cs    = 0;
         a_card  = 0;
@@ -270,4 +270,4 @@ TArrayP< gchar >::~TArrayP()
 
 GWR_NAMESPACE_END(libgwr);
 
-#endif
+#endif                                                                          //  __LIBGWR_M_ARRAY_P_H__

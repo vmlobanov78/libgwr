@@ -62,6 +62,9 @@ GwrTextView::TextTagHelper::TextTagHelper(
     d_tag_bld       =   gtk_text_buffer_create_tag(a_text_buffer, NULL, "weight",           PANGO_WEIGHT_BOLD,      NULL);
     d_tag_ita       =   gtk_text_buffer_create_tag(a_text_buffer, NULL, "style",            PANGO_STYLE_ITALIC,     NULL);
     d_tag_stk       =   gtk_text_buffer_create_tag(a_text_buffer, NULL, "strikethrough",    TRUE,                   NULL);
+    d_tag_htm       =   gtk_text_buffer_create_tag(a_text_buffer, NULL,
+                            "foreground"    ,   "#0000ff"                       ,
+                            "underline"     ,    PANGO_UNDERLINE_SINGLE         , NULL);
 
     d_tags_color_fg =   g_array_new(FALSE, TRUE, sizeof(GtkTextTag*));
     d_tags_color_bg =   g_array_new(FALSE, TRUE, sizeof(GtkTextTag*));
@@ -72,9 +75,9 @@ GwrTextView::TextTagHelper::TextTagHelper(
     // color tags
     for ( i = 0 ; i < LIBGWR_COLOR_DEFINED_CARD ; i++ )
     {
-        temp = gtk_text_buffer_create_tag(a_text_buffer, NULL, "foreground", color::Html(i), NULL);
+        temp = gtk_text_buffer_create_tag(a_text_buffer, NULL, "foreground", color::Colors[i]->html(), NULL);
         g_array_append_val(d_tags_color_fg, temp);
-        temp = gtk_text_buffer_create_tag(a_text_buffer, NULL, "background", color::Html(i), NULL);
+        temp = gtk_text_buffer_create_tag(a_text_buffer, NULL, "background", color::Colors[i]->html(), NULL);
         g_array_append_val(d_tags_color_bg, temp);
     }
 }
@@ -101,6 +104,7 @@ GwrTextView::TextTagHelper::build_tag_list(
     if ( _flags & libgwr::text::attributes::Bld  )   slist = g_slist_append(slist, d_tag_bld);
     if ( _flags & libgwr::text::attributes::Ita  )   slist = g_slist_append(slist, d_tag_ita);
     if ( _flags & libgwr::text::attributes::Stk  )   slist = g_slist_append(slist, d_tag_stk);
+    if ( _flags & libgwr::text::attributes::Htm  )   slist = g_slist_append(slist, d_tag_htm);
 
     if ( _flags & libgwr::text::attributes::FgColor )
     {
@@ -124,18 +128,30 @@ GwrTextView::Model::Model()
 {
     d_gtk_text_buffer   =   gtk_text_buffer_new(gtk_text_tag_table_new());
     d_text_tag_helper   =   GWR_NEW( TextTagHelper, d_gtk_text_buffer );
-
-    a_count             = 0;
 }
 GwrTextView::Model::~Model()
 {
+}
+gchar*
+GwrTextView::Model::get_text()
+{
+    GtkTextIter         iter_start, iter_end;
+    //..........................................................................
+    gtk_text_buffer_get_start_iter  ( buffer(), &iter_start );
+    gtk_text_buffer_get_end_iter    ( buffer(), &iter_end   );
+
+    return gtk_text_buffer_get_text( buffer(), &iter_start, &iter_end, FALSE );
+}
+void
+GwrTextView::Model::set_text(const gchar* _txt)
+{
+    gtk_text_buffer_set_text( buffer(), _txt, -1 );
 }
 void
 GwrTextView::Model::clear()
 {
     GtkTextIter         iter_start, iter_end;
     //..........................................................................
-    a_count = 0;
     gtk_text_buffer_get_start_iter  (buffer(), &iter_start);                    // get start of buffer
     gtk_text_buffer_get_end_iter    (buffer(), &iter_end);                      // get end of buffer
 
@@ -150,8 +166,6 @@ GwrTextView::Model::append(
     gint                offset_start;
     GSList          *   slist       = NULL;
     //..........................................................................
-    a_count++;
-
     // build GtkTextTag* list
     d_text_tag_helper->build_tag_list(&slist, _tag);
 
@@ -174,16 +188,40 @@ GwrTextView::Model::append(
         slist = g_slist_next(slist);
     }
 }
+void
+GwrTextView::Model::append_html(
+    const   gchar     *   _txt)
+{
+    GtkTextIter         iter_start, iter_end;
+    gint                offset_start;
+    //..........................................................................
+    gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // get end of buffer iter   = start of our text
+    offset_start = gtk_text_iter_get_offset(&iter_end);                         // get end of buffer offset = start of our text
+
+    gtk_text_buffer_insert(buffer(), &iter_end, _txt, -1);                      // insert text
+
+    gtk_text_buffer_get_end_iter(buffer(), &iter_end);                          // iter_end has changed, have to recompute it
+
+    gtk_text_buffer_get_iter_at_offset(buffer(), &iter_start, offset_start);    // iter_start
+
+    gtk_text_buffer_apply_tag(
+        buffer()                            ,
+        d_text_tag_helper->get_tag_htm()    ,
+        &iter_start, &iter_end              );
+}
 //  ############################################################################
 //
 //  GwrTextView::View
 //
 //  ############################################################################
 GwrTextView::View::View(
-    Control     *   _control,
+    GwrTextView *   _control,
     gboolean        _editable)
 {
+    //  ........................................................................
     g_return_if_fail( _control );
+
+    Static_init();
 
     a_control               = _control;
     a_text_buffer           = control()->model()->buffer();
@@ -194,12 +232,17 @@ GwrTextView::View::View(
 
     d_gtk_lab1              =   gtk_label_new("Find : ");
     d_gtk_entry_find        =   gtk_entry_new();
-    d_gtk_hbox              =   gtk_hbox_new(FALSE, 0);
+    d_gtk_hbox              =   libgwr::gtk::hbox_new(FALSE, 0);
 
-    d_gtk_vbox              =   gtk_vbox_new(FALSE, 0);
+    d_gtk_vbox              =   libgwr::gtk::vbox_new(FALSE, 0);
 
-    g_signal_connect(d_gtk_text_view    , "key-release-event", G_CALLBACK(View::Sgn_key_release_event), this);
-    g_signal_connect(d_gtk_entry_find   , "key-release-event", G_CALLBACK(View::Sgn_entry_find_key_release_event), this);
+    g_signal_connect(d_gtk_text_view    , "key-release-event"   , G_CALLBACK(View::Sgn_key_release_event), this);
+    g_signal_connect(d_gtk_text_view    , "button-press-event"  , G_CALLBACK(View::Sgn_button_press_event), this);
+    g_signal_connect(d_gtk_entry_find   , "key-release-event"   , G_CALLBACK(View::Sgn_entry_find_key_release_event), this);
+
+    //  add the event for urls
+    gtk_widget_add_events( d_gtk_text_view, GDK_POINTER_MOTION_HINT_MASK );
+    g_signal_connect(d_gtk_text_view    , "motion-notify-event" , G_CALLBACK(View::Sgn_motion_notify_event), this);
 
     gtk_container_add(GTK_CONTAINER(d_gtk_scrolled_window)  , d_gtk_text_view);
 
@@ -209,46 +252,130 @@ GwrTextView::View::View(
     gtk_box_pack_start(GTK_BOX(d_gtk_vbox), d_gtk_scrolled_window   ,  TRUE , TRUE, 0);
     gtk_box_pack_start(GTK_BOX(d_gtk_vbox), d_gtk_hbox              , FALSE , TRUE, 0);
 
-    a_is_shown              = TRUE;
+    a_is_shown              =   TRUE;
 
-    d_find_text             = NULL;
-    d_find_text_ck          = NULL;
+    d_find_text             =   NULL;
+    d_find_text_ck          =   NULL;
 
-    d_mark_find_start       = NULL;
+    d_mark_find_start       =   NULL;
 }
 GwrTextView::View::~View()
 {
+    //g_object_unref( d_scroll_mark );
 }
 //  ----------------------------------------------------------------------------
+//  View - static init
+//  ----------------------------------------------------------------------------
+gboolean        GwrTextView::View::s_initialized    =   FALSE;
 void
-GwrTextView::View::scroll(GtkTextIter* _iter)
+GwrTextView::View::Static_init()
+{
+    if ( s_initialized )
+        return;
+
+    s_cursor_arrow      =   gdk_cursor_new(GDK_HAND2);
+    s_cursor_default    =   gdk_cursor_new(GDK_XTERM);
+}
+//  ----------------------------------------------------------------------------
+//  View - cursor
+//  ----------------------------------------------------------------------------
+GdkCursor   *   GwrTextView::View::s_cursor_arrow   =   NULL;
+GdkCursor   *   GwrTextView::View::s_cursor_default =   NULL;
+
+void
+GwrTextView::View::set_html_cursor(gboolean _on)
+{
+            GdkWindow           *   w       =   NULL;
+            GdkCursor           *   cold    =   NULL;
+            GdkCursor           *   cnew    =   NULL;
+    //  ........................................................................
+    w       =   gtk_text_view_get_window(
+                    GTK_TEXT_VIEW(get_gtk_text_view())  ,
+                    GTK_TEXT_WINDOW_TEXT                );
+    g_return_if_fail( w );
+
+    cold                    =   gdk_window_get_cursor( w );
+
+    if ( _on )
+        cnew                =   View::s_cursor_arrow;
+    else
+        cnew                =   View::s_cursor_default;
+
+    if ( cnew == cold )
+        return;
+
+    gdk_window_set_cursor( w, cnew );
+}
+//  ----------------------------------------------------------------------------
+//  View - scolling
+//  ----------------------------------------------------------------------------
+void
+GwrTextView::View::p0_scroll(GtkTextIter* _iter)
 {
     gtk_text_view_scroll_to_iter(
         GTK_TEXT_VIEW(d_gtk_text_view),
         _iter,
         (gdouble)0.0,
-        FALSE,
+        TRUE,
         (gdouble)0.0,
-        (gdouble)0.0);
+        (gdouble)0.5);
+}
+//  ----------------------------------------------------------------------------
+void
+GwrTextView::View::p0_scroll_to_line()
+{
+    GtkTextIter     iter;
+    //  ........................................................................
+    gtk_text_buffer_get_iter_at_line(
+        buffer()                ,
+        &iter                   ,
+        a_scroll_to_line_lineno );
+
+    p0_scroll( &iter );
+}
+//  ----------------------------------------------------------------------------
+gboolean
+GwrTextView::View::Scroll_to_line_timeout_func(gpointer    _data)
+{
+            GwrTextView::View   *   THIS    =   NULL;
+    //  ........................................................................
+    THIS    =   (GwrTextView::View*)_data;
+
+    THIS->p0_scroll_to_line();
+
+    THIS->a_scroll_to_line_lineno         = 0;
+    THIS->a_scroll_to_line_timeout_id     = 0;
+
+    return FALSE;                                                               //  cancel the timeout
+}
+//  ----------------------------------------------------------------------------
+void
+GwrTextView::View::scroll_to_line(
+    guint32     _lineno     ,
+    gboolean    _delayed    )
+{
+    gint            lineno  =   (gint)_lineno;
+    //  ........................................................................
+    if ( ! _delayed )
+    {
+        a_scroll_to_line_lineno =   lineno;
+        p0_scroll_to_line();
+        return;
+    }
+
+    a_scroll_to_line_lineno     =   lineno;
+    a_scroll_to_line_timeout_id =   g_timeout_add(
+        300                                             ,
+        GwrTextView::View::Scroll_to_line_timeout_func  ,
+        (gpointer)this                                  );
 }
 //  ----------------------------------------------------------------------------
 void
 GwrTextView::View::scroll_to_end()
 {
-    //GtkTextIter iter;
-    /*
-    //..........................................................................
-    gtk_text_buffer_get_end_iter(a_text_buffer, &iter);
-
-    gtk_text_view_scroll_to_iter(
-        GTK_TEXT_VIEW(d_gtk_text_view),
-        &iter,
-        (gdouble)0.0,
-        FALSE,
-        (gdouble)0.0,
-        (gdouble)0.0);
-    */
 }
+//  ----------------------------------------------------------------------------
+//  View - appearance
 //  ----------------------------------------------------------------------------
 void
 GwrTextView::View::set_font_monospace(
@@ -274,7 +401,7 @@ GwrTextView::View::set_color_bg(
     gtk_widget_modify_base(d_gtk_text_view, GTK_STATE_NORMAL, &color);
 }
 //  ----------------------------------------------------------------------------
-//  View::find
+//  View - find
 //  ----------------------------------------------------------------------------
 void
 GwrTextView::View::find_entry_show(
@@ -301,6 +428,37 @@ GwrTextView::View::clear()
     _find_text_set_mark_find_start_at_buffer_top();
 }
 //  ----------------------------------------------------------------------------
+gboolean
+GwrTextView::View::gtk_text_iter_from_window_coords(gint _wx, gint _wy, GtkTextIter* _iter)
+{
+            GtkTextView         *   tv      =   NULL;
+            GtkTextWindowType       wt;
+            gint                    xbuf    =   0;
+            gint                    ybuf    =   0;
+    //  ........................................................................
+    tv  =   GTK_TEXT_VIEW(this->get_gtk_text_view());
+
+    wt  =   gtk_text_view_get_window_type(
+                tv                                      ,
+                gtk_widget_get_window( GTK_WIDGET(tv) ) );
+
+    gtk_text_view_window_to_buffer_coords(
+        tv      ,
+        wt      ,
+        _wx     ,                                                               //  xin
+        _wy     ,                                                               //  yin
+        &xbuf   ,                                                               //  x out
+        &ybuf   );                                                              //  y out
+
+    gtk_text_view_get_iter_at_location(
+        tv          ,
+        _iter       ,
+        xbuf        ,
+        ybuf        );
+
+    return TRUE;
+}
+//  ----------------------------------------------------------------------------
 void
 GwrTextView::View::_find_text_set_mark_find_start_at_buffer_top()
 {
@@ -314,7 +472,6 @@ GwrTextView::View::_find_text_set_mark_find_start_at_buffer_top()
     gtk_text_buffer_get_start_iter(
         buffer()                    ,
         &iter                       );
-
 
     d_mark_find_start   =   gtk_text_buffer_create_mark(
                                 buffer()                ,
@@ -349,7 +506,7 @@ GwrTextView::View::_find_text_and_select()
     if ( ! b )
         return FALSE;
 
-    scroll( &iter_match_start );
+    p0_scroll( &iter_match_start );
 
     gtk_text_buffer_select_range(
         a_text_buffer               ,
@@ -463,6 +620,25 @@ lab_end:
     return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
 }
 //  ----------------------------------------------------------------------------
+//  View::Sgn_key_release_event()
+//  ----------------------------------------------------------------------------
+gboolean
+GwrTextView::View::Sgn_button_press_event(
+    GtkWidget   *   _widget   ,
+    GdkEvent    *   _event    ,
+    gpointer        _data)
+{
+            View                *   THIS    = NULL;
+            GdkEventButton      *   evb     =   NULL;
+    //  ........................................................................
+    THIS    =   (View*)_data;
+    evb     =   (GdkEventButton*)_event;
+
+    THIS->control()->sgn_button_press_event( evb );
+
+    return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
+}
+//  ----------------------------------------------------------------------------
 //  View::Sgn_entry_find_key_release_event()
 //  ----------------------------------------------------------------------------
 gboolean
@@ -501,18 +677,28 @@ lab_end:
     //  allow other handlers
     return FALSE;
 }
-//  ############################################################################
-//
-//  GwrTextView::Control
-//
-//  ############################################################################
-GwrTextView::Control::Control(gboolean _editable)
+//  ----------------------------------------------------------------------------
+//  View::Sgn_motion_notify_event()
+//  ----------------------------------------------------------------------------
+gboolean
+GwrTextView::View::Sgn_motion_notify_event(
+    GtkWidget   *   _widget,
+    GdkEvent    *   _event,
+    gpointer        _data)
 {
-    d_model     = GWR_NEW( Model );
-    d_view      = GWR_NEW( View, this , _editable );
-}
-GwrTextView::Control::~Control()
-{
+    static  guint32                         Count   =   0;
+            View                        *   THIS    =   NULL;
+            GdkEventMotion              *   evm     =   NULL;
+    //..........................................................................
+    THIS    =   (View*)_data;
+    evm     =   (GdkEventMotion*)_event;
+
+    //  filter 1 on 10 event
+    Count   =   ( Count + 1 ) % 10;
+    if ( ! Count )
+        THIS->control()->sgn_motion_notify_event( evm );
+
+    return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
 }
 //  ############################################################################
 //
@@ -521,11 +707,227 @@ GwrTextView::Control::~Control()
 //  ############################################################################
 GwrTextView::GwrTextView(gboolean _editable)
 {
-    d_control   = GWR_NEW( Control, _editable );
-}
+    d_html_callback     =   NULL;
+    a_html_inside       =   FALSE;
 
+    d_model             =   GWR_NEW_CAST( Model );
+    d_view              =   GWR_NEW_CAST( View, this , _editable );
+}
 GwrTextView::~GwrTextView()
 {
+    if ( html_callback() )
+        delete d_html_callback;
+}
+
+
+void
+GwrTextView::html_callback_set(HtmlCallback * _hcb)
+{
+    //  ........................................................................
+    g_return_if_fail( _hcb );
+
+
+
+    d_html_callback =   GWR_NEW_CAST( HtmlCallback );
+    d_html_callback->set( _hcb );
+}
+
+
+void
+GwrTextView::sgn_button_press_event(GdkEventButton* _evb)
+{
+            GtkTextTag          *   htag    =   NULL;
+            GtkTextIter             iter;
+            GtkTextIter             iter1;
+            GtkTextIter             iter2;
+            gchar               *   dstr    =   NULL;
+    //  ........................................................................
+    if ( ! html_callback() )
+        goto lab_end;
+
+    if ( ! view()->gtk_text_iter_from_window_coords( _evb->x, _evb->y, &iter ) )
+    {
+        goto lab_end;
+    }
+
+    htag    =   model()->text_tag_helper()->get_tag_htm();
+
+    if ( ! gtk_text_iter_has_tag( &iter, htag ) )
+        goto lab_end;
+
+    gtk_text_iter_assign( &iter1, &iter );
+    while ( ! gtk_text_iter_begins_tag( &iter1, htag ) )
+    {
+        if ( ! gtk_text_iter_backward_char( &iter1 ) )
+            goto lab_end;
+    }
+
+    gtk_text_iter_assign( &iter2, &iter );
+    while ( ! gtk_text_iter_ends_tag( &iter2, htag ) )
+    {
+        if ( ! gtk_text_iter_forward_char( &iter2 ) )
+            goto lab_end;
+    }
+
+    dstr = gtk_text_buffer_get_slice(
+        model()->buffer()    ,
+        &iter1,
+        &iter2,
+        FALSE);
+
+    if ( dstr )
+    {
+        html_callback()->func()( dstr, html_callback()->data() );
+        g_free( dstr );
+    }
+
+    //  ........................................................................
+lab_end:
+    return;
+}
+void
+GwrTextView::sgn_motion_notify_event(GdkEventMotion* _evm)
+{
+            GtkTextTag          *   htag    =   NULL;
+            gboolean                b       =   FALSE;
+            GtkTextIter             iter;
+    //  ........................................................................
+    //printf("motion event\n");
+
+    if ( ! html_callback() )
+        goto lab_end;
+
+    if ( ! view()->gtk_text_iter_from_window_coords( _evm->x, _evm->y, &iter ) )
+    {
+        goto lab_end;
+    }
+
+    htag    =   model()->text_tag_helper()->get_tag_htm();
+
+    b = gtk_text_iter_has_tag( &iter, htag );
+
+    if ( b )
+    {
+        if ( ! a_html_inside )
+        {
+            view()->set_html_cursor(TRUE);
+            a_html_inside = TRUE;
+        }
+    }
+    else
+    {
+        if ( a_html_inside )
+        {
+            view()->set_html_cursor(FALSE);
+            a_html_inside = FALSE;
+        }
+    }
+
+    //  ........................................................................
+lab_end:
+    return;
+}
+//  ############################################################################
+//
+//  GwrFileView
+//
+//  ############################################################################
+GwrFileView::GwrFileView()
+    :   GwrTextView(FALSE)
+{
+    d_file_url                      =   NULL;
+
+    d_vbox                          =   gtk_box_new( GTK_ORIENTATION_VERTICAL   , 0 );
+        d_hbox                      =   gtk_box_new( GTK_ORIENTATION_HORIZONTAL , 0 );
+            d_label_location        =   gtk_label_new( "Location : " );
+            d_label_location_text   =   gtk_label_new( "?" );
+            d_button_open_ext       =   gtk_button_new_with_label( "Open");
+
+    gtk_box_set_homogeneous( GTK_BOX(d_hbox), FALSE );
+    gtk_box_pack_start( GTK_BOX(d_hbox), d_label_location       , FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX(d_hbox), d_label_location_text  , TRUE , TRUE , 0 );
+    gtk_box_pack_start( GTK_BOX(d_hbox), d_button_open_ext      , FALSE, FALSE, 0 );
+
+    gtk_box_set_homogeneous( GTK_BOX(d_vbox), FALSE );
+    gtk_box_pack_start( GTK_BOX(d_vbox), d_hbox                         , FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX(d_vbox), GwrTextView::get_gtk_widget()  , TRUE , TRUE , 0 );
+
+    g_signal_connect(d_button_open_ext    , "button-press-event"  , G_CALLBACK(GwrFileView::Sgn_button_open_ext_press_event), this);
+
+}
+GwrFileView::GwrFileView(
+    GwrFileView::Url    *   _url)
+    :   GwrFileView()
+{
+    file_set( _url );
+}
+GwrFileView::~GwrFileView()
+{
+    delete d_file_url;
+
+}
+
+gboolean
+GwrFileView::file_set(
+    GwrFileView::Url    *   _url)
+{
+    gchar               sline   [64];
+    gchar               temp    [4096];
+    guint32             nline   =   0;
+    FILE            *   f       =   NULL;
+    //  ........................................................................
+    g_return_val_if_fail( _url                  , FALSE );
+    g_return_val_if_fail( _url->file_location() , FALSE );
+    //  ........................................................................
+    //  init
+    GWR_IF_FALSE( f = fopen( _url->file_location(), "r" ), f )
+        goto lab_exit_error;
+
+    d_file_url   =   GWR_NEW_CAST( Url, _url->file_location(), _url->file_line() );
+
+    //  ........................................................................
+    //  go !
+    GwrTextView::clear();
+
+    while ( ! feof(f) )
+    {
+        fgets(temp, 4096 - 2, f);
+
+        nline++;
+        sprintf(sline,"%5i ", nline);
+
+        GwrTextView::append( sline, 0 );
+        GwrTextView::append( temp, 0 );
+    }
+
+    //  if given lineno, define the mark & scroll
+    if ( url()->file_line() )
+    {
+        GwrTextView::view()->scroll_to_line( url()->file_line(), TRUE );        //  delay because gtk bug !
+    }
+    //  ........................................................................
+lab_exit_success:
+    fclose( f );
+    return TRUE;
+    //  ........................................................................
+lab_exit_error:
+    return FALSE;
+}
+//  ----------------------------------------------------------------------------
+//  View::Sgn_key_release_event()
+//  ----------------------------------------------------------------------------
+gboolean
+GwrFileView::Sgn_button_open_ext_press_event(
+    GtkWidget   *   _widget   ,
+    GdkEvent    *   _event    ,
+    gpointer        _data)
+{
+    //        GwrFileView         *   THIS    =   NULL;
+    //        GdkEventButton      *   evb     =   NULL;
+    //  ........................................................................
+    printf("Open ext click\n");
+
+    return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
 }
 
 

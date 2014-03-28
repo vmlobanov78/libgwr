@@ -1,4 +1,3 @@
-
 /*
     *****************************************************************************
     *                                                                           *
@@ -55,18 +54,18 @@ class Collection32
     {
         friend class Collection32;
         //  ....................................................................
-        private:
+    private:
         gchar   *   d_nam;
         T           _val;
         guint32     a_flg;
     };
     //  ........................................................................
-    private:
+private:
     Element < T >   a_array [ 32 ];                                             //!< 32 objects maximum
     guint32         a_next_free_index;
     //  ........................................................................
-    public:
-     Collection32()
+public:
+    Collection32()
         : a_next_free_index(0)
     {
         for ( guint32 i = 0 ; i != 32 ; i++ )
@@ -81,18 +80,18 @@ class Collection32
             g_free_safe( a_array[ i ].d_nam );
     }
     //  ........................................................................
-    private:
+private:
     inline gboolean     _get_index_from_name        (const gchar* _name, guint32& __index);
     inline gboolean     _get_index_from_power_of_2  (guint32 _power);
     inline gboolean     _get_power_of_2_from_index  (guint32& __result, guint32 _index);
     //  ........................................................................
-    public:
+public:
     //! Get the cardinal of elements in the collection
     inline guint32      card                ();
     //! Get an element's value from the element's index
     inline GList    *   values_from_flags   (guint32 _flags);
 
-    public:
+public:
     //! Add an element to the collection
     inline gboolean     add         (const gchar* _name, T _value);
     //! Given a name, test if the corresponding T value is set in flags
@@ -111,8 +110,8 @@ Collection32< const gchar* >::~Collection32()
 {
     for ( guint32 i = 0 ; i != 32 ; i++ )
     {
-            g_free_safe( a_array[ i ].d_nam );
-            g_free_safe( const_cast< gchar* >( a_array[ i ]._val ) );
+        g_free_safe( a_array[ i ].d_nam );
+        g_free_safe( const_cast< gchar* >( a_array[ i ]._val ) );
     }
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,8 +219,8 @@ Collection32 < T >::flag_test(const gchar* _name, guint32 _flags)
     g_return_val_if_fail( _get_index_from_name(_name, index)    , FALSE );
     //  ........................................................................
     return a_array[ index ].a_flg & _flags     ?
-            TRUE                     :
-            FALSE                    ;
+           TRUE                     :
+           FALSE                    ;
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template    < typename T >

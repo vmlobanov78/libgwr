@@ -55,123 +55,80 @@ Store   *   Store::s_store          = NULL;
 guint32_x2  Store::s_ret_guint32_x2;
 gboolean    Store::s_ret_gboolean;
 
-//  ###########################################################################
-//  ###																		###
-//  ##																		 ##
-//  #								PATH									  #
-//  ##																		 ##
-//  ###																		###
-//  ###########################################################################
-void*
-Path::operator new(size_t t)
-{
-	Path * path = g_try_new0(Path, 1);
-
-	if ( ! path )
-    {
-		//GCMD_ERR("Path::operator new:g_try_new0 failed");
-    }
-	return path;
-}
-void
-Path::operator delete(void *p)
-{
-	g_free(p);
-}
-
+//  ****************************************************************************
+//
+//                          PATHs
+//
+//  ****************************************************************************
 Path::Path(guint32 card)
 {
-	d_ascii_dump	= (gchar*)g_try_malloc0(64);
-	a_card			= card;
-	d_uid			= (guint32*) g_try_malloc0(a_card * sizeof(guint32) );
+    d_ascii_dump	= (gchar*)g_try_malloc0(64);
+    a_card			= card;
+    d_uid			= (guint32*) g_try_malloc0(a_card * sizeof(guint32) );
 }
 Path::~Path()
 {
-	g_free(d_ascii_dump);
-	g_free(d_uid);
-}
-
-guint32
-Path::card()
-{
-	return a_card;
-}
-
-guint32
-Path::uid_get(gint _pos)
-{
-	return d_uid[_pos];
-}
-
-void
-Path::uid_set(gint _pos, guint32 _uid)
-{
-	d_uid[_pos] = _uid;
+    g_free(d_ascii_dump);
+    g_free(d_uid);
 }
 
 Path*
 Path::dup()
 {
-	Path    *   dup = NULL;
-	guint32     i   = 0;
-	//.........................................................................
+    Path    *   dup = NULL;
+    //.........................................................................
+    dup = GWR_NEW_CAST( Path, card() );
 
-	dup = new Path(card());
+    memcpy(
+        dup->vpuid()                ,
+        this->vpuid()               ,
+        sizeof( guint32 ) * card() );
 
-	for ( i = 0 ; i != card() ; i++ )
-		dup->uid_set(i, uid_get(i));
-
-	return dup;
+    return dup;
 }
 
 const gchar*
 Path::dump()
 {
-	gchar   temp[128];
-	guint32 i ;
-	//.........................................................................
-	if ( a_card == 0 )
-	{
-		sprintf(d_ascii_dump, "~ Empty ~");
-		return (const gchar*)d_ascii_dump;
-	}
+    gchar   temp[128];
+    guint32 i ;
+    //.........................................................................
+    if ( a_card == 0 )
+    {
+        sprintf(d_ascii_dump, "~ Empty ~");
+        return (const gchar*)d_ascii_dump;
+    }
 
-	sprintf(d_ascii_dump, "%03i", uid_get(0));
+    sprintf(d_ascii_dump, "%03i", uid_get(0));
 
-	for ( i = 1 ; i < a_card ; i++ )
-	{
-		sprintf(temp, " %03i ", uid_get(i));
-		strcat(d_ascii_dump, temp);
-	}
+    for ( i = 1 ; i < a_card ; i++ )
+    {
+        sprintf(temp, " %03i ", uid_get(i));
+        strcat(d_ascii_dump, temp);
+    }
 
-	return (const gchar*)d_ascii_dump;
+    return (const gchar*)d_ascii_dump;
 }
-
-
-
-
-//  ###########################################################################
-//  ###																		###
-//  ##																		 ##
-//  #							NODE ROOT									  #
-//  ##																		 ##
-//  ###																		###
-//  ###########################################################################
+//  ****************************************************************************
+//
+//                          NodeRoot
+//
+//  ****************************************************************************
 void
 Store::node_root_init()
 {
-	g_return_if_fail( ! a_node_root_created );
+    g_return_if_fail( ! a_node_root_created );
 
     d_data_root =   GWR_NEW_CAST( IDataRoot );
 
-	d_node_root =   GWR_NEW_CAST(
+    d_node_root =   GWR_NEW_CAST(
                         NodeRoot    ,
                         0, 0        ,
                         0, 0        ,
                         (Node*)NULL ,
                         d_data_root );
 
-	a_node_root_created = TRUE;
+    a_node_root_created = TRUE;
 }
 
 GWR_NAMESPACE_END(treestore)

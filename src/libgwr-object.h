@@ -51,24 +51,27 @@ namespace libgwr
 //! didnt succeed ).
 template <typename T> class Object : public T
 {
-    public:
+public:
 
     void*		operator new(size_t size)
-                {
-                    Object<T>* g = g_try_new0(Object<T>, 1);
+    {
+        Object<T>* g = g_try_new0(Object<T>, 1);
 
-                    if ( !g )
-                        g_critical("Instance<%s>::new():g_try_new0 failed", GWR_STRINGIZE(T));
+        if ( !g )
+            g_critical("Instance<%s>::new():g_try_new0 failed", GWR_STRINGIZE(T));
 
-                    return g;
-                }
+        return g;
+    }
 
     void		operator delete (void *p)
-                {
-                    g_free(p);
-                }
+    {
+        g_free(p);
+    }
 
-    T   *       cast()  { return static_cast<T*>(this); }
+    T   *       cast()
+    {
+        return static_cast<T*>(this);
+    }
 
     Object() : T() {}
     template <typename U1> Object(U1 u1) : T(u1) {}

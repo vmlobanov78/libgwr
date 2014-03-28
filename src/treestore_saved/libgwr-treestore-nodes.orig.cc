@@ -59,10 +59,35 @@ GWR_NAMESPACE_START(treestore)
 //  ###																		###
 //  ###########################################################################
 //  ----------------------------------------------------------------------------
-//  Node::Node()
+//  Node::new()
 //  ----------------------------------------------------------------------------
 //!
-//! \brief  Node constructor
+//! \brief  allocator new
+//!
+void*	Node::operator new(
+	size_t  size)
+{
+	Node	*n = g_try_new0(Node, 1);
+
+	return n;
+}
+//  ----------------------------------------------------------------------------
+//  Node::delete
+//  ----------------------------------------------------------------------------
+//!
+//! \brief  de-allocator delete
+//!
+void
+Node::operator delete(
+void *p)
+{
+	g_free(p);
+}
+//  ----------------------------------------------------------------------------
+//  PNode::PNode()
+//  ----------------------------------------------------------------------------
+//!
+//! \brief  PNode constructor
 //!
 //!	\param  _uid        uid of the node
 //!	\param  _depth      Depth of the node ( = same as depth in GtkTreePath )
@@ -71,15 +96,15 @@ GWR_NAMESPACE_START(treestore)
 //!	\param  _parent     Parent node of this node
 //!	\param  _data       User's data
 //!
-Node::Node(
-    guint32					_uid,
-    gint					_depth, // only for the new node_block
-    guint16					_spos,
-    guint16					_hpos,
-    Node				*   _parent,
-    IData		        *   _data)
+PNode::PNode(
+	guint32					_uid,
+	gint					_depth, // only for the new node_block
+	guint16					_spos,
+	guint16					_hpos,
+	Node				*   _parent,
+	IData		        *   _data)
 {
-    a_bits			=   0;
+	a_bits			=   0;
 
     flags_set_uid(_uid);
     flags_set_visibility( _data->IGetVisibility() );
@@ -87,44 +112,47 @@ Node::Node(
     a_spos          =   _spos;
     a_hpos          =   _hpos;
 
-    a_parent	    =   _parent;
+	a_parent	    =   _parent;
 
-    a_aprev			=   NULL;
-    a_anext			=   NULL;
+	a_aprev			=   NULL;
+	a_anext			=   NULL;
+	a_snext			=   NULL;
 
-    d_children		=   GWR_NEW_CAST( NodeBlock, _depth + 1, (Node*)this );
+	d_children		=   new NodeBlock(_depth + 1, (Node*)this);
 
-    d_data			=   _data;
+	d_data			=   _data;
 
-    //Count++;
-    //NODE_INF("NOD+(%04i):[%s]",Count, log());
+	//Count++;
+	//NODE_INF("NOD+(%04i):[%s]",Count, log());
 }
 //  ----------------------------------------------------------------------------
-//  Node::~Node()
+//  PNode::~PNode()
 //  ----------------------------------------------------------------------------
 //!
-//! \brief Node destructor
+//! \brief PNode destructor
 //!
 //! Here we only delete the memory allowed for the struct itself.
 //! We do _NOT_ free the NodeBlock containing the children.
 //! For recursive delete, use remove()
 //!
-Node::~Node()
+PNode::~PNode()
 {
-    //NODE_INF("NOD-(%04i):[%s]", (Count - 1), log());
+	//NODE_INF("NOD-(%04i):[%s]", (Count - 1), log());
 
     delete data();
 
-    //Count--;
+	//Count--;
 }
 //  ----------------------------------------------------------------------------
-//  Node::check()
+//  PNode::check()
 //  ----------------------------------------------------------------------------
 //! \fn check()
 //!
 //! \brief  For debug.
+//!
+//! Called if LIBGWR_TREESTORE_CHECK_LEVEL != 0. Dont call on NodeRoot.
 gboolean
-Node::check()
+PNode::check()
 {
     Node    *   p = a_parent;
     //  ........................................................................
@@ -142,7 +170,7 @@ Node::check()
 
         g_return_val_if_fail( p->children()->get_shown_node(spos()) == this , FALSE );      //  - have a valid spos
 
-        g_return_val_if_fail( hpos() == LIBGWR_TREESTORE_INVALID_POS, FALSE );              //  - have a unvalid hpos
+        g_return_val_if_fail( hpos() == 0xFFFF, FALSE );                                    //  - have a unvalid hpos
     }
     //  ........................................................................
     //  a hidden node must :
@@ -150,20 +178,28 @@ Node::check()
     {
         g_return_val_if_fail(flags_get_visibility() == data()->IGetVisibility(), FALSE);    //  - have visibility match
 
-        g_return_val_if_fail( spos() == LIBGWR_TREESTORE_INVALID_POS, FALSE );              //  - have a unvalid spos
+        g_return_val_if_fail( spos() == 0xFFFF, FALSE );                                    //  - have a unvalid spos
 
         g_return_val_if_fail( p->children()->get_hidden_node(hpos()) == this , FALSE );     //  - have a valid spos
+    }
+
+    //  ........................................................................
+    {
+        if ( snext() == this )
+        {
+            _GWR_BREAK_
+        }
     }
 
     return TRUE;
 }
 //  ----------------------------------------------------------------------------
-//  Node::row()
+//  PNode::row()
 //  ----------------------------------------------------------------------------
 //!
 //! \fn Node:row()
 //!
-//! \brief  __RECURSIVE__ Get a node's row index in the tree
+//! brief\  __RECURSIVE__ Get a node's row index in the tree
 //!
 guint32
 Node::row()
@@ -176,52 +212,53 @@ Node::row()
 
     r = spos() + 1;                                                             //  our pos -> row
 
-    if ( depth() != 1 )                                                         //  if not direct child of node_root, recurse
-        r += parent()->row();
+	if ( depth() != 1 )                                                         //  if not direct child of node_root, recurse
+		r += parent()->row();
 
-    return r;
+	return r;
 }
 //  ----------------------------------------------------------------------------
-//  Node::log()
+//  PNode::log()
 //  ----------------------------------------------------------------------------
 //!
-//! \fn     log()
+//! \fn PNode:log()
 //!
-//! \brief  Get all infos about a Node
+//! brief\  Get all infos about a Node
 //!
 const gchar*
-Node::log()
+PNode::log()
 {
-    static gchar Node_str_01[1024];
+	static gchar Node_str_01[1024];
 
-    //  format : "node : ref_count pos parent next children data"
-    sprintf(Node_str_01, "%s this:%p uid:%05i dep:%03i spos:%03i hpos:%03i aprev:%p anext:%p schd:%03i hchd:%03i dat:%s",
-            flags_get_shown()                                   ?
+	//  format : "node : ref_count pos parent next children data"
+	sprintf(Node_str_01, "%s this:%p uid:%05i dep:%03i spos:%03i hpos:%03i aprev:%p anext:%p snext:%p schd:%03i hchd:%03i dat:%s",
+        flags_get_shown()                                   ?
             ( flags_get_visibility() ? " * * " : " *   " )  :
             ( flags_get_visibility() ? "   * " : "     " )  ,
-            this                                        ,
-            flags_get_uid()                             ,
-            a_parent ? a_parent->children()->depth() : 1,
-            spos()                                      ,
-            hpos()                                      ,
-            aprev()                        ,
-            anext()                        ,
-            children()->scard()            ,
-            children()->hcard()            ,
-            data() ? "Y" : "N" );
+        this                                        ,
+        flags_get_uid()                             ,
+		a_parent ? a_parent->children()->depth() : 1,
+        spos()                                      ,
+        hpos()                                      ,
+		aprev()                        ,
+		anext()                        ,
+		snext()                        ,
+		children()->scard()            ,
+		children()->hcard()            ,
+		data() ? "Y" : "N" );
 
-    return Node_str_01;
+	return Node_str_01;
 }
 //  ----------------------------------------------------------------------------
-//  Node::dump_tree()
+//  PNode::dump_tree()
 //  ----------------------------------------------------------------------------
 //!
-//! \fn Node::dump_tree()
+//! \fn PNode::dump_tree()
 //!
-//! \brief  Get all infos about a Node
+//! brief\  Get all infos about a Node
 //!
 void
-Node::dump_tree(guint32 _level)
+PNode::dump_tree(guint32 _level)
 {
     NodeBlock   *       block   = NULL;
     Node        *       child   = NULL;
@@ -286,8 +323,7 @@ Node::dump_tree(guint32 _level)
     //
     //  children
     //
-    child = block->first_node();
-    while ( child )
+    child = block->first_node(); while ( child )
     {
         child->dump_tree(1 + _level);
         child = child->anext();
@@ -300,74 +336,111 @@ Node::dump_tree(guint32 _level)
 //  ##																		 ##
 //  ###																		###
 //  ###########################################################################
-guint32 NodeBlock::Count   = 0;
+guint32 PNodeBlock::Count   = 0;
+
 //  ----------------------------------------------------------------------------
-//  NodeBlock::NodeBlock()
+//  NodeBlock::new
 //  ----------------------------------------------------------------------------
 //!
-//! \fn NodeBlock::NodeBlock()
+//! \fn NodeBlock::new()
 //!
-NodeBlock::NodeBlock(
+void*   NodeBlock::operator new(
+	size_t								size)
+{
+	NodeBlock	*nb = g_try_new0(NodeBlock, 1);
+
+	return nb;
+}
+//  ----------------------------------------------------------------------------
+//  NodeBlock::delete
+//  ----------------------------------------------------------------------------
+//!
+//! \fn NodeBlock::delete()
+//!
+void	NodeBlock::operator delete (void *p)
+{
+	g_free(p);
+}
+//  ----------------------------------------------------------------------------
+//  PNodeBlock::PNodeBlock()
+//  ----------------------------------------------------------------------------
+//!
+//! \fn PNodeBlock::PNodeBlock()
+//!
+PNodeBlock::PNodeBlock(
     guint32     _depth,
     Node    *   _parent)
 {
-    a_hcard		    = 0;
-    a_scard		    = 0;
+	a_hcard		    = 0;
+	a_scard		    = 0;
 
     a_first_node    = NULL;
     a_last_node     = NULL;
 
-    a_depth		    = _depth;
-    a_parent	    = _parent;
+	a_depth		    = _depth;
+	a_parent	    = _parent;
 
-    d_hnodes = GWR_NEW_CAST( libgwr_treestore_nodeblock_array, 65535, 8 );
-    d_snodes = GWR_NEW_CAST( libgwr_treestore_nodeblock_array, 65535, 8 );
+    //  array of all nodes
+	d_hnodes = g_array_sized_new(
+		FALSE,					// zero_terminated element appended at the end
+		TRUE,					// all bits set to zero
+		sizeof(Node*),			// element_size,
+		10);					//reserved_size);
 
-    // Fuck, Fuck, Fuck !!!
-    // Spended hours on this, g_array_sized_new( ...set bits to 0 )
-    // doesnt fucking work !!!
-    // printf("GArray 0x%08x d:%03i p:0x%08x [0]=0x%08x\n", nb->d_nodes, nb->a_depth, nb->a_parent, g_array_index(nb->d_nodes, Node*, 0));
+	d_snodes = g_array_sized_new(
+		FALSE,					// zero_terminated element appended at the end
+		TRUE,					// all bits set to zero
+		sizeof(Node*),			// element_size,
+		10);					//reserved_size);
 
-    Count++;
-    //BLOCK_INF("BLK+(%04i):d %03i", Count, a_depth);
+	// Fuck, Fuck, Fuck !!!
+	// Spended hours on this, g_array_sized_new( ...set bits to 0 )
+	// doesnt fucking work !!!
+	// printf("GArray 0x%08x d:%03i p:0x%08x [0]=0x%08x\n", nb->d_nodes, nb->a_depth, nb->a_parent, g_array_index(nb->d_nodes, Node*, 0));
+
+	Count++;
+	//BLOCK_INF("BLK+(%04i):d %03i", Count, a_depth);
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::~PNodeBlock()
+//  PNodeBlock::~PNodeBlock()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::~NodeBlock()
 //!
-//! \brief  Here we only delete the array of children ; it does _NOT_ affect the
+//! \fn PNodeBlock::~PNodeBlock()
+//!
+//! brief\  Here we only delete the array of children ; it does _NOT_ affect the
 //! children nodes. For recursive deletion of children , call delete_all_nodes
 //! first.
 //!
-NodeBlock::~NodeBlock()
+PNodeBlock::~PNodeBlock()
 {
     g_assert( ( hcard() == 0 ) && ( scard() == 0 ) );
-    //BLOCK_INF("BLK-(%04i):d %03i c:%03i", Count - 1, a_depth, a_card);
+	//BLOCK_INF("BLK-(%04i):d %03i c:%03i", Count - 1, a_depth, a_card);
 
-    delete d_hnodes;
-    delete d_snodes;
+	g_array_free( d_hnodes, TRUE );
+	g_array_free( d_snodes, TRUE );
 
-    Count--;
+	Count--;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::check()
+//  PNodeBlock::check()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::check()
+//! \fn check()
 //!
 //! \brief  For debug.
+//!
+//! Called if LIBGWR_TREESTORE_CHECK_LEVEL != 0. Dont call on NodeRoot.
 gboolean
-NodeBlock::check()
+PNodeBlock::check()
 {
-    Node        *   node    = NULL;
-    Node        *   next    = NULL;
-    guint16			i	    = 0;
+	Node        *   node    = NULL;
+	Node        *   next    = NULL;
+	guint32			i	    = 0;
     guint32         card    = 0;
 
-    //..........................................................................
+	//..........................................................................
     card    = a_hcard + a_scard;
 
-    //  ........................................................................
+	//  ........................................................................
     //  verify chaining
     node    = a_first_node;
 
@@ -405,39 +478,39 @@ NodeBlock::check()
     }
     while ( TRUE );
 
-    //  ........................................................................
+	//  ........................................................................
     //  verify indexes
-    if ( a_hcard != d_hnodes->card() )
+    if ( (int)a_hcard != d_hnodes->len )
     {
         printf("*** (PNODEBLOCK) *** a_hcard != GArray->len\n");
         _GWR_BREAK_;
     }
-    if ( a_scard != d_snodes->card() )
+    if ( (int)a_scard != d_snodes->len )
     {
         printf("*** (PNODEBLOCK) *** a_hcard != GArray->len\n");
         _GWR_BREAK_;
     }
 
-    //  ........................................................................
+	//  ........................................................................
     //  verify shown indexes
-    for (  i = 0 ; i != a_scard ; i++ )
+    for ( guint16 i = 0 ; i != a_scard ; i++ )
     {
-        node = d_snodes->get( i );
+        node = g_array_index(d_snodes, Node*, i);
 
-        if ( node->spos() != i )
+        if ( PNODE(node)->spos() != i )
         {
             printf("*** (PNODEBLOCK) *** node->spos() != GArray position\n");
             _GWR_BREAK_;
         }
     }
 
-    //  ........................................................................
+	//  ........................................................................
     //  verify hidden indexes
-    for (  i = 0 ; i != a_hcard ; i++ )
+    for ( guint16 i = 0 ; i != a_hcard ; i++ )
     {
-        node = d_hnodes->get( i );
+        node = g_array_index(d_hnodes, Node*, i);
 
-        if ( node->hpos() != i )
+        if ( PNODE(node)->hpos() != i )
         {
             printf("*** (PNODEBLOCK) *** node->hpos() != GArray position\n");
             _GWR_BREAK_;
@@ -447,27 +520,29 @@ NodeBlock::check()
     return TRUE;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::children_clr_fields()
+//  PNodeBlock::children_clr_fields()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::children_clr_fields()
+//!
+//! \fn PNodeBlock::children_clr_fields()
 //!
 //! \brief  Reset Garrays and some arrays-related vars.
 //! Arrays must be empty.
 //!
 void
-NodeBlock::children_clr_fields()
+PNodeBlock::children_clr_fields()
 {
     g_return_if_fail( ( a_hcard == 0 ) && ( a_scard == 0 ) );
 
-    a_scard         = 0;
+	a_scard         = 0;
     a_hcard         = 0;
     a_first_node    = NULL;
     a_last_node     = NULL;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::get_shown_node()
+//  PNodeBlock::get_shown_node()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::get_shown_node()
+//!
+//! \fn get_shown_node()
 //!
 //! \brief  Get a visible node from its index.
 //!
@@ -475,38 +550,39 @@ NodeBlock::children_clr_fields()
 //!
 //! \return NULL if bad error ; the Node else.
 Node*
-NodeBlock::get_shown_node(
-    guint16 _pos)
+PNodeBlock::get_shown_node(
+	guint16 _pos)
 {
-    Node			*node   = NULL;
-    //.........................................................................
-    if ( a_scard == 0 )
-    {
-        // gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
-        // cant do this : g_return_val_if_fail( index == 0, NULL );
-        if ( _pos != 0 )
-            return NULL;
+	Node			*node   = NULL;
+	//.........................................................................
+	if ( a_scard == 0 )
+	{
+		// gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
+		// cant do this : g_return_val_if_fail( index == 0, NULL );
+		if ( _pos != 0 )
+			return NULL;
 
-        //BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [NULL]", "node_get", a_depth, index, a_card);
-        // this is authorized, since gtk call us for 0th child !!!
-        return NULL;
-    }
-    else
-    {
-        // gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
-        // cant do this : g_return_val_if_fail( index < a_card, NULL );
-        if ( _pos >= a_scard )
-            return NULL;
-    }
+		//BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [NULL]", "node_get", a_depth, index, a_card);
+		// this is authorized, since gtk call us for 0th child !!!
+		return NULL;
+	}
+	else
+	{
+		// gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
+		// cant do this : g_return_val_if_fail( index < a_card, NULL );
+		if ( _pos >= a_scard )
+			return NULL;
+	}
 
-    node        =   d_snodes->get( _pos );                                      //  get the node
-    //BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [%s]", "node_get", a_depth, pos, a_card, node->log());
-    return node;
+	node    =   g_array_index(d_snodes, Node*    , (gint)_pos );                //  get the node
+	//BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [%s]", "node_get", a_depth, pos, a_card, node->log());
+	return node;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::get_hidden_node()
+//  PNodeBlock::get_hidden_node()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::get_hidden_node()
+//!
+//! \fn get_hidden_node()
 //!
 //! \brief  Get a hidden node from its index. Returns NULL on index error.
 //!
@@ -514,22 +590,22 @@ NodeBlock::get_shown_node(
 //!
 //! \return NULL if bad index ; the Node else.
 Node*
-NodeBlock::get_hidden_node(
-    guint16 _pos)
+PNodeBlock::get_hidden_node(
+	guint16 _pos)
 {
-    Node			*node   = NULL;
-    //.........................................................................
-    if ( a_hcard == 0 )
-    {
+	Node			*node   = NULL;
+	//.........................................................................
+	if ( a_hcard == 0 )
+	{
         g_assert( ! _pos );
-        return NULL;
-    }
+		return NULL;
+	}
 
     g_return_val_if_fail( _pos < a_hcard, NULL );
 
-    node    =   d_hnodes->get( _pos );                                          //  get the node
-    //BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [%s]", "node_get", a_depth, pos, a_card, node->log());
-    return node;
+	node    =   g_array_index(d_hnodes, Node*    , (gint)_pos );                //  get the node
+	//BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [%s]", "node_get", a_depth, pos, a_card, node->log());
+	return node;
 }
 //  ****************************************************************************
 //
@@ -537,9 +613,10 @@ NodeBlock::get_hidden_node(
 //
 //  ****************************************************************************
 //  ----------------------------------------------------------------------------
-//  NodeBlock::node_add()
+//  PNodeBlock::node_add()
 //  ----------------------------------------------------------------------------
-//! \fn         NodeBlock::node_add()
+//!
+//! \fn PNodeBlock::node_add()
 //!
 //! \brief  Create a Node, and add it to the block. This method respect the
 //!     ordering setting given in parameter. This is the most important method
@@ -550,35 +627,37 @@ NodeBlock::get_hidden_node(
 //! \param  _collate_key_to_use collate key index to use
 //! \param  _data               user's data, implementing DataInterface
 //! \param  _visible            wether the node will be visible or not
+//!
 Node*
-NodeBlock::node_add(
-    guint32	            _uid,
-    eSortType           _sort_type,
-    gint                _collate_key_to_use,
-    IData           *   _data)
+PNodeBlock::node_add(
+	guint32	            _uid,
+	eSortType           _sort_type,
+	gint                _collate_key_to_use,
+	IData           *   _data)
 {
-    Node        *   node    = NULL;
-    Node        *   lsn     = NULL;                                             //!< Last encountered Node while sorting
-    Node        *   plsn    = NULL;                                             //!< Previous Node of lsn
-    guint32			i	    = 0;
+	Node        *   node    = NULL;
+	Node        *   lsn     = NULL;                                             //!< Last encountered Node while sorting
+	Node        *   plsn    = NULL;                                             //!< Previous Node of lsn
+	guint32			i	    = 0;
     guint32         card    = 0;
 
+    Node        *   lvn     = NULL;
     Node        *   nvn     = NULL;
 
     Node        *   p       = NULL;
     gboolean        shown   = TRUE;
-    //.........................................................................
-    // find if we will add a shown or hidden node
+	//.........................................................................
+	// find if we will add a shown or hidden node
     p = parent();
 
     shown   =   p->shown()                                      ?
-                ( _data->IGetVisibility()  ? TRUE : FALSE ) :               //  parent shown  : shown = visibility
-                ( FALSE )                                   ;               //  parent hidden : shown = FALSE
+                    ( _data->IGetVisibility()  ? TRUE : FALSE ) :               //  parent shown  : shown = visibility
+                    ( FALSE )                                   ;               //  parent hidden : shown = FALSE
 
-    // create a new node with pos = 0 :
-    // we cant set the positions now, because we dont know at what position
-    // it will be stored, and in what array ( visible / hidden )
-    node = GWR_NEW_CAST( Node, _uid, a_depth, 0, 0, a_parent, _data);
+	// create a new node with pos = 0 :
+	// we cant set the positions now, because we dont know at what position
+	// it will be stored, and in what array ( visible / hidden )
+	node = new Node(_uid, a_depth, 0, 0, a_parent, _data);
 
     card = a_hcard + a_scard;                                                   //  total number of nodes
 
@@ -588,17 +667,17 @@ NodeBlock::node_add(
     //  values, and we call lab_generic_append, which was originally coded
     //  for appending after a sort ( we dont set plsn, it is not used in
     //  that code )
-    if ( ! _sort_type  )                                                        //  eSortNone is 0x00
+	if ( ! _sort_type  )                                                        //  eSortNone is 0x00
     {
         plsn = a_last_node;
         //lsn    = NULL;                                                        _GWR_OPTIM_
-        goto lab_sort_append;
+		goto lab_sort_append;
     }
     //  ........................................................................
     //  sort descending ( basic 'insertion sort algorithm' )
 lab_sort_descending:
 
-    if ( _sort_type != eSortDescending )
+	if ( _sort_type != eSortDescending )
         goto lab_sort_ascending;
 
     lsn = a_first_node;                                                         //  first node of d_hnodes and d_vnodes
@@ -623,7 +702,7 @@ lab_loop_sd:
     //  basic 'insertion sort algorithm'
 lab_sort_ascending:
 
-    if ( _sort_type != eSortAscending )
+	if ( _sort_type != eSortAscending )
         goto lab_bad_sort_type_value;
 
     lsn = a_first_node;                                                         //  first node of d_hnodes and d_vnodes
@@ -648,20 +727,20 @@ lab_loop_sa:
     //  here lsn is always NULL, and plsn stays for lsn cf L761, L736
 lab_sort_append:
 
-    node->set_anext(NULL);                                                      //  _GWR_REDUNDANT_ There is no Node after us
+    PNODE(node)->set_anext(NULL);                                               //  _GWR_REDUNDANT_ There is no Node after us
 
     a_last_node = node;
 
     //  'node' is not the first chaininig Node
     if ( plsn )
     {
-        node->set_aprev(plsn);
-        plsn->set_anext(node);
+        PNODE(node)->set_aprev(plsn);
+        PNODE(plsn)->set_anext(node);
     }
     //  'node' is the first chaininig Node
     else
     {
-        node->set_aprev(NULL);                                                  //  _GWR_REDUNDANT_
+        PNODE(node)->set_aprev(NULL);                                           //  _GWR_REDUNDANT_
         a_first_node = node;
     }
 
@@ -671,7 +750,7 @@ lab_sort_append:
     //  sort type error
 lab_bad_sort_type_value:
 
-    g_assert(FALSE);
+	g_assert(FALSE);
 
     //  ........................................................................
     //  end of append case, common for sort and no-sort cases
@@ -681,14 +760,24 @@ lab_generic_append:
     if ( shown )
     {
         //  append shown node & set its spos
-        d_snodes->add( node );
+        d_snodes = g_array_append_val(d_snodes, node);
+        PNODE(node)->set_spos( a_scard );                                       //  a_spos = ( a_scard - 1 ) + 1 = a_scard
+        PNODE(node)->set_hpos( 0xFFFF );                                        //  invalidate hpos
 
-        node->set_spos( a_scard );                                              //  a_spos = ( a_scard - 1 ) + 1 = a_scard
-        node->invalidate_hpos();                                                //  invalidate hpos
+        //  snext stuff : no shown Node after node
+        PNODE(node)->set_snext(NULL);                                           //  _GWR_REDUNDANT_
+
+        //  snext stuff : if we didnt create the first _SHOWN_ node, modify
+        //  the chaining of sprev node lvn
+        if ( a_scard )
+        {
+            lvn = g_array_index(d_snodes, Node*, a_scard - 1);
+            PNODE(lvn)->set_snext(node);
+        }
 
         a_scard++;
 
-        node->flags_set_shown(1);
+        PNODE(node)->flags_set_shown(1);
 
         NODE_CHECK(node);
         BLOCK_CHECK(this);
@@ -699,9 +788,9 @@ lab_generic_append:
     else
     {
         //  append hidden node
-        d_hnodes->add( node );
-        node->set_hpos( a_hcard );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
-        node->invalidate_spos();                                                //  invalidate spos
+        d_hnodes = g_array_append_val(d_hnodes, node);
+        PNODE(node)->set_hpos( a_hcard );                                       //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
+        PNODE(node)->set_spos( 0xFFFF );                                        //  invalidate spos
 
         //
         //  ...there is no hnext stuff...
@@ -709,65 +798,88 @@ lab_generic_append:
 
         a_hcard++;
 
-        node->flags_set_shown(0);
+        PNODE(node)->flags_set_shown(0);
 
         NODE_CHECK(node);
         BLOCK_CHECK(this);
 
         return node;
     }
-    //.........................................................................
-    //  'Insert' back-end : We have to insert 'node' at pos i, instead of 'lsn'
+	//.........................................................................
+	//  'Insert' back-end : We have to insert 'node' at pos i, instead of 'lsn'
     //  lsn is not NULL, and plsn may be NULL.
 lab_generic_insert:
 
     g_assert(lsn);
 
     //  ordered chaining
-    node->set_anext(lsn);
-    lsn->set_aprev(node);
+    PNODE(node)->set_anext(lsn);
+    PNODE(lsn)->set_aprev(node);
 
-    //  'node' is not the first chaining Node
-    if ( plsn )
-    {
-        node->set_aprev(plsn);
-        plsn->set_anext(node);
-    }
-    //  'node' is the first chaining Node
-    else
-    {
-        node->set_aprev(NULL);                                              //  _GWR_REDUNDANT_
-        a_first_node = node;
-    }
+        //  'node' is not the first chaining Node
+        if ( plsn )
+        {
+            PNODE(node)->set_aprev(plsn);
+            PNODE(plsn)->set_anext(node);
+        }
+        //  'node' is the first chaining Node
+        else
+        {
+            PNODE(node)->set_aprev(NULL);                                       //  _GWR_REDUNDANT_
+            a_first_node = node;
+        }
 
     //  insert a shown node
     if ( shown )
     {
-        node->flags_set_shown(1);
+        PNODE(node)->flags_set_shown(1);
 
         //  find next shown Node of node
-        nvn = node->find_anext_shown();                                  //  this is slow
+        nvn = PNODE(node)->find_anext_shown();                                  //  this is slow
 
         //  there is a Next Visible(shown) Node
-        if ( nvn )
+        if ( nvn)
         {
-            d_snodes->ins( nvn->spos(), node );                                 //  insert in shown array
-            node->set_spos(nvn->spos());                                        //  set spos  field of node
-            node->invalidate_hpos();                                            //  invalidate hpos
+            d_snodes = g_array_insert_val( d_snodes, PNODE(nvn)->spos(), node); //  insert in shown array
+            PNODE(node)->set_snext(nvn);                                        //  set snext field of node
+            PNODE(node)->set_spos(PNODE(nvn)->spos());                          //  set spos  field of node
+            PNODE(node)->set_hpos( 0xFFFF );                                    //  invalidate hpos
 
-            inc_spos_from_node( 1 + nvn->spos() );
+            //  ................................................................
+            //  snext stuff for other shown Nodes
+
+            //  if we didnt create the first _SHOWN_ Node, modify the previous
+            //  _SHOWN_ Node so its snext field points to the newly created Node
+            if ( PNODE(nvn)->spos() )                                                               //  there is a Node before 'node'
+                PNODE( parent()->children()->node_get(PNODE(nvn)->spos() - 1))->set_snext(node);    //  because nvn had pos > 0 // THIS ???
+
+            //  ................................................................
+            //  spos stuff
+            //  increase by 1 all pos sfields of Nodes following 'node', beginning with
+            //  node just after us, wich is nvn
+            while ( nvn )
+            {
+                PNODE(nvn)->inc_spos();
+                nvn = nvn->snext();
+            }
         }
         //  there is no Next Visible Node : simply append to d_snodes
         else
         {
-            d_snodes->add( node );
-            node->set_spos( a_scard );
-            node->invalidate_hpos();                                            //  invalidate hpos
+            d_snodes = g_array_append_val(d_snodes, node);
+            PNODE(node)->set_snext(NULL);
+            PNODE(node)->set_spos( a_scard );
+            PNODE(node)->set_hpos( 0xFFFF );                                    //  invalidate hpos
+
+            //  if we didnt create the first _SHOWN_ Node, modify the previous
+            //  _SHOWN_ Node so its snext field points to the newly created Node
+            if ( a_scard )
+                PNODE(g_array_index(d_snodes, Node*, a_scard -1))->set_snext(node);
         }
 
         a_scard++;
 
-        node->flags_set_shown(1);
+        PNODE(node)->flags_set_shown(1);
 
         NODE_CHECK(node);
         BLOCK_CHECK(this);
@@ -777,6 +889,8 @@ lab_generic_insert:
     //  indert a hidden node
     else
     {
+        PNODE(node)->set_snext(NULL);                                           //  set snext field of node
+
         /*
         //  find next hidden Node of 'node'
         nhn = PNODE(node)->find_anext_hidden();                                 //  this is slow
@@ -797,9 +911,9 @@ lab_generic_insert:
         }
         */
         //  append hidden node
-        d_hnodes->add( node );
-        node->set_hpos( a_hcard );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
-        node->invalidate_spos();                                                //  invalidate spos
+        d_hnodes = g_array_append_val(d_hnodes, node);
+        PNODE(node)->set_hpos( a_hcard );                                       //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
+        PNODE(node)->set_spos( 0xFFFF );                                        //  invalidate spos
 
         //
         //  ...there is no hnext stuff...
@@ -807,7 +921,7 @@ lab_generic_insert:
 
         a_hcard++;
 
-        node->flags_set_shown(0);
+        PNODE(node)->flags_set_shown(0);
 
         NODE_CHECK(node);
         BLOCK_CHECK(this);
@@ -819,65 +933,20 @@ lab_generic_insert:
 }
 //  ****************************************************************************
 //
-//  INC / DEC spos
-//
-//  ****************************************************************************
-//  ----------------------------------------------------------------------------
-//  NodeBLock::dec_spos_from_node()
-//  ----------------------------------------------------------------------------
-//! \fn     NodeBlock:dec_spos_from_node()
-//!
-//! \brief  Decrease spos of all shown nodes after one node ( including it ).
-void
-NodeBlock::dec_spos_from_node(guint16 _spos)
-{
-    Node    *   n       = NULL;
-    guint16     i       = 0;
-    //..........................................................................
-    for ( i = _spos ; i != scard() ; i++ )
-    {
-        n = get_shown_node( i );
-#ifdef  LIBGWR_CHECK_TREESTORE_NODEBLOCK_DEC_SPOS_FROM_NODE
-        g_assert( n != NULL );
-#endif
-        n->dec_spos();
-    }
-}
-//  ----------------------------------------------------------------------------
-//  NodeBLock::inc_spos_from_node()
-//  ----------------------------------------------------------------------------
-//! \fn     NodeBlock:inc_spos_from_node()
-//!
-//! \brief  Increase spos of all shown nodes after one node ( including it ).
-void
-NodeBlock::inc_spos_from_node(guint16 _spos)
-{
-    Node    *   n       = NULL;
-    guint16     i       = 0;
-    //..........................................................................
-    for ( i = _spos ; i != scard() ; i++ )
-    {
-        n = get_shown_node( i );
-#ifdef  LIBGWR_CHECK_TREESTORE_NODEBLOCK_INC_SPOS_FROM_NODE
-        g_assert( n != NULL );
-#endif
-        n->inc_spos();
-    }
-}
-//  ****************************************************************************
-//
 //  FIND
 //
 //  ****************************************************************************
 //  ----------------------------------------------------------------------------
-//  Node::find_anext_shown()
+//  PNode::find_anext_shown()
 //  ----------------------------------------------------------------------------
+//!
 //! \fn Node:find_anext_shown()
 //!
-//! \brief  Get the anext visible Node of a Node. Useful when showing a hidden
+//! brief\  Get the anext visible Node of a Node. Useful when showing a hidden
 //!     node.
+//!
 Node*
-Node::find_anext_shown()
+PNode::find_anext_shown()
 {
     Node* n = a_anext;
 
@@ -892,14 +961,16 @@ Node::find_anext_shown()
     return NULL;
 }
 //  ----------------------------------------------------------------------------
-//  Node::find_anext_hidden()
+//  PNode::find_anext_hidden()
 //  ----------------------------------------------------------------------------
+//!
 //! \fn Node:find_anext_hidden()
 //!
-//! \brief  Get the anext visible Node of a Node. Useful when hiding a visible
+//! brief\  Get the anext visible Node of a Node. Useful when hiding a visible
 //!     node.
+//!
 Node*
-Node::find_anext_hidden()
+PNode::find_anext_hidden()
 {
     Node* n = a_anext;
 
@@ -914,9 +985,10 @@ Node::find_anext_hidden()
     return NULL;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::find_sub_node()
+//  PNodeBlock::find_sub_node()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::find_sub_node()
+//!
+//! \fn PNodeBlock::find_sub_node()
 //!
 //! \brief  __RECURSIVE__ Find a node among the descendance.
 //!     __WARNING__ THIS METHOD CAN RETURN HIDDEN NODES         __WARNING__
@@ -926,8 +998,8 @@ Node::find_anext_hidden()
 //!
 //! \return The Node found, NULL if error / not found.
 Node*
-NodeBlock::find_sub_node(
-    Path    *   _path)
+PNodeBlock::find_sub_node(
+	Path    *   _path)
 {
     Node    *   node    = NULL;
     guint32     dep     = 0;
@@ -937,24 +1009,24 @@ NodeBlock::find_sub_node(
     g_return_val_if_fail( ! node->parent()      , NULL );                       //  only call on root node
     g_return_val_if_fail(   depth() == 1        , NULL );                       //  only call on root node
 
-    dep = 1;                                                                    //  root's children have depth 1
+	dep = 1;                                                                    //  root's children have depth 1
 
 loop:
-    node = node->children()->a_first_node;                                      //  we scan all nodes, even hidden
+	node = node->children()->a_first_node;                                      //  we scan all nodes, even hidden
 
-    while ( node )
-    {
-        if ( node->uid() == _path->uid_get(dep-1) )                             //  uid correspondance
-        {
-            if ( ++dep > _path->card() )                                        //  this was the last uid : Node found !
-                return node;
-            else
-                goto loop;                                                      //  more uid to scans : descend one depth
-        }
-        node = node->anext();                                                   //  we scan all nodes, even hidden
-    }
+	while ( node )
+	{
+		if ( node->uid() == _path->uid_get(dep-1) )                             //  uid correspondance
+		{
+			if ( ++dep > _path->card() )                                        //  this was the last uid : Node found !
+				return node;
+			else
+				goto loop;                                                      //  more uid to scans : descend one depth
+		}
+		node = node->anext();                                                   //  we scan all nodes, even hidden
+	}
 
-    return NULL;
+	return NULL;
 }
 //  ****************************************************************************
 //
@@ -962,49 +1034,55 @@ loop:
 //
 //  ****************************************************************************
 //  ----------------------------------------------------------------------------
-//  Node::remove_children()
+//  PNode::remove_children()
 //  ----------------------------------------------------------------------------
+//!
 //! \fn Node:remove_children()
 //!
 //! __RECURSIVE__ remove the descendance of the node.
+//!
 guint32
-Node::remove_children()
+PNode::remove_children()
 {
     return children()->remove_all_nodes();
 }
 //  ----------------------------------------------------------------------------
-//  Node::remove_child()
+//  PNode::remove_child()
 //  ----------------------------------------------------------------------------
+//!
 //! \fn Node:remove_child()
 //!
-//! \brief  __RECURSIVE__ remove a child and all its descendance.
+//! brief\  __RECURSIVE__ remove a child and all its descendance.
+//!
 guint32
-Node::remove_child(
+PNode::remove_child(
     guint16 _pos)
 {
-    guint32									count   = 0;
-    //.........................................................................
+	guint32									count   = 0;
+	//.........................................................................
 
     // remove children nodes
-    count += children()->remove_one_node(_pos);
+	count += children()->remove_one_node(_pos);
 
-    return count;
+	return count;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::remove_shown_node()
+//  PNodeBlock::remove_visible_node()
 //  ----------------------------------------------------------------------------
-//! \fn     NodeBlock::remove_shown_node()
+//!
+//! \fn PNodeBlock::remove_visible_node()
 //!
 //! \brief  __RECURSIVE__ Remove a _VISIBLE_ Node and all its children
 //!     ( including hidden children ! )
 //!
 //! \param  _pos    the position of visible Node to remove
+//!
 guint32
-NodeBlock::remove_shown_node(
-    guint16 _pos)
+PNodeBlock::remove_shown_node(
+	guint16 _pos)
 {
     Node        *   node	= NULL;
-    //.........................................................................
+	//.........................................................................
     node = get_shown_node(_pos);
 
     g_return_val_if_fail( node                          , 0         );
@@ -1016,14 +1094,15 @@ NodeBlock::remove_shown_node(
     return remove_shown_node(node);
 }
 guint32
-NodeBlock::remove_shown_node(
-    Node    *   node)
+PNodeBlock::remove_shown_node(
+	Node    *   node)
 {
     Node        *   p       = NULL;
     Node        *   n       = NULL;
+    Node        *   tmp     = NULL;
     guint32         count   = 0;
     guint16         pos     = 0;
-    //.........................................................................
+	//.........................................................................
     g_return_val_if_fail( node          , 0  );
     g_return_val_if_fail( node->shown() , 0  );
 
@@ -1033,13 +1112,18 @@ NodeBlock::remove_shown_node(
     //  ordered chaining
     p   = node->aprev();
     n   = node->anext();
-    NODEBLOCK_ORDERED_CHAINING_CUT(p,n);
+    PNODEBLOCK_ORDERED_CHAINING_CUT(p,n);
 
     // remove the node from the shown array
-    pos = node->spos();
-    d_snodes->del( pos );
+    pos = PNODE(node)->spos();
+    g_array_remove_index(d_snodes, pos);
 
-    dec_spos_from_node( pos );
+    tmp = g_array_index(d_snodes, Node*, pos);
+    while ( tmp )
+    {
+        PNODE(tmp)->dec_spos();
+        tmp = tmp->snext();
+    }
 
     a_scard--;
 
@@ -1053,23 +1137,25 @@ NodeBlock::remove_shown_node(
     return count;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::remove_hidden_node()
+//  PNodeBlock::remove_hidden_node()
 //  ----------------------------------------------------------------------------
-//! \fn     NodeBlock::remove_hidden_node()
+//!
+//! \fn PNodeBlock::remove_hidden_node()
 //!
 //! \brief  __RECURSIVE__ Remove a _HIDDEN_ Node and all its children
 //!     ( including hidden children ! )
 //!
 //! \param  _pos    the position of hidden Node to remove
+//!
 guint32
-NodeBlock::remove_hidden_node(
-    guint16 _pos)
+PNodeBlock::remove_hidden_node(
+	guint16 _pos)
 {
     Node        *   node	= NULL;
     Node        *   p       = NULL;
     Node        *   n       = NULL;
     guint32         count   = 0;
-    //.........................................................................
+	//.........................................................................
     node = get_hidden_node(_pos);
 
     g_return_val_if_fail( node               , 0  );
@@ -1078,10 +1164,10 @@ NodeBlock::remove_hidden_node(
     //  ordered chaining
     p   = node->aprev();
     n   = node->anext();
-    NODEBLOCK_ORDERED_CHAINING_CUT(p,n);
+    PNODEBLOCK_ORDERED_CHAINING_CUT(p,n);
 
     // remove the node from the hidden array
-    d_hnodes->del( _pos );
+    g_array_remove_index(d_hnodes, _pos);
 
     //
     //  ... no hpos ...
@@ -1090,7 +1176,7 @@ NodeBlock::remove_hidden_node(
     a_hcard--;
 
     //  now remove all children
-    count = count + 1 + node->remove_children();
+    count = count + 1 + node->remove_all_children();
 
     //  delete objects
     delete node->children();
@@ -1099,20 +1185,22 @@ NodeBlock::remove_hidden_node(
     return count;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::remove_all_nodes()
+//  PNodeBlock::remove_all_nodes()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::remove_all_nodes()
+//!
+//! \fn PNodeBlock::remove_all_nodes()
 //!
 //! \brief  __RECURSIVE__ Remove all _VISIBLE_ Nodes and all their children
 //!     ( including hidden children ! )
+//!
 guint32
-NodeBlock::remove_all_nodes()
+PNodeBlock::remove_all_nodes()
 {
-    Node*		node	= NULL;
-    Node*		next	= NULL;
+	Node*		node	= NULL;
+	Node*		next	= NULL;
     guint32     count   = 0;
     guint16     hc      = 0;
-    //.........................................................................
+	//.........................................................................
 
     //BLOCK_INF("remove_nodes():[%03i]", a_card);
 
@@ -1120,10 +1208,10 @@ NodeBlock::remove_all_nodes()
 
     while ( node )
     {
-        next    =   node->anext();
+        next    =   PNODE(node)->anext();
         if ( node->shown() )
         {
-            count   +=  remove_shown_node(node->spos());
+            count   +=  remove_shown_node(PNODE(node)->spos());
         }
         else
         {
@@ -1144,9 +1232,9 @@ NodeBlock::remove_all_nodes()
 //
 //  ****************************************************************************
 //  ----------------------------------------------------------------------------
-//  Node::visibility_changed()
+//  PNode::visibility_changed()
 //  ----------------------------------------------------------------------------
-//! \fn Node::visibility_changed()
+//! \fn visibility_changed()
 //!
 //! \brief  Refresh display of a Node and its descendance when its visibility
 //!     has changed.
@@ -1159,7 +1247,7 @@ NodeBlock::remove_all_nodes()
 //!
 //! \return s_ret_gboolean
 gboolean
-Node::visibility_changed()
+PNode::visibility_changed()
 {
     Node        *   p       = NULL;
     NodeBlock   *   b       = NULL;
@@ -1174,14 +1262,14 @@ Node::visibility_changed()
     //  ........................................................................
     //  some checks
     {
-        v_old = flags_get_visibility();
-        v_new = d_data->IGetVisibility();
+    v_old = flags_get_visibility();
+    v_new = d_data->IGetVisibility();
 
-        if ( v_old == v_new )                                                       //  no visibility change : error
-        {
-            Store::s_ret_gboolean = FALSE;
-            return FALSE;
-        }
+    if ( v_old == v_new )                                                       //  no visibility change : error
+    {
+        Store::s_ret_gboolean = FALSE;
+        return FALSE;
+    }
     }
     //  ........................................................................
     b       =   brothers();
@@ -1222,9 +1310,9 @@ Node::visibility_changed()
     return Store::s_ret_gboolean;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::r_parent_has_been_shown()
+//  PNodeBlock::r_parent_has_been_shown()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::r_parent_has_been_shown()
+//! \fn r_parent_has_been_shown()
 //!
 //! \brief  Refresh display of children parent has just been shown.
 //!
@@ -1234,25 +1322,25 @@ Node::visibility_changed()
 //!         refreshed ( Nodes H -> S ).
 //!     s_ret_gboolean      : Set to FALSE on error.
 void
-NodeBlock::r_parent_has_been_shown()
+PNodeBlock::r_parent_has_been_shown()
 {
     IData   *   d       = NULL;
 
-    Node    *	n       = NULL;
+	Node    *	n       = NULL;
 
-    Node    *	na	    = NULL;
-    //..........................................................................
+	Node    *	na	    = NULL;
+	//..........................................................................
     //  first some checks
     {
 
-        if ( scard() )                                                              //  parent has been shown => it was hidden before => all Nodes must be hidden
-        {
-            Store::s_ret_gboolean  = FALSE;
-            return;
-        }
+    if ( scard() )                                                              //  parent has been shown => it was hidden before => all Nodes must be hidden
+    {
+        Store::s_ret_gboolean  = FALSE;
+        return;
+    }
 
-        if ( ! hcard() )                                                            //  no Node to show : end !
-            return;
+    if ( ! hcard() )                                                            //  no Node to show : end !
+        return;
     }
 
     n   =   a_first_node;                                                       //  we know that n is hidden
@@ -1281,10 +1369,10 @@ lab_loop:
     n->children()->r_parent_has_been_shown();                                   //  recursive call
 
 lab_next:
-    n = na;                                                                 //  roll
+        n = na;                                                                 //  roll
 
-    if ( ! n )                                                              //  if no anext, we're done
-        goto lab_end;
+        if ( ! n )                                                              //  if no anext, we're done
+            goto lab_end;
 
     goto lab_loop;                                                              //  loop
 
@@ -1293,9 +1381,9 @@ lab_end:
     BLOCK_CHECK(this);
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::r_parent_has_been_hidden()
+//  PNodeBlock::r_parent_has_been_hidden()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::r_parent_has_been_hidden()
+//! \fn r_parent_has_been_hidden()
 //!
 //! \brief  Refresh display of children parent has just been hidden.
 //!
@@ -1305,19 +1393,19 @@ lab_end:
 //!         refreshed ( Nodes S -> H ).
 //!     s_ret_gboolean      : Set to FALSE on error.
 void
-NodeBlock::r_parent_has_been_hidden()
+PNodeBlock::r_parent_has_been_hidden()
 {
     IData   *   d       = NULL;
 
-    Node    *	n       = NULL;
+	Node    *	n       = NULL;
 
-    Node    *	na	    = NULL;
-    //..........................................................................
+	Node    *	na	    = NULL;
+	//..........................................................................
     //  first some checks
     {
 
-        if ( ! scard() )                                                            //  no Node to hide : end !
-            return;
+    if ( ! scard() )                                                            //  no Node to hide : end !
+        return;
 
     }
 
@@ -1343,10 +1431,10 @@ lab_loop:
     n->children()->r_parent_has_been_hidden();                                  //  recursive call
 
 lab_next:
-    n = na;                                                                     //  roll
+        n = na;                                                                 //  roll
 
-    if ( ! n )                                                                  //  if no anext, we're done
-        goto lab_end;
+        if ( ! n )                                                              //  if no anext, we're done
+            goto lab_end;
 
     goto lab_loop;                                                              //  loop
 
@@ -1355,9 +1443,9 @@ lab_end:
     BLOCK_CHECK(this);
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::node_move_from_hidden_to_shown()
+//  PNodeBlock::node_move_from_hidden_to_shown()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::node_move_from_hidden_to_shown()
+//! \fn node_move_from_hidden_to_shown()
 //!
 //! \brief  "Show" one node i.e.
 //!     - move it from hidden Nodes array to visible Nodes array
@@ -1367,11 +1455,12 @@ lab_end:
 //!
 //! \return TRUE / FALSE
 gboolean
-NodeBlock::node_move_from_hidden_to_shown(Node* _n)
+PNodeBlock::node_move_from_hidden_to_shown(Node* _n)
 {
-    Node    *	h       = NULL;
+	Node    *	h       = NULL;
 
-    Node    *	ns	    = NULL;
+	Node    *	ns	    = NULL;
+	Node    *	ps	    = NULL;
 
     guint32     nsp     = 0;
 
@@ -1380,66 +1469,86 @@ NodeBlock::node_move_from_hidden_to_shown(Node* _n)
     //  remove node from hidden Nodes array
     {
 
-        d_hnodes->del( _n->hpos() );                                            //  remove n from Hidden
+    d_hnodes = g_array_remove_index(d_hnodes, _n->hpos() );                     //  remove n from Hidden
 
-        //
-        //  ...there is no hidden chaining...
-        //
+    //
+    //  ...there is no hidden chaining...
+    //
 
-        a_hcard--;                                                              //  dec Hidden card here allow simple test 'i < a_hcard' in for...next loop
+    a_hcard--;                                                                  //  dec Hidden card here allow simple test 'i < a_hcard' in for...next loop
 
-        for ( i = _n->hpos() ; i < a_hcard ; i++ )                              //  from next hidden node in array to end of array, dec hpos
-        {
-            h = d_hnodes->get( i );
-            h->dec_hpos();
-        }
+    for ( i = _n->hpos() ; i < a_hcard ; i++ )                                  //  from next hidden node in array to end of array, dec hpos
+    {
+        h = g_array_index( d_hnodes, Node*, i );
+        PNODE(h)->dec_hpos();
+    }
 
-        _n->invalidate_hpos();                                                  //  invalidate hpos
+    PNODE(_n)->set_hpos( 0xFFFF );                                              //  invalidate hpos
 
     }
     //  ........................................................................
     //  insert node in shown array
     {
 
-        ns = _n->find_anext_shown();                                                //  find anext shown
+    ns = _n->find_anext_shown();                                                //  find anext shown
 
-        //  insert before an existing visible Node
-        if ( ns )
-        {
-            //  chaining
-            nsp = ns->spos();
-            d_snodes->ins( nsp, _n );                                               //  insert
-            //  indexes
-            _n->set_spos(nsp);                                                      //  _n -> spos
-            a_scard++;                                                              //  inc visible card
+    //  insert before an existing visible Node
+    if ( ns )
+    {
+        //  chaining
+        nsp = PNODE(ns)->spos();
+        d_snodes = g_array_insert_val(d_snodes, nsp, _n);                       //  insert
 
-            inc_spos_from_node( 1 + nsp );
-        }
-        //  simply append to visible node array
-        else
+        PNODE(_n)->set_snext(ns);                                               //  _n -> snext
+
+        if ( nsp )
         {
-            //  chaining
-            d_snodes->add( _n );                                                    //  append
-            //  s-indexes
-            _n->set_spos(a_scard);                                                  //  _n -> spos
-            a_scard++;                                                              //  inc visible card
+            ps = g_array_index(d_snodes, Node*, nsp - 1);
+            ps->set_snext(_n);                                                  //  sprev (_n ) -> snext
         }
 
-        _n->flags_set_shown(1);
+        //  indexes
+        PNODE(_n)->set_spos(nsp);                                               //  _n -> spos
 
+        while ( ns )                                                            //  set spos of all Nodes after n
+        {
+            PNODE(ns)->inc_spos();
+            ns = ns->snext();
+        }
+
+    }
+    //  simply append to visible node array
+    else
+    {
+        //  chaining
+        d_snodes = g_array_append_val(d_snodes, _n);                            //  append
+
+        PNODE(_n)->set_snext(NULL);                                             //  _n -> snext
+
+        if ( a_scard )
+        {
+            ps = g_array_index(d_snodes, Node*, a_scard - 1);
+            ps->set_snext(_n);                                                  //  sprev ( _n ) -> snext
+        }
+
+        //  s-indexes
+        PNODE(_n)->set_spos(a_scard);                                           //  _n -> spos
+    }
+
+    PNODE(_n)->flags_set_shown(1);
+
+    a_scard++;                                                                  //  inc visible card
 
     }
 
     Store::Get_static_store()->emit_row_inserted(_n);
 
-    BLOCK_CHECK(this);
-
     return TRUE;
 }
 //  ----------------------------------------------------------------------------
-//  NodeBlock::node_move_from_shown_to_hidden()
+//  PNodeBlock::node_move_from_shown_to_hidden()
 //  ----------------------------------------------------------------------------
-//! \fn NodeBlock::node_move_from_shown_to_hidden()
+//! \fn node_move_from_shown_to_hidden()
 //!
 //! \brief  "Hide" one node i.e.
 //!     - move it from shown Nodes array to hidden Nodes array
@@ -1449,47 +1558,63 @@ NodeBlock::node_move_from_hidden_to_shown(Node* _n)
 //!
 //! \return TRUE / FALSE
 gboolean
-NodeBlock::node_move_from_shown_to_hidden(Node* _n)
+PNodeBlock::node_move_from_shown_to_hidden(Node* _n)
 {
+    Node    *       ns      = NULL;
+    Node    *       ps      = NULL;
+
     guint16         nsp     = 0;
-    //.........................................................................
+	//.........................................................................
     Store::Get_static_store()->emit_row_deleted(_n);                            //  following gtk+ recommandations, signal is sent before modifying model
 
-    //.........................................................................
+	//.........................................................................
     //  remove _n from shown Nodes array
     {
 
-        //  chaining
-        nsp         = _n->spos();
-        d_snodes->del( nsp );                                                   //  remove _n from array
-        a_scard--;
+    //  chaining
+    nsp         = _n->spos();
+    d_snodes    = g_array_remove_index(d_snodes, nsp);                          //  remove _n from array
 
-        dec_spos_from_node(nsp);                                                //  dec all Nodes spos after _n
+    ns          = _n->snext();                                                  //  next shown ( may be NULL )
 
-        _n->invalidate_spos();                                                  //  invalidate _n spos
+    if ( nsp )                                                                  //  if there is previous shown...
+    {
+        ps  = g_array_index( d_snodes, Node*, nsp - 1 );
+        PNODE(ps)->set_snext( ns );                                             //  ...sprev( _n ) -> snext
+    }
+
+    //  indexes
+    while ( ns  )                                                               //  from ns to last shown, dec index
+    {
+        PNODE(ns)->dec_spos();
+        ns = PNODE(ns)->snext();
+    }
+
+    _n->set_spos(0xFFFF);                                                       //  invalidate some fields
+    _n->set_snext(NULL);
+
+    a_scard--;
 
     }
     //  ........................................................................
     //  move _n in hidden array
     {
 
-        //  just append all existing hidden Nodes ; the index of hidden Nodes
-        //  is unuseful, since...they are hidden ! Hidden Nodes does not need
-        //  to be sorted !
-        //
-        //                      ~ I am the best ~
-        //
-        //  ( But the hidden array not sorted may be not practical for debug ! )
-        d_hnodes->add( _n );                                                    //  append
-        _n->set_hpos( a_hcard );
+    //  just append all existing hidden Nodes ; the index of hidden Nodes
+    //  is unuseful, since...they are hidden ! Hidden Nodes does not need
+    //  to be sorted !
+    //
+    //                      ~ I am the best ~
+    //
+    //  ( But the hidden array not sorted may be not practical for debug ! )
+    d_hnodes = g_array_append_val(d_hnodes, _n);                                //  append
+    _n->set_hpos( a_hcard );
 
-        a_hcard++;                                                              //  dec hidden card
+    a_hcard++;                                                                  //  dec hidden card
 
     }
 
-    _n->flags_set_shown(0);                                                     //  flag _n as hidden
-
-    BLOCK_CHECK(this);
+    PNODE(_n)->flags_set_shown(0);
 
     return TRUE;
 }

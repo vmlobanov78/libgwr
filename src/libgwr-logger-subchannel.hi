@@ -53,15 +53,42 @@
     public:
     class SubChannel
     {
+        friend class Logger;
+
         private:
         gchar               *   d_header;
-        gboolean                a_muted;
+
+        gboolean                a_enabled_console;
+        gboolean                a_enabled_textview;
+
         TextAttributes          a_att;
         gchar                   a_att_str[16];
-
+        //  ....................................................................
         public:
-                SubChannel(const gchar* _header, TextAttributes _att) :
-                    a_muted(FALSE), a_att(_att)
+        inline  const   gchar       *       get_header()    { return d_header;          }
+        inline          guint32             flags()         {   return a_att.flags();   }
+        inline          guint32             fgcol()         {   return a_att.fgcol();   }
+        inline          guint32             bgcol()         {   return a_att.bgcol();   }
+        inline          const gchar *       get_console_attributes()
+                                            {
+                                                return a_att_str;
+                                            }
+        //  ....................................................................
+        private:
+                void        enable                  (Logger::eOutput, gboolean);
+        public:
+        inline  gboolean    enabled_console     ()  { return a_enabled_console;     }
+        inline  gboolean    enabled_textview    ()  { return a_enabled_textview;    }
+        //  ....................................................................
+        public:
+                SubChannel(
+                    const   gchar           *   _header                     ,
+                            TextAttributes      _att                        ,
+                            gboolean            _enable_console             ,
+                            gboolean            _enable_textview            )
+                    :   a_enabled_console   (_enable_console)   ,
+                        a_enabled_textview  (_enable_textview)  ,
+                        a_att               (_att)
                 {
                     d_header    = _header ? g_strdup(_header) : NULL;
 
@@ -72,18 +99,5 @@
                 {
                     g_free_safe(d_header);
                 }
-
-        inline  const   gchar *     get_header()    {   return d_header;        }
-        inline  void                mute()          {   a_muted = TRUE;         }
-        inline  void                unmute()        {   a_muted = FALSE;        }
-        inline  gboolean            is_muted()      {   return a_muted;         }
-        //----------------------------------------------------------------------
-        inline  guint32             flags()         {   return a_att.flags();   }
-        inline  guint32             fgcol()         {   return a_att.fgcol();   }
-        inline  guint32             bgcol()         {   return a_att.bgcol();   }
-        inline  const gchar *       get_console_attributes()
-                                    {
-                                        return a_att_str;
-                                    }
     };
 

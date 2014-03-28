@@ -41,46 +41,62 @@
 #define     __LIBGWR_COLOR_H__
 //  ............................................................................
 GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(color)
 
 class Color
 {
     friend class LibGwrStatic;
 
-    private:
+private:
 
-    public:
+public:
     //--------------------------------------------------------------------------
-    private:
+private:
     gchar   *   d_name;
     gchar   *   d_html;
+    gchar   *   d_console_fg;
+    gchar   *   d_console_bg;
 
-    public:
+public:
     void        set_html(const gchar* _html)
-                {
-                    g_free_safe( d_html );
-                    d_html = g_strdup( _html );
-                }
+    {
+        g_free_safe( d_html );
+        d_html = g_strdup( _html );
+    }
 
 
-    public:
-            Color(const gchar* _name, const gchar* _html)
-            {
-                d_name  = g_strdup(_name);
-                d_html  = g_strdup(_html);
-            }
+public:
+    Color(const gchar* _name, const gchar* _html, const gchar* _console_fg, const gchar* _console_bg)
+    {
+        d_name          = g_strdup( _name       );
+        d_html          = g_strdup( _html       );
+        d_console_fg    = g_strdup( _console_fg );
+        d_console_bg    = g_strdup( _console_bg );
+    }
     virtual ~Color()
     {
         g_free( d_name );
         g_free( d_html);
     }
 
-    inline  const gchar *   name()  { return d_name; }
-    inline  const gchar *   html()  { return d_html; }
+    inline  const gchar *   name()
+    {
+        return d_name;
+    }
+    inline  const gchar *   html()
+    {
+        return d_html;
+    }
+    inline  const gchar *   cfg()
+    {
+        return d_console_fg;
+    }
+    inline  const gchar *   cbg()
+    {
+        return d_console_bg;
+    }
 
 };
-
-//  ............................................................................
-GWR_NAMESPACE_START(color)
 
 enum
 {
@@ -105,43 +121,25 @@ enum
     Grey6   =       16
 };
 
-extern  const gchar *   Name(guint32 _index);
-extern  const gchar *   Html(guint32 _index);
-extern  void            SetStdColor(const gchar* _html);
+extern      Color       *   Colors[LIBGWR_COLOR_CARD_MAX];
 //  ............................................................................
-GWR_NAMESPACE_START(console)
-
-extern  const   gchar   *       Fg[1+8];
-extern  const   gchar   *       Bg[1+8];
-
-GWR_NAMESPACE_END(console)
-//  ............................................................................
-inline  gchar   *           G_console_add_fg(gchar* p, guint32 _index)
+inline  gchar   *           Console_add_fg(gchar* p, guint32 _index)
 {
-    if ( _index <= 8 )
-    {
-        *(p++) = libgwr::color::console::Fg[_index][0];
-        *(p++) = libgwr::color::console::Fg[_index][1];
-        return p;
-    }
+    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD , NULL );
 
-    *(p++) = libgwr::color::console::Fg[libgwr::color::Std][0];
-    *(p++) = libgwr::color::console::Fg[libgwr::color::Std][1];
+    *(p++) = libgwr::color::Colors[_index]->cfg()[0];
+    *(p++) = libgwr::color::Colors[_index]->cfg()[1];
     return p;
 }
-inline  gchar   *           G_console_add_bg(gchar* p, guint32 _index)
+inline  gchar   *           Console_add_bg(gchar* p, guint32 _index)
 {
-    if ( _index <= 8 )
-    {
-        *(p++) = libgwr::color::console::Bg[_index][0];
-        *(p++) = libgwr::color::console::Bg[_index][1];
-        return p;
-    }
+    g_return_val_if_fail( _index < LIBGWR_COLOR_DEFINED_CARD , NULL );
 
-    *(p++) = libgwr::color::console::Bg[libgwr::color::Std][0];
-    *(p++) = libgwr::color::console::Bg[libgwr::color::Std][1];
+    *(p++) = libgwr::color::Colors[_index]->cbg()[0];
+    *(p++) = libgwr::color::Colors[_index]->cbg()[1];
     return p;
 }
+
 GWR_NAMESPACE_END(color)
 GWR_NAMESPACE_END(libgwr)
 

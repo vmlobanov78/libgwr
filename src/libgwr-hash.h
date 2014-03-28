@@ -1,11 +1,11 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr.h                                                                *
+    *   libgwr-hash .h                                                          *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Part of libwgwr                                                         *
+    *   Hash functions                                                          *
     *                                                                           *
     *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
     *                                                                           *
@@ -28,71 +28,28 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : Object                                                        *
+    *   Class   :                                                               *
     *                                                                           *
     *   Parent  : None                                                          *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef     __LIBGWR_H__
-#define     __LIBGWR_H__
-//  ...........................................................................
-#include	<gtk/gtk.h>
-#include	<glib/gprintf.h>
-//  ...........................................................................
-#include    <sys/stat.h>
-#include    <unistd.h>
-#include    <stdlib.h>
-#include    <errno.h>
-#include    <string.h>
-//  ...........................................................................
-#include    "libgwr-define-optim.h"
-#include    "libgwr-common.h"
-#include	"libgwr-macro.h"
-#include	"libgwr-counter.h"
-#include	"libgwr-collection.h"
-#include	"libgwr-str.h"
-#include	"libgwr-hash.h"
-#include	"libgwr-env.h"
-#include	"libgwr-object.h"
-#include	"libgwr-t-array.h"
-#include	"libgwr-t-m-array-p.h"
-#include	"libgwr-stack.h"
-#include	"libgwr-spacer.h"
-#include	"libgwr-pipe.h"
-#include	"libgwr-color.h"
-#include	"libgwr-text-style.h"
-#include	"libgwr-text-attributes.h"
-#include	"libgwr-chrono.h"
-//  ...........................................................................
-#include    "libgwr-svipc.h"
-//  ...........................................................................
-#include	"widget/libgwr-widget-gtk-utils.h"
-#include	"widget/libgwr-widget-textview.h"
-#include	"widget/libgwr-widget-menu.h"
-#include	"widget/libgwr-widget-extensible-header.h"
-#include	"libgwr-logger.h"
-//  ...........................................................................
-#include    "libgwr-treestore.h"
+#ifndef     __LIBGWR_HASH_H__
+#define     __LIBGWR_HASH_H__
 //  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(hash)
 
-extern  Logger      *   GD_libgwr_logger;
-extern  guint32         GA_libgwr_logger_channel;
+//  DJB Hash Function by Professor Daniel J. Bernstein
+typedef guint32     tDJB;
+extern  tDJB        DJB(const gchar* _str);
 
-inline  void            P_set_logger(Logger* _logger, guint32 _channel)
-{
-    GD_libgwr_logger            = _logger;
-    GA_libgwr_logger_channel    = _channel;
-}
 
-//  ............................................................................
-//  GLib extensions
-extern  guint32     g_ptr_array_find_first_free_index   (GPtrArray*, gboolean   _allocate = TRUE            );
-extern  gpointer    g_ptr_array_get                     (GPtrArray*, guint32    _index                      );
-extern  gboolean    g_ptr_array_set                     (GPtrArray*, guint32    _index          , gpointer  );
-//  ............................................................................
+
+
+
+GWR_NAMESPACE_END(hash)
 GWR_NAMESPACE_END(libgwr)
 
-#endif
+#endif                                                                          // __LIBGWR_HASH_H__

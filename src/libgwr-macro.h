@@ -64,6 +64,14 @@ namespace NAME                                                                  
 #define LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES      FALSE
 #define LIBGWR_GTK_EVENT_KEY_PROPAGATE_NO       TRUE
 
+#define GWR_IF_FALSE( CODE, CONDITION )                                         \
+    CODE;                                                                       \
+    if ( ! ( CONDITION ) )
+
+#define GWR_IF_TRUE( CODE, CONDITION )                                          \
+    CODE;                                                                       \
+    if ( CONDITION )
+
 
 
 

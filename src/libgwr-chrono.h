@@ -36,36 +36,45 @@
 #ifndef     __LIBGWR_CHRONO_H__
 #define     __LIBGWR_CHRONO_H__
 //  ...........................................................................
-namespace libgwr
+GWR_NAMESPACE_START(libgwr)
+
+//  ############################################################################
+//
+//							TimeStamp
+//
+//  ############################################################################
+class TimeStamp
 {
-//  ***************************************************************************
+    GTimeVal a_gtv_start;
+};
+//  ############################################################################
 //
 //							Chrono
 //
-//  ***************************************************************************
+//  ############################################################################
 #define LIBGWR_CHRONO( PC, DO_SOMETHING )                                       \
     (PC)->start();                                                              \
     DO_SOMETHING;                                                               \
-    (PC)->stop();
+    (PC)->time();
 
 //! \class  Chrono
 //! \brief  For measuring time
 class Chrono
 {
-    private:
-    GTimeVal a_gtv_start;
-    GTimeVal a_gtv_stop;
+private:
+    GTimeVal    a_gtv_start;
+    GTimeVal    a_gtv_stop;
 
     guint32     a_es;
     guint32     a_ems;
     glong       a_eus;
 
-    public:
+public:
     void    start()
     {
         g_get_current_time( &a_gtv_start );
     }
-    void stop()
+    void    time()
     {
         g_get_current_time( &a_gtv_stop );
 
@@ -87,12 +96,18 @@ class Chrono
         a_ems   = a_ems % (guint32)1000;
     }
 
-    guint32 es()        { return a_es;  }
-    guint32 ems()       { return a_ems; }
+    guint32 es()
+    {
+        return a_es;
+    }
+    guint32 ems()
+    {
+        return a_ems;
+    }
     //glong   eus()       { return a_eus; }
 
-    public:
-             Chrono()   {}
+public:
+    Chrono()   {}
     virtual ~Chrono()   {}
 };
 

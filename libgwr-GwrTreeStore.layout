@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="src/libgwr-t-m-array-p.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="12" />
+		</Cursor>
+		<Folding>
+			<Collapse line="56" />
+			<Collapse line="116" />
+			<Collapse line="119" />
+			<Collapse line="129" />
+			<Collapse line="149" />
+			<Collapse line="156" />
+			<Collapse line="172" />
+			<Collapse line="178" />
+			<Collapse line="196" />
+			<Collapse line="202" />
+			<Collapse line="224" />
+			<Collapse line="236" />
+			<Collapse line="240" />
+			<Collapse line="255" />
+			<Collapse line="266" />
+			<Collapse line="275" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4145" topLine="24" />
+		</Cursor>
+		<Folding>
+			<Collapse line="207" />
+			<Collapse line="278" />
+			<Collapse line="376" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore-gobject.cc" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3570" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="src/libgwr-macro.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="7" />
+		</Cursor>
+	</File>
+	<File name="src/libgwr-stack.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="12" />
+		</Cursor>
+		<Folding>
+			<Collapse line="51" />
+			<Collapse line="67" />
+			<Collapse line="76" />
+			<Collapse line="84" />
+			<Collapse line="93" />
+			<Collapse line="100" />
+			<Collapse line="112" />
+			<Collapse line="128" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore-custom.cc" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3646" topLine="27" />
+		</Cursor>
+		<Folding>
+			<Collapse line="66" />
+			<Collapse line="84" />
+			<Collapse line="103" />
+			<Collapse line="134" />
+			<Collapse line="165" />
+			<Collapse line="198" />
+			<Collapse line="230" />
+			<Collapse line="253" />
+			<Collapse line="257" />
+			<Collapse line="261" />
+			<Collapse line="297" />
+			<Collapse line="304" />
+			<Collapse line="310" />
+			<Collapse line="343" />
+			<Collapse line="412" />
+			<Collapse line="444" />
+			<Collapse line="513" />
+			<Collapse line="537" />
+			<Collapse line="563" />
+			<Collapse line="579" />
+			<Collapse line="596" />
+			<Collapse line="625" />
+			<Collapse line="653" />
+			<Collapse line="707" />
+			<Collapse line="898" />
+			<Collapse line="916" />
+			<Collapse line="958" />
+			<Collapse line="976" />
+			<Collapse line="1004" />
+			<Collapse line="1020" />
+			<Collapse line="1062" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore.cc" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3570" topLine="27" />
+		</Cursor>
+		<Folding>
+			<Collapse line="96" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore-node-blocks.hi" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7867" topLine="107" />
+		</Cursor>
+	</File>
+	<File name="src/libgwr-treestore-nodes.hi" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7304" topLine="176" />
+		</Cursor>
+	</File>
+	<File name="src/libgwr-define-optim.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3847" topLine="11" />
+		</Cursor>
+	</File>
+	<File name="src/libgwr-treestore-gtmi.cc" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3646" topLine="121" />
+		</Cursor>
+		<Folding>
+			<Collapse line="75" />
+			<Collapse line="96" />
+			<Collapse line="116" />
+			<Collapse line="135" />
+			<Collapse line="151" />
+			<Collapse line="166" />
+			<Collapse line="197" />
+			<Collapse line="213" />
+			<Collapse line="236" />
+			<Collapse line="268" />
+			<Collapse line="284" />
+			<Collapse line="309" />
+			<Collapse line="319" />
+			<Collapse line="334" />
+			<Collapse line="353" />
+			<Collapse line="378" />
+			<Collapse line="411" />
+			<Collapse line="423" />
+			<Collapse line="447" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-object.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="3" />
+		</Cursor>
+		<Folding>
+			<Collapse line="39" />
+			<Collapse line="52" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-treestore-nodes.cc" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="46274" topLine="449" />
+		</Cursor>
+		<Folding>
+			<Collapse line="80" />
+			<Collapse line="112" />
+			<Collapse line="127" />
+			<Collapse line="135" />
+			<Collapse line="149" />
+			<Collapse line="169" />
+			<Collapse line="193" />
+			<Collapse line="224" />
+			<Collapse line="257" />
+			<Collapse line="262" />
+			<Collapse line="267" />
+			<Collapse line="290" />
+			<Collapse line="312" />
+			<Collapse line="343" />
+			<Collapse line="360" />
+			<Collapse line="374" />
+			<Collapse line="410" />
+			<Collapse line="415" />
+			<Collapse line="423" />
+			<Collapse line="436" />
+			<Collapse line="458" />
+			<Collapse line="479" />
+			<Collapse line="483" />
+			<Collapse line="494" />
+			<Collapse line="518" />
+			<Collapse line="522" />
+			<Collapse line="558" />
+			<Collapse line="591" />
+			<Collapse line="656" />
+			<Collapse line="662" />
+			<Collapse line="681" />
+			<Collapse line="699" />
+			<Collapse line="731" />
+			<Collapse line="737" />
+			<Collapse line="744" />
+			<Collapse line="778" />
+			<Collapse line="832" />
+			<Collapse line="837" />
+			<Collapse line="853" />
+			<Collapse line="858" />
+			<Collapse line="880" />
+			<Collapse line="884" />
+			<Collapse line="902" />
+			<Collapse line="906" />
+			<Collapse line="930" />
+			<Collapse line="945" />
+			<Collapse line="971" />
+			<Collapse line="983" />
+			<Collapse line="1004" />
+			<Collapse line="1020" />
+			<Collapse line="1109" />
+			<Collapse line="1121" />
+			<Collapse line="1162" />
+			<Collapse line="1175" />
+			<Collapse line="1195" />
+			<Collapse line="1204" />
+			<Collapse line="1237" />
+			<Collapse line="1245" />
+			<Collapse line="1273" />
+			<Collapse line="1316" />
+			<Collapse line="1380" />
+			<Collapse line="1401" />
+		</Folding>
+	</File>
+	<File name="src/libgwr-t-array.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="21" />
+		</Cursor>
+		<Folding>
+			<Collapse line="54" />
+			<Collapse line="84" />
+			<Collapse line="91" />
+			<Collapse line="96" />
+			<Collapse line="104" />
+			<Collapse line="125" />
+			<Collapse line="135" />
+			<Collapse line="142" />
+			<Collapse line="149" />
+			<Collapse line="161" />
+			<Collapse line="165" />
+			<Collapse line="181" />
+			<Collapse line="183" />
+			<Collapse line="194" />
+			<Collapse line="203" />
+			<Collapse line="208" />
+			<Collapse line="230" />
+			<Collapse line="239" />
+			<Collapse line="246" />
+			<Collapse line="250" />
+		</Folding>
+	</File>
+</CodeBlocks_layout_file>

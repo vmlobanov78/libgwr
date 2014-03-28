@@ -1,7 +1,7 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-spacer.h                                                         *
+    *   libgwr-define-optim.h                                                   *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -26,67 +26,50 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : None                                                          *
+    *   Class   : Object                                                        *
     *                                                                           *
     *   Parent  : None                                                          *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef __LIBGWR_SPACER_H__
-#define __LIBGWR_SPACER_H__
+#ifndef     __LIBGWR_DEFINE_OPTIM_H__
+#define     __LIBGWR_DEFINE_OPTIM_H__
 
-namespace libgwr
-{
+//  ****************************************************************************
+//  libgwr::treestore
+//  ****************************************************************************
+#define     LIBGWR_TREESTORE_CHECK_NODES                                        1
+#define     LIBGWR_TREESTORE_CHECK_NODEBLOCKS                                   1
 
-class   Spacer
-{
-private:
-    gchar   *   d_spaces;
-    gint        a_size;
-    gchar   *   a_pointer;
-    gint        a_step;
+#define     LIBGWR_CHECK_TREESTORE_PATH                                         1
 
-public:
-    Spacer(gint _n, gint _step)
-    {
-        a_size      =   _n;
-        a_step      =   _step;
+#define     LIBGWR_CHECK_TREESTORE_NODEBLOCK_DEC_SPOS_FROM_NODE                 1
+#define     LIBGWR_CHECK_TREESTORE_NODEBLOCK_INC_SPOS_FROM_NODE                 1
 
-        d_spaces    =   (gchar*)g_malloc0(1 + a_size);
-        a_pointer   =   d_spaces + a_size;
+#define     LIBGWR_CHECK_TREESTORE_SNEXT                                        1
+//  ----------------------------------------------------------------------------
+#if ( LIBGWR_TREESTORE_CHECK_NODES != 0 )
+#define NODE_CHECK(node)                                                        \
+        node->check();
+#else
+#define NODE_CHECK(node)
+#endif
 
-        for ( gint i = 0 ; i < a_size ; i++ )
-            d_spaces[i] = ' ';
-        d_spaces[a_size] = 0;
-    }
-    virtual ~Spacer()
-    {
-        g_free( d_spaces );
-    }
+#if ( LIBGWR_TREESTORE_CHECK_NODEBLOCKS != 0 )
+#define BLOCK_CHECK(block)                                                      \
+        block->check();
+#else
+#define BLOCK_CHECK(block)
+#endif
+//  ****************************************************************************
+//
+//  ****************************************************************************
 
-public:
-    inline  void    inc()
-    {
-        if ( (a_pointer - a_step) >= d_spaces )
-            a_pointer -= a_step;
-    }
-    inline  void    dec()
-    {
-        if ( (a_pointer + a_step) <= (d_spaces + a_size) )
-            a_pointer += a_step;
-    }
-    inline  void    reset()
-    {
-        a_pointer   =   d_spaces + a_size;
-    }
 
-    inline  const gchar*    get()
-    {
-        return a_pointer;
-    }
-};
 
-}   //  namespace libgwr
 
-#endif //__LIBGWR_SPACER_H__
+
+
+
+#endif                                                                          //  __LIBGWR_DEFINE_OPTIM_H__

@@ -840,7 +840,7 @@ Store::ext_path_from_iter(
 
 	// build & fill a reverse path
 	depth		= node->depth();
-	path		= new Path(depth);
+	path		= GWR_NEW_CAST( Path, depth );
 
 	do
 	{

@@ -53,26 +53,33 @@
     public:
     class Channel
     {
+        friend class Logger;
+
         private:
         guint32                     a_index;
 
         TArrayP< SubChannel >   *   d_subchannels;
 
         gchar                   *   d_header;
-        gboolean                    a_output_console;
         GwrTextView             *   a_gwr_text_view;
         int                         a_fd;
         int                         a_fd_bin;
 
         public:
-                 Channel(guint32 _index, guint32 _subchannels_card_max, guint32 _subchannels_reallocs = 10, gboolean _create_default = TRUE);
+                 Channel(
+                            guint32                         _index                          ,
+                    const   gchar                       *   _header                         ,
+                            guint32                         _subchannels_card_max           ,
+                            guint32                         _subchannels_realloc            ,
+                            libgwr::widget::GwrTextView *   _textview               = NULL  ,
+                            int                             _fd                     = 0     ,
+                            int                             _fd_bin                 = 0     );
+
         virtual ~Channel();
         //----------------------------------------------------------------------
+        public:
         void                set_header              (const gchar* _header);
         const gchar*        get_header              ();
-
-        void                set_output_console      (gboolean _b);
-        gboolean            get_output_console      ();
 
         void                set_output_gwr_text_view(GwrTextView* _gtv);
         GwrTextView*        get_output_gwr_text_view();
@@ -85,35 +92,25 @@
 
         void                set_server              ();
         //----------------------------------------------------------------------
-        void                    create_default_subchannels();
-        inline  gboolean        create_subchannel(guint32 _ix, const gchar* _header, TextAttributes _att)
-                                {
-                                    SubChannel * sub = NULL;
-                                    //..........................................
-                                    sub = GWR_NEW_CAST( SubChannel, _header, _att );
+        private:
+        void                enable                  (Logger::eOutput, gboolean);
+        //----------------------------------------------------------------------
+        public:
+        void                    create_default_subchannels(gboolean _output_console, gboolean _output_textview);
+        gboolean                create_subchannel(
+                                            guint32             _ix             ,
+                                    const   gchar           *   _header         ,
+                                            TextAttributes      _att            ,
+                                            gboolean            _output_console ,
+                                            gboolean            _output_textview);
 
-                                    if ( ! d_subchannels->p2_set( _ix, sub ) )
-                                    {
-                                        delete sub;
-                                        return FALSE;
-                                    }
-
-                                    return TRUE;
-                                }
+        public:
         inline  SubChannel  *   subchannel(guint32 _ix)
                                 {
-                                    return d_subchannels->p2_get( _ix );
-                                }
-        inline  void            unmute(guint32 _flavour)
-                                {
-                                    subchannel(_flavour)->unmute();
-                                }
-        inline  void            mute(guint32 _flavour)
-                                {
-                                    subchannel(_flavour)->mute();
-                                }
-        inline  gboolean        is_muted(guint32 _flavour)
-                                {
-                                    return subchannel(_flavour)->is_muted();
+                                    SubChannel * sub = NULL;
+                                    if ( d_subchannels->get( _ix, sub ) )
+                                        return sub;
+
+                                    return NULL;
                                 }
     };

@@ -1,0 +1,227 @@
+/*
+    *****************************************************************************
+    *                                                                           *
+    *   libgwr-logger-log.hi                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Helper for logging                                                      *
+    *                                                                           *
+    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   This program is free software; you can redistribute it and/or modify    *
+    *   it under the terms of the GNU General Public License as published by    *
+    *   the Free Software Foundation; either version 2 of the License, or       *
+    *   (at your option) any later version.                                     *
+    *                                                                           *
+    *   This program is distributed in the hope that it will be useful,         *
+    *   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+    *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+    *   GNU General Public License for more details.                            *
+    *                                                                           *
+    *   You should have received a copy of the GNU General Public License       *
+    *   along with this program; if not, write to the Free Software             *
+    *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,   *
+    *   USA.                                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Class   : Logger                                                        *
+    *                                                                           *
+    *   Purpose : log functions for libgwr::Logger                              *
+    *                                                                           *
+    *****************************************************************************
+*/
+
+    static char			s1  [4096];
+    static char			s2  [4096];
+    //  ------------------------------------------------------------------------
+public:
+    inline   void
+    log(guint32 _channel, guint32 _subchannel, const char* _format, ...)
+    {
+        va_list             val;
+        GwrTextView     *   gtv     = NULL;
+        //int                 fd      = 0;
+        Channel         *   c       = NULL;
+        SubChannel      *   s       = NULL;
+        //.........................................................................
+        c   =   channel(_channel);
+        g_return_if_fail(c);
+
+        s   = c->subchannel(_subchannel);
+        g_return_if_fail(s);
+
+        va_start(val, _format);
+        vsprintf(s1, _format, val);
+        va_end(val);
+        //  ....................................................................
+        //  console
+        if ( s->enabled_console() )
+        {
+            if ( c->get_header() )
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s:%s%s:\033[0m%s", c->get_header(), s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s:\033[0m%s", c->get_header(), s1);
+                }
+            }
+            else
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s%s:\033[0m%s", s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s", s1);
+                }
+            }
+            printf(s2);
+        }
+        //  ....................................................................
+        //  GwrTextView
+        gtv = c->get_output_gwr_text_view();
+        if ( gtv )
+        {
+            if ( s->enabled_textview() )
+            {
+                // channel header
+                if ( c->get_header() )
+                {
+                    sprintf(s2, "%s:", c->get_header());
+                    gtv->append     (s2, libgwr::TextAttributes().flags());
+                }
+
+                // subchannel header
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s:", s->get_header());
+                    gtv->append         (s2, s->flags());
+                }
+
+                // text
+                sprintf(s2, "%s", s1);
+                gtv->append         (s2 , s->flags());
+            }
+        }
+        //  ....................................................................
+        //  Stream
+    }
+    //  ------------------------------------------------------------------------
+    inline  void
+    lognl(guint32 _channel, guint32 _subchannel, const char* _format, ...)
+    {
+        va_list             val;
+        GwrTextView     *   gtv     = NULL;
+        //int                 fd      = 0;
+        Channel         *   c       = NULL;
+        SubChannel      *   s       = NULL;
+        //.........................................................................
+        c   =   channel(_channel);
+        g_return_if_fail(c);
+
+        s   = c->subchannel(_subchannel);
+        g_return_if_fail(s);
+
+        va_start(val, _format);
+        vsprintf(s1, _format, val);
+        va_end(val);
+        //  ....................................................................
+        //  console
+        if ( s->enabled_console() )
+        {
+            if ( c->get_header() )
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s:%s%s:\033[0m%s\n", c->get_header(), s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s:\033[0m%s\n", c->get_header(), s1);
+                }
+            }
+            else
+            {
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s%s:\033[0m%s\n", s->get_console_attributes(), s->get_header(), s1);
+                }
+                else
+                {
+                    sprintf(s2, "%s\n", s1);
+                }
+            }
+            printf(s2);
+        }
+        //  ....................................................................
+        //  GwrTextView
+        gtv = c->get_output_gwr_text_view();
+        if ( gtv )
+        {
+            if ( s->enabled_textview() )
+            {
+                // channel header
+                if ( c->get_header() )
+                {
+                    sprintf(s2, "%s:", c->get_header());
+                    gtv->append     (s2, libgwr::TextAttributes().flags());
+                }
+
+                // subchannel header
+                if ( s->get_header() )
+                {
+                    sprintf(s2, "%s:", s->get_header());
+                    gtv->append         (s2, s->flags());
+                }
+
+                // text
+                sprintf(s2, "%s\n", s1);
+                gtv->append         (s2 , s->flags());
+            }
+        }
+    }
+    //  ------------------------------------------------------------------------
+    inline  void
+    write(guint32 _channel, guint32 _subchannel, const char* _format, ...)
+    {
+        va_list             val;
+        GwrTextView     *   gtv     = NULL;
+        //int                 fd      = 0;
+        Channel         *   c       = NULL;
+        SubChannel      *   s       = NULL;
+        //.........................................................................
+        c   =   channel(_channel);
+        g_return_if_fail(c);
+
+        s   = c->subchannel(_subchannel);
+        g_return_if_fail(s);
+
+        va_start(val, _format);
+        vsprintf(s1, _format, val);
+        va_end(val);
+        //  ....................................................................
+        //  console
+        if ( s->enabled_console() )
+        {
+            printf("%s", s1);
+        }
+        //  ....................................................................
+        //  GwrTextView
+        gtv = c->get_output_gwr_text_view();
+        if ( gtv )
+        {
+            if ( s->enabled_textview() )
+            {
+                // text
+                gtv->append         (s1 , s->flags());
+            }
+        }
+    }
