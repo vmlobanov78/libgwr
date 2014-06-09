@@ -4,10 +4,32 @@
 	<Project>
 		<Option title="libgwr" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="core/headers/;core/;widget/;build/;Treestore/;doc/;" />
+		<Option virtualFolders="src/;src/bash/;src/CC/;src/CC/treestore/;src/CC/logger/;src/CC/gen-log/;src/CC/gen-log/lexer/;src/CC/gen-log/parser/;src/CC/widget/;src/CC/headers/;src/C/widget/;src/C/;doc/;" />
 		<Build>
-			<Target title="Debug">
-				<Option output="obj/Debug/gwr" prefix_auto="1" extension_auto="1" />
+			<Target title="D-gen-log">
+				<Option output="bin/Debug/libgwr-gen-log" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../libgwr" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="sample.def" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-Wno-unused-label" />
+					<Add option="-ggdb" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config --libs gtk+-$(CB_GTK_VERSION)`" />
+					<Add library="bin/Debug/libgwr.a" />
+				</Linker>
+				<ExtraCommands>
+					<Add before="chmod u=rwx $(PROJECT_DIR)/src/CC/gen-log/libgwr-prebuild-gen-log.bash" />
+					<Add before="$(PROJECT_DIR)/src/CC/gen-log/libgwr-prebuild-gen-log.bash $(PROJECT_DIR)" />
+				</ExtraCommands>
+			</Target>
+			<Target title="D-libgwr">
+				<Option output="bin/Debug/gwr" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
 				<Option object_output="obj/Debug/" />
 				<Option type="2" />
@@ -16,184 +38,633 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-Wno-unused-label" />
 					<Add option="-ggdb" />
 				</Compiler>
 			</Target>
-			<Target title="Release">
-				<Option output="obj/Release/gwr" prefix_auto="1" extension_auto="1" />
+			<Target title="D-libgwrc">
+				<Option output="bin/Debug/gwrc" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="obj/Release/" />
+				<Option object_output="obj/Debug/" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
-					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
 					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-ggdb" />
 				</Compiler>
-				<Linker>
-					<Add option="-s" />
-				</Linker>
+			</Target>
+			<Target title="R-libgwr">
+				<Option output="bin/Release/gwr" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+			</Target>
+			<Target title="R-libgwrc">
+				<Option output="bin/Release/gwrc" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="Debug" targets="D-libgwr;D-libgwrc;" />
+			<Add alias="Release" targets="R-libgwr;R-libgwrc;" />
+		</VirtualTargets>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-fno-rtti" />
+			<Add option="-std=c++11" />
 			<Add option="-fno-exceptions" />
+			<Add option="-Wno-unused-label" />
 			<Add option="-Wno-unused-but-set-variable" />
-			<Add option="`pkg-config --cflags gtk+-3.0`" />
+			<Add option="`pkg-config --cflags gtk+-$(CB_GTK_VERSION)`" />
+			<Add directory="/home/gwr/Src/libgwr/libgwr-1.0" />
 		</Compiler>
-		<Unit filename="build/Makefile">
-			<Option virtualFolder="build/" />
-		</Unit>
 		<Unit filename="doc/done.txt">
 			<Option virtualFolder="doc/" />
+			<Option target="D-gen-log" />
 		</Unit>
 		<Unit filename="doc/notes.txt">
 			<Option virtualFolder="doc/" />
+			<Option target="D-gen-log" />
 		</Unit>
 		<Unit filename="doc/todo.txt">
 			<Option virtualFolder="doc/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-chrono.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-array-data-multi.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-collection.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-array-data-multi.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-color.cc">
-			<Option virtualFolder="core/" />
+		<Unit filename="src/C/libgwrc-array-equal.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-color.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-array-equal.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-common.cc">
-			<Option virtualFolder="core/" />
+		<Unit filename="src/C/libgwrc-color.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-common.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-common.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-counter.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-define-logs.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-define-optim.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-define-optims.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-env.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-define-settings.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-hash.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-hash.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-logger-channel.hi">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-macro-bits.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-logger-log.hi">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-macro-console.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-logger-subchannel.hi">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/libgwrc-macro.h">
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-logger.cc">
-			<Option virtualFolder="core/" />
+		<Unit filename="src/C/libgwrc.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-logger.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer-private.h">
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-macro-bits.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-macro-console.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer.h">
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-macro.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-textview.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-object.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-textview.h">
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-pipe.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-utils.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-spacer.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/C/widget/libgwrc-gwrgtk-utils.h">
+			<Option virtualFolder="src/C/widget/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/libgwr-stack.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-01-header.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-str.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-02-precode.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-t-array.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-03-regexp.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-t-m-array-p.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-04-rules-01-rol.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-text-attributes.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-04-rules.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-text-style.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-05-postcode.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-custom.cc">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-lexer.cc">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-gobject.cc">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log-lexer.hh">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-gtmi.cc">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log.flex">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-node-blocks.hi">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/lexer/libgwr-gen-log.flex.lexer.cc">
+			<Option virtualFolder="src/CC/gen-log/lexer/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-nodes.cc">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-main-generate-mono.cci">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore-nodes.hi">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-main-generate-multi.cci">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore.cc">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-main.cc">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr-treestore.h">
-			<Option virtualFolder="Treestore/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-parsing-classes.hh">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr.cc">
-			<Option virtualFolder="core/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-parsing-write.cci">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/libgwr.h">
-			<Option virtualFolder="core/headers/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-parsing.cc">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-extensible-header.cc">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log-parsing.hh">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-extensible-header.h">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log.cc">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-gtk-utils.cc">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/libgwr-gen-log.hh">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-gtk-utils.h">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/libgwr-prebuild-gen-log.bash">
+			<Option virtualFolder="src/CC/gen-log/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-menu.cc">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/parser/libgwr-gen-log-parser.cc">
+			<Option virtualFolder="src/CC/gen-log/parser/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-menu.h">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/parser/libgwr-gen-log-parser.hh">
+			<Option virtualFolder="src/CC/gen-log/parser/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-textview.cc">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/parser/libgwr-gen-log.bison">
+			<Option virtualFolder="src/CC/gen-log/parser/" />
+			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/widget/libgwr-widget-textview.h">
-			<Option virtualFolder="widget/" />
+		<Unit filename="src/CC/gen-log/parser/libgwr-gen-log.bison.parser.cc">
+			<Option virtualFolder="src/CC/gen-log/parser/" />
+			<Option target="D-gen-log" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-bits-array.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-chrono.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-collection.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-color.cc">
+			<Option virtualFolder="src/CC/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-color.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-common.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-counter.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-define-optims.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-define-settings.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-file.cc">
+			<Option virtualFolder="src/CC/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-file.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-kv-array.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-m-array-p.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-macro-mvc.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-macro.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-object.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-pipe.cc">
+			<Option virtualFolder="src/CC/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-pipe.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-spacer.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-stack.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-str.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-svipc.cc">
+			<Option virtualFolder="src/CC/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-svipc.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-t-array-p.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-t-array.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-t-m-array-p.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-text-attributes.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-text-style.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr-types.hh">
+			<Option virtualFolder="src/CC/headers/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/libgwr.cc">
+			<Option virtualFolder="src/CC/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger-channel.hhi">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger-log.hhi">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger-subchannel.hhi">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger-thread.hhi">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger.cc">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/logger/libgwr-logger.hh">
+			<Option virtualFolder="src/CC/logger/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-custom.cc">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-gobject.cc">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-gtmi.cc">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-node-blocks.hhi">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-nodes.cc">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore-nodes.hhi">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore.cc">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/treestore/libgwr-treestore.hh">
+			<Option virtualFolder="src/CC/treestore/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-extensible-header.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-extensible-header.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune-preset-load.hhi">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune-preset-save.hhi">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune-preset.hhi">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gtk-fasttextview.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gtk-fasttextview.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gtk-matrix.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-gtk-matrix.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-menu.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-menu.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-textview.cc">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/CC/widget/libgwr-widget-textview.hh">
+			<Option virtualFolder="src/CC/widget/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/bash/libgwr.bash">
+			<Option virtualFolder="src/bash/" />
+			<Option target="D-gen-log" />
+		</Unit>
+		<Unit filename="src/libgwr.hh">
+			<Option virtualFolder="src/" />
+			<Option target="D-libgwr" />
+			<Option target="R-libgwr" />
+		</Unit>
+		<Unit filename="src/libgwrc.h">
+			<Option virtualFolder="src/" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwrc" />
+			<Option target="D-libgwr" />
 		</Unit>
 		<Extensions>
 			<code_completion />
-			<debugger />
+			<debugger>
+				<search_path add="src/gen-log/parser" />
+				<search_path add="src/gen-log/lexer" />
+			</debugger>
 			<envvars />
 		</Extensions>
 	</Project>
