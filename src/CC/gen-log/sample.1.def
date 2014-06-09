@@ -1,0 +1,101 @@
+//      ************************************************************************
+//
+//      kconfig-gen-log.h
+//
+//      ------------------------------------------------------------------------
+//
+//      part of libkconfig
+//
+//      Copyright (C) 2011-2013 Guillaume Wardavoir
+//
+//      ------------------------------------------------------------------------
+//
+//      This program is free software  you can redistribute it and/or modify
+//      it under the terms of the GNU General Public License as published by
+//      the Free Software Foundation  either version 2 of the License, or
+//      (at your option) any later version.
+//
+//      This program is distributed in the hope that it will be useful,
+//      but WITHOUT ANY WARRANTY  without even the implied warranty of
+//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//      GNU General Public License for more details.
+//
+//      You should have received a copy of the GNU General Public License
+//      along with this program  if not, write to the Free Software
+//      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,
+//      USA.
+//
+//      ------------------------------------------------------------------------
+//
+//     Class   :
+//
+//     Parent  : None
+//
+//     Purpose : Defs for all logs in libkconfig. From this file will be
+//               generated :
+//                  - log macros
+//                  - code for the log_settings widget
+//
+//     *************************************************************************
+
+(namespaces-prefix)                         libkconfig::log
+(channels-prefix)                           LIBKCONFIG_LOG_CHANNEL_
+(file.h)                                    myfile.hi
+(file.cc)                                   myfile.cci
+
+(+parsing)
+{
+    (macro-prefix)                          PARSING
+
+    (pref-lst-0)                            files dirs
+    (pref-fmt-0)                            "%s"
+    (pref-arg-0)                            libkconfig::parsing::Kconfig_file_spacer()->get()
+
+    std                                     STD             PARSING_MSG     INF:Grn  WNG:Ora  ERR:Red
+    files                                   FILES           PARSING_FILES   INF:Grn  WNG:Ora  ERR:Red
+    dirs                                    DIRS            PARSING_FILES   INF:Grn  WNG:Ora  ERR:Red
+}
+(-parsing)
+
+(+flex)
+{
+    (+log)
+    {
+        (macro-prefix)                      FLEX
+
+        //  tests
+        std1                                STD1            PARSING_FLEX    INF:Grn
+        std2                                STD2            PARSING_FLEX    INF:Grn,Std
+        std3                                STD3            PARSING_FLEX    INF:Grn,Std:Ita
+        std4                                STD4            PARSING_FLEX    INF:Grn:Ita
+        std5            @ITEM @OBJECT       STD5            PARSING_FLEX    INF:Grn,Std:Ita,Bld
+        std6                                STD6            PARSING_FLEX    INF:Grn:Ita,Bld
+
+        std                                 STD             PARSING_FLEX    INF:Grn  WNG:Ora  ERR:Red
+        help                                HELP            PARSING_FLEX    INF:Grn           ERR:Red
+        string                              STR             PARSING_FLEX    INF:Grn
+        exp                                 EXP             PARSING_FLEX    INF:Grn  WNG:Ora  ERR:Red
+    }
+    (-log)
+}
+(-flex)
+
+(+message)
+{
+
+    (pref-lst-0)                            item
+    (pref-fmt-0)                            "[%-70s] [%6i @ %-40s]:"
+    (pref-arg-0)                            ITEM->cname(), ITEM->kconfig_file_line(), libkconfig::object::G_kernel_get()->kconfig_file( ITEM->kconfig_file_index() )
+
+    item                @ITEM @OBJECT       MSG_ITM         MSG             INF:Grn  WNG:Ora  ERR:Red
+}
+(-message)
+
+
+
+
+
+
+
+
+

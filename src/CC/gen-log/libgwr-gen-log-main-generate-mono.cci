@@ -1,0 +1,562 @@
+/*
+    *****************************************************************************
+    *                                                                           *
+    *   libgwr-gen-log-main.cc                                                  *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   part of libkconfig                                                      *
+    *                                                                           *
+    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   This program is free software; you can redistribute it and/or modify    *
+    *   it under the terms of the GNU General Public License as published by    *
+    *   the Free Software Foundation; either version 2 of the License, or       *
+    *   (at your option) any later version.                                     *
+    *                                                                           *
+    *   This program is distributed in the hope that it will be useful,         *
+    *   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+    *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+    *   GNU General Public License for more details.                            *
+    *                                                                           *
+    *   You should have received a copy of the GNU General Public License       *
+    *   along with this program; if not, write to the Free Software             *
+    *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,   *
+    *   USA.                                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Class   :                                                               *
+    *                                                                           *
+    *   Purpose : main() for gen-log debug                                      *
+    *                                                                           *
+    *****************************************************************************
+*/
+
+
+//  ############################################################################
+//                              GENERATE
+//  ############################################################################
+#undef      F_APPEND
+#define     F_APPEND(FI, FORMAT, ...)                                           \
+    sprintf( FI##_tmp, FORMAT, __VA_ARGS__ );                                   \
+    libgwr::dstr::append( FI, FI##_tmp, NULL);
+
+//  ----------------------------------------------------------------------------
+//  Generate_mono_module_header()
+//  ----------------------------------------------------------------------------
+gboolean    Generate_mono_module_header()
+{
+    guint32     i   = 0;
+    guint32     j   = 0;
+
+    FILE    *   f   = NULL;
+
+    parsing::NSP            *   nsp         = NULL;
+    parsing::THM            *   thm         = NULL;
+    parsing::FLA            *   fla         = NULL;
+
+    GSList  *   sl1         = NULL;
+    GSList  *   sl2         = NULL;
+    GSList  *   sl3         = NULL;
+
+    gchar       tmp         [128];
+    gchar   *   pfmt        =   NULL;                                           //  preformat fmt
+    gchar   *   parg        =   NULL;                                           //  preformat args
+    gchar       mnS         [128];                                              //  Macro Name Standard
+    gchar       mnG         [128];                                              //  Macro Name Glue
+    gchar       mnW         [128];                                              //  Macro Name Write
+    gchar       mnp         [128];                                              //  Macro Name Params
+    gchar       mtcha       [128];                                              //  Macro Text Channel
+    gchar       mtfla       [128];                                              //  Macro Text Subchannel
+    gchar       mtfmt       [512];                                              //  Macro Text Format
+    gchar       mtarg       [512];                                              //  Macro Text Arguments
+    //  ........................................................................
+    f = fopen( parsing::File_h(), "w" );
+    if ( ! f )
+    {
+        //BISON_ERR( "%s", "Generate_kconfig_log_generated_themes_hi:fopen failed");
+        return FALSE;
+    }
+    //  ........................................................................
+    //  Write help
+    fprintf(f, "/*\n");
+    fprintf(f, "\n");
+    fprintf(f, "    Macro explanations :\n");
+    fprintf(f, "    ------------------\n");
+    fprintf(f, "\n");
+    fprintf(f, "    MACRO_NAME_XXX      Writes : Channel header + Subchannel Header + text + \"\\n\"\n");
+    fprintf(f, "    MACRO_NAME_gXXX     Writes : Channel header + Subchannel Header + text\n");
+    fprintf(f, "    MACRO_NAME_wXXX     Writes :                                      text\n");
+    fprintf(f, "\n");
+    fprintf(f, "*/\n");
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_enter(f);
+    //  ........................................................................
+    //  libgwr::log::Root object, & init functions
+    fprintf(f, "\n%s\n", "extern  libgwr::log::Root*  LibGwrLogRoot();");
+    fprintf(f, "\n%s\n", "extern  void                LibGwrLog_generate_namespaces();");
+    fprintf(f, "\n%s\n", "extern  void                LibGwrLog_create_subchannels(libgwr::Logger*);");
+    //  ........................................................................
+    //  main loop
+    sl1 = parsing::Namespaces_list(); while ( sl1 )
+    {
+        nsp = static_cast < parsing::NSP * > ( sl1->data );
+
+        sl2 = nsp->slist();
+
+        if ( g_slist_length( sl2 ) == 0 )
+            goto lab_sl1_next;
+
+        //  + namespace
+        fprintf(f, "%s", "//  ############################################################################\n");
+        Generate_nsp_enter(f, nsp);
+        fprintf(f, "%s", "\n");
+
+        while ( sl2 )
+        {
+            pfmt = NULL;
+            parg = NULL;
+
+            thm = static_cast < parsing::THM * > ( sl2->data );
+
+            //  ................................................................
+            //  Write : Theme declaration + wrappers
+            fprintf(f, "//  ----------------------------------------------------------------------------\n");
+            fprintf(f, "//  THEME : name:%s  - macro:%s  - channel:%s\n", thm->name(), thm->macro_full(), thm->channel()->name_core());
+            fprintf(f, "//  ----------------------------------------------------------------------------\n");
+
+            fprintf(f, "extern  libgwr::log::Theme*             %s;\n\n", thm->macro_core());
+
+            fprintf(f, "inline  void    %s_wrap(guint32 _channel, guint32 _subchannel_start)\n", thm->macro_core());
+            fprintf(f, "{\n");
+            fprintf(f, "    libgwr::log::Theme_wrap(%s, _channel, _subchannel_start);\n", thm->macro_core());
+            fprintf(f, "}\n");
+
+            fprintf(f, "inline  void    %s_unwrap()\n", thm->macro_core());
+            fprintf(f, "{\n");
+            fprintf(f, "    libgwr::log::Theme_unwrap(%s);\n", thm->macro_core());
+            fprintf(f, "}\n");
+
+            fprintf(f, "\n");
+            //  ................................................................
+            //  Preformat : definition
+            {
+
+            pfmt    =   g_strconcat( "PREFORMAT_FMT_", nsp->nfu(), "_", thm->macro_full(), NULL);
+            parg    =   g_strconcat( "PREFORMAT_ARG_", nsp->nfu(), "_", thm->macro_full(), NULL);
+
+            //  params ? add parameters to macro arguments
+            if ( thm->params() )
+            {
+                libgwr::dstr::append( parg, "(", NULL );
+                for ( i = 0 ; i != thm->params()->card() ; i++ )
+                {
+                    if ( i )
+                        libgwr::dstr::append( parg, ", ", thm->params()->get(i), NULL );
+                    else
+                        libgwr::dstr::append( parg, thm->params()->get(i), NULL );
+                }
+                libgwr::dstr::append( parg, ")", NULL );
+            }
+
+            }
+            //  ................................................................
+            //  Write : preformat
+            {
+
+            if ( thm->tprf() )
+            {
+                fprintf(f, "#define %s(FORMAT) %s FORMAT \n", pfmt, thm->tprf()->fmt() );
+                fprintf(f, "#define %s %s\n", parg, thm->tprf()->arg() );
+            }
+            else
+            {
+                fprintf(f, "%s\n", "// no preformat");
+            }
+            fprintf(f, "\n");
+
+            }
+            //  ................................................................
+            //  Write : flavours ( subchannels )
+            j = 0 ; sl3 = thm->slist(); while ( sl3 )
+            {
+                fla = static_cast < parsing::FLA * > ( sl3->data );
+
+                fprintf(f, "extern  libgwr::log::Flavour              %s_FLAVOUR_%s;\n", thm->macro_core(), fla->name());
+
+                //  ............................................................
+                //  macro call
+                {
+
+                sprintf(mnS, "%s_%s"    , thm->macro_full(), fla->name());           //  standard macro  : INF
+                sprintf(mnG, "%s_g%s"   , thm->macro_full(), fla->name());           //  return macro    : rINF
+                sprintf(mnW, "%s_w%s"   , thm->macro_full(), fla->name());           //  glue macro      : gINF
+
+                if ( ! thm->params() )
+                {
+                    sprintf(mnp, "(FORMAT, ...)");
+                }
+                else
+                {
+                    sprintf(mnp, "(");
+                    for ( i = 0 ; i != thm->params()->card() ; i++ )
+                    {
+                        sprintf(tmp,"%s, ", thm->params()->get(i));
+                        strcat(mnp, tmp);
+                    }
+                    strcat(mnp,"FORMAT, ...)");
+                }
+
+                }
+                //  ............................................................
+                //  macro contenu
+                {
+
+                sprintf(mtcha, "%s::%s->cix()"              , nsp->nfp(), thm->macro_core()                );
+                sprintf(mtfla, "%s::%s_FLAVOUR_%s.six()"    , nsp->nfp(), thm->macro_core(), fla->name()  );
+
+                if ( thm->tprf() )
+                {
+                    sprintf ( tmp, "%s(FORMAT)"     , pfmt);
+                    strcpy  ( mtfmt, tmp );
+
+                    sprintf ( tmp, "%s, __VA_ARGS__", parg);
+                    strcpy  ( mtarg, tmp );
+                }
+                else
+                {
+                    sprintf ( tmp, "FORMAT");
+                    strcpy  ( mtfmt, tmp );
+
+                    sprintf ( tmp, "%s", "__VA_ARGS__");
+                    strcpy  ( mtarg, tmp );
+                }
+                //fprintf(f, "\n");
+
+                }
+                //  ............................................................
+                //  Write
+                {
+
+                //  Standard
+                fprintf(f, "#define %s%s  ", mnS, mnp);
+                fprintf(f, "%s->log(   %s, %s, %s \"\\n\", %s );\n", parsing::Global_logger_pointer(), mtcha, mtfla, mtfmt, mtarg);
+                //  Glue
+                fprintf(f, "#define %s%s ", mnG, mnp);
+                fprintf(f, "%s->log(   %s, %s, %s, %s );\n", parsing::Global_logger_pointer(), mtcha, mtfla, mtfmt, mtarg);
+                //  Return
+                fprintf(f, "#define %s%s ", mnW, mnp);
+                fprintf(f, "%s->write( %s, %s, %s, %s );\n", parsing::Global_logger_pointer(), mtcha, mtfla, mtfmt, mtarg);
+
+                }
+
+                sl3 = g_slist_next( sl3 );
+            }
+
+            g_free( pfmt );
+            g_free( parg );
+            sl2 = g_slist_next( sl2 );
+        }
+
+        //  - namespace
+        Generate_nsp_exit(f, nsp);
+        fprintf(f, "%s", "\n");
+
+lab_sl1_next:
+        sl1 = g_slist_next( sl1 );
+    }
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_exit(f);
+    //  ........................................................................
+lab_success:
+    fclose(f);
+    return TRUE;
+    //  ........................................................................
+lab_failure:
+    fclose(f);
+    return FALSE;
+}
+//  ----------------------------------------------------------------------------
+//  Generate_mono_module_code_themes_and_flavours()
+//  ----------------------------------------------------------------------------
+gboolean    Generate_mono_module_code_themes_and_flavours()
+{
+    FILE    *   f   =   NULL;
+
+    guint32     i   =   0;
+
+    parsing::NSP     *   nsp         = NULL;
+    parsing::THM     *   thm         = NULL;
+    parsing::FLA     *   fla         = NULL;
+
+    GSList  *   sl1         = NULL;
+    GSList  *   sl2         = NULL;
+    GSList  *   sl3         = NULL;
+
+    gchar   *   f1          = NULL;                                             // Theme construction
+    gchar       f1_tmp      [1024];
+
+    gchar       f2_t1       [1024];                                             // Subchannel TextAttributes
+    gchar       f2_t2       [1024];
+    gchar       f2_t3       [1024];
+    //  ........................................................................
+    f = fopen( parsing::File_cc(), "w" );
+    if ( ! f )
+    {
+        //BISON_ERR( "%s", "Generate_kconfig_log_declarations_cci:fopen failed");
+        return FALSE;
+    }
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_enter(f);
+    //  ........................................................................
+    sl1 = parsing::Namespaces_list(); while ( sl1 )
+    {
+        nsp = static_cast < parsing::NSP * > ( sl1->data );
+
+        sl2 = nsp->slist();
+
+        if ( g_slist_length( sl2 ) == 0 )
+            goto lab_sl1_next;
+
+        //  + namespace
+        fprintf(f, "%s", "//  ############################################################################\n");
+        Generate_nsp_enter(f, nsp);
+        fprintf(f, "%s", "\n");
+
+        while ( sl2 )
+        {
+            f1  = NULL;
+            thm = static_cast < parsing::THM * > ( sl2->data );
+
+            fprintf(f, "//  ----------------------------------------------------------------------------\n");
+            fprintf(f, "//  THEME : name:%s  - macro:%s  - channel:%s\n", thm->name(), thm->macro_full(), thm->channel()->name_core());
+            fprintf(f, "//  ----------------------------------------------------------------------------\n");
+
+            //fprintf(f, "libkconfig::log::Theme  %s(%u, \"%s\", \"%s\", LIBKCONFIG_LOG_CHANNEL_INDEX_%s, %u",
+            //    thm->macro_vn() ,
+            //    t_count++       ,
+            //    nsp->n1(), thm->name(), thm->cha()->name(), thm->scard());
+            sprintf(f1_tmp, "libgwr::log::Theme*  %s = GWR_NEW_CAST(libgwr::log::Theme, \"%s\", %s",
+                thm->macro_core()                           ,
+                thm->name(), thm->channel()->name_full()    );
+            libgwr::dstr::set( f1, f1_tmp );
+
+            sl3 = thm->slist(); while ( sl3 )
+            {
+                fla = static_cast < parsing::FLA * > ( sl3->data );
+
+                //  subchannel text attributes
+                sprintf(f2_t1, "libgwr::TextAttributes( libgwr::text::attributes::FgColor | libgwr::text::attributes::BgColor");
+                if ( fla->fmt()->card() )
+                {
+                    for ( i = 0 ; i != fla->fmt()->card() ; i++ )
+                    {
+                        sprintf(f2_t2, " | libgwr::text::attributes::%s", fla->fmt()->get(i));
+                        strcat(f2_t1, f2_t2);
+                    }
+                }
+                sprintf(f2_t2,         ", libgwr::color::%s, libgwr::color::%s )",
+                    fla->fg()                       ,
+                    fla->bg() ? fla->bg() : "Std"   );
+                sprintf(f2_t3, "%s%s", f2_t1, f2_t2 );
+
+                fprintf(f, "libgwr::log::Flavour %s_FLAVOUR_%s(\"%s\", %u, %s);\n",
+                    thm->macro_core()   ,
+                    fla->name()        ,
+                    fla->name()        ,
+                    fla->six()          ,
+                    f2_t3               );
+
+                F_APPEND( f1, ", &%s::%s_FLAVOUR_%s", nsp->nf(), thm->macro_core() ,fla->name() );
+
+                sl3 = g_slist_next( sl3 );
+            }
+
+            F_APPEND( f1, "%s", ", NULL);" );
+            fprintf(f, "%s\n", f1);
+            g_free( f1 );
+
+            sl2 = g_slist_next( sl2 );
+        }
+
+        //  - namespace
+        Generate_nsp_exit(f, nsp);
+        fprintf(f, "%s", "\n");
+
+lab_sl1_next:
+        sl1 = g_slist_next( sl1 );
+    }
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_exit(f);
+
+lab_success:
+    fclose(f);
+    return TRUE;
+
+lab_failure:
+    fclose(f);
+    return FALSE;
+}
+//  ----------------------------------------------------------------------------
+//  Generate_mono_module_code_functions()
+//  ----------------------------------------------------------------------------
+gboolean    Generate_mono_module_code_functions()
+{
+    FILE    *   f   = NULL;
+
+    parsing::NSP     *   nsp         = NULL;
+    parsing::THM     *   thm         = NULL;
+    parsing::FLA     *   fla         = NULL;
+
+    GSList  *   sl1         = NULL;
+    GSList  *   sl2         = NULL;
+    GSList  *   sl3         = NULL;
+
+    gchar   *   f1          = NULL;                                             // Generated_namespaces_build()
+    gchar       f1_tmp      [1024];
+
+    gchar   *   f2          = NULL;                                             // Generated_logger_create_subchannels()
+    gchar       f2_tmp      [1024];
+    gchar       f2_t1       [1024];
+
+    ////gchar   *   f3          = NULL;                                             // Generated_set_logbase()
+    ////gchar       f3_tmp      [1024];
+    //  ........................................................................
+    //  context :
+    //  libgwr::Logger              *   l           = NULL;
+    //  libgwr::TextAttributes          t_fg_grn    = libgwr::TextAttributes( libgwr::text::attributes::FgColor, libgwr::color::Grn     );
+    //  libgwr::TextAttributes          t_fg_ora    = libgwr::TextAttributes( libgwr::text::attributes::FgColor, libgwr::color::Ora     );
+    //  libgwr::TextAttributes          t_fg_red    = libgwr::TextAttributes( libgwr::text::attributes::FgColor, libgwr::color::Red     );
+    //  libgwr::TextAttributes          t_fg_grey9  = libgwr::TextAttributes( libgwr::text::attributes::FgColor, libgwr::color::Grey9   );
+    //
+    //  sample of what we want :
+    //  l->channel( LIBKCONFIG_LOG_CHANNEL_OBJECT )->create_subchannel("INF", t_fg_grn);
+    //  ........................................................................
+    f = fopen( parsing::File_cc(), "a");
+    if ( ! f )
+    {
+        //PARSING_ERR( "%s", "Generate_module_code_functions:fopen failed");
+        return FALSE;
+    }
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_enter(f);
+    //  ........................................................................
+    //  libgwr::log::Root object
+    fprintf(f, "\n%s\n" ,   "libgwr::log::Root   ga_libgwr_log_root;");
+    fprintf(f, "%s\n"   ,   "libgwr::log::Root*  LibGwrLogRoot()");
+    fprintf(f, "%s\n"   ,   "{");
+    fprintf(f, "%s\n"   ,   "    return & ga_libgwr_log_root;");
+    fprintf(f, "%s\n"   ,   "}");
+    //  ........................................................................
+    sprintf(f1_tmp, "%s", "void LibGwrLog_generate_namespaces()\n{\n");
+    libgwr::dstr::set( f1, f1_tmp );
+    F_APPEND(f1, "%s", "    libgwr::log::Namespace * nsp = NULL;\n\n");
+
+    sprintf(f2_tmp, "%s", "void LibGwrLog_create_subchannels(libgwr::Logger* _l)\n{\n");
+    libgwr::dstr::set( f2, f2_tmp );
+
+    F_APPEND(f2, "%s\n", "    // In this function :");
+    F_APPEND(f2, "%s\n", "    // - subchannels names & id are written litterally, for easier debugging");
+    F_APPEND(f2, "%s\n", "    // - subchannels attributes are taken from the libgwr::log::Flavour object");
+    F_APPEND(f2, "%s\n", "    //   for more lisibility\n");
+
+    ////sprintf(f3_tmp, "%s", "void libkconfig::log::Generated_set_logbase()\n{\n");
+    ////libgwr::str::set( f3, f3_tmp );
+
+    //  ........................................................................
+    //  namespaces loop
+    sl1 = parsing::Namespaces_list(); while ( sl1 )
+    {
+        nsp = static_cast < parsing::NSP * > ( sl1->data );
+
+        //  Generated_namespaces_init()
+        F_APPEND(f1, "%s", "    //  ========================================================================\n");
+        F_APPEND(f1,       "    //  NAMESPACE : %s\n", nsp->nf());
+        F_APPEND(f1, "%s", "    //  ========================================================================\n");
+        F_APPEND(f1,       "    nsp = GWR_NEW_CAST( libgwr::log::Namespace, \"%s\" );\n", nsp->nf());
+        F_APPEND(f1, "%s", "        LibGwrLogRoot()->namespace_add( nsp );\n");
+
+        sl2 = nsp->slist();
+
+        if ( g_slist_length( sl2 ) == 0 )
+            goto lab_sl1_next;
+
+        //  ....................................................................
+        //  themes loop
+        while ( sl2 )
+        {
+            thm = static_cast < parsing::THM * > ( sl2->data );
+
+            // Generated_namespaces_build()
+            F_APPEND(f1,       "        nsp->themes()->add(  %s::%s );\n", nsp->nfp(), thm->macro_core());
+            // Generated_logger_create_subchannels()
+            F_APPEND(f2, "%s", "    //  ----------------------------------------------------------------------------\n");
+            F_APPEND(f2,       "    //  THEME : name:%s  - macro:%s  - channel:%s\n", thm->name(), thm->macro_core(), thm->channel()->name_core());
+            F_APPEND(f2, "%s", "    //  ----------------------------------------------------------------------------\n");
+            // Generated_set_logbase()
+            ////F_APPEND(f3,       "    %s::%s.set_logbase();\n", nsp->n1(), thm->macro_vn());
+
+            //  ................................................................
+            //  subchannels loop
+            sl3 = thm->slist(); while ( sl3 )
+            {
+                fla = static_cast < parsing::FLA * > ( sl3->data );
+
+                // Generated_namespaces_init()
+                // subchannel text attributes from the libgwr::log::Flavour object
+                sprintf(f2_t1, "%s::%s_FLAVOUR_%s.taf()", nsp->nf(), thm->macro_core(), fla->name());
+                //sprintf(f2_t1, "%u", fla->taf());
+
+                F_APPEND(f2,           "    _l->channel( %s )->create_subchannel( %u, \"%s\", %s, FALSE, TRUE);\n", thm->channel()->name_full(), fla->six(), fla->name(), f2_t1);
+                // Generated_set_logbase()
+
+                sl3 = g_slist_next( sl3 );
+            }
+
+            sl2 = g_slist_next( sl2 );
+        }
+
+
+lab_sl1_next:
+        sl1 = g_slist_next( sl1 );
+    }
+    //  ........................................................................
+    //  Generated_namespaces_init()
+    fprintf(f, "%s", "//  ############################################################################\n");
+    fprintf(f, "%s}\n", f1);
+    g_free( f1 );
+
+    //  Generated_logger_create_subchannels()
+    fprintf(f, "%s", "//  ############################################################################\n");
+    fprintf(f, "%s}\n", f2);
+    g_free( f2 );
+
+    //  Generated_set_logbase()
+    ////fprintf(f, "%s", "//  ############################################################################\n");
+    ////fprintf(f, "%s}\n", f3);
+    ////g_free( f3 );
+
+    //  ........................................................................
+    //  pre-namespace
+    Generate_namespaces_prefixes_exit(f);
+
+lab_success:
+    fclose(f);
+    return TRUE;
+
+lab_failure:
+    fclose(f);
+    return FALSE;
+}
+
+
+
+

@@ -1,0 +1,67 @@
+/*
+    *****************************************************************************
+    *                                                                           *
+    *   libgwr-gen-log-parsing-write.cc                                         *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   part of libkconfig                                                      *
+    *                                                                           *
+    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   This program is free software; you can redistribute it and/or modify    *
+    *   it under the terms of the GNU General Public License as published by    *
+    *   the Free Software Foundation; either version 2 of the License, or       *
+    *   (at your option) any later version.                                     *
+    *                                                                           *
+    *   This program is distributed in the hope that it will be useful,         *
+    *   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+    *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+    *   GNU General Public License for more details.                            *
+    *                                                                           *
+    *   You should have received a copy of the GNU General Public License       *
+    *   along with this program; if not, write to the Free Software             *
+    *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,   *
+    *   USA.                                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Class   : None                                                          *
+    *                                                                           *
+    *   Parent  : None                                                          *
+    *                                                                           *
+    *   Purpose : Write generated code to file                                  *
+    *                                                                           *
+    *****************************************************************************
+*/
+
+#include    "libgwr-gen-log-parsing.h"
+
+GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(log)
+GWR_NAMESPACE_START(parsing)
+
+
+
+
+
+/*
+
+
+//  ----------------------------------------------------------------------------
+//  Generate()
+//  ----------------------------------------------------------------------------
+gboolean    Generate()
+{
+    Generate_kconfig_log_generated_themes_hi();
+    Generate_kconfig_log_generated_themes_cci();
+    Generate_kconfig_log_generated_functions_cci();
+
+    return TRUE;
+}
+*/
+GWR_NAMESPACE_END(parsing)
+GWR_NAMESPACE_END(log)
+GWR_NAMESPACE_END(libgwr)
