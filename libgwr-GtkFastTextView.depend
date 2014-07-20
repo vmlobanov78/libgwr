@@ -356,7 +356,7 @@
 	<string.h>
 	"libgwrc-array-equal.h"
 
-1405757461 source:/home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.c
+1405778302 source:/home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.c
 	<string.h>
 	"libgwrc-fast-text-buffer.h"
 	"libgwrc-fast-text-buffer-private.h"
@@ -2495,8 +2495,9 @@
 1405777504 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer-private.h
 	"C/arrays/libgwrc-array-data-multi.h"
 
-1405778173 source:/home/gwr/Src/C-C++/libgwr/src/GtkFastTextView-demo/GtkFastTextView-demo.c
+1405835415 source:/home/gwr/Src/C-C++/libgwr/src/GtkFastTextView-demo/GtkFastTextView-demo.c
 	<gtk/gtk.h>
+	<string.h>
 	<sys/times.h>
 	"C/gtk/GtkFastTextView/gtkfasttextview.h"
 
