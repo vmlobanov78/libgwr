@@ -404,16 +404,6 @@
 			<Option target="D-libgwr" />
 			<Option target="R-libgwr" />
 		</Unit>
-		<Unit filename="src/CC/libgwr-kv-array.hh">
-			<Option virtualFolder="src/CC/headers/" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/CC/libgwr-m-array-p.hh">
-			<Option virtualFolder="src/CC/headers/" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
 		<Unit filename="src/CC/libgwr-macro-mvc.hh">
 			<Option virtualFolder="src/CC/headers/" />
 			<Option target="D-libgwr" />
