@@ -1,13 +1,11 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-color.h                                                          *
+    *   libgwrc-fast-text-buffer-private.h                                      *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Part of libwgwr                                                         *
-    *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,29 +26,57 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose :   C colors                                                    *
+    *   Purpose : Private data for GwrFastTextBuffer                             *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef     __LIBGWR_COLOR_H__
-#define     __LIBGWR_COLOR_H__
+#ifndef __LIBGWRC_FAST_TEXT_BUFFER_PRIVATE_H__
+#define __LIBGWRC_FAST_TEXT_BUFFER_PRIVATE_H__
 //  ............................................................................
-#include    <glib.h>
+#include    "C/arrays/libgwrc-array-data-multi.h"
 //  ............................................................................
-#define LIBGWR_COLOR_CARD_MAX           256
-#define LIBGWR_COLOR_DEFINED_CARD       20
 
-typedef struct  _libgwrC_Color  libgwrC_Color;
-
-struct  _libgwrC_Color
+//  f   =   foreground
+//  b   =   background
+//  s   =   style
+//  l   =   length  max = 2^9 - 1 = 511
+//
+//  76543210 76543210 76543210 76543210
+//  00000000 00000000 00000000 00000000
+//  00000000 0lllllll llssssbb bbbfffff
+//  0sssssss ssssslll llllllbb bbbfffff
+enum
 {
-    guint8  r;
-    guint8  g;
-    guint8  b;
-}   __attribute__(( aligned(8) ));
-//  ............................................................................
-extern  libgwrC_Color   libgwrC_Colors[ LIBGWR_COLOR_CARD_MAX ];
-//  ............................................................................
+    eGFTB_LD_FG_MASK    =   (guint32)   0x0000001f      ,
+    eGFTB_LD_FG_OFFSET  =   (guint32)   0               ,
 
-#endif
+    eGFTB_LD_BG_MASK    =   (guint32)   0x000003e0      ,
+    eGFTB_LD_BG_OFFSET  =   (guint32)   5               ,
+
+    eGFTB_LD_ST_MASK    =   (guint32)   0x00003c00      ,
+    eGFTB_LD_ST_OFFSET  =   (guint32)   10              ,
+
+    eGFTB_LD_LN_MASK    =   (guint32)   0x0007fc00      ,
+    eGFTB_LD_LN_OFFSET  =   (guint32)   10
+};
+
+typedef struct  _GwrFastTextBufferLineDesc   GwrFastTextBufferLineDesc;
+
+struct  _GwrFastTextBufferLineDesc
+{
+    guint32     a_data1;
+}   __attribute__ ((packed));
+
+typedef struct  _GwrFastTextBufferPrivate    GwrFastTextBufferPrivate;
+
+struct  _GwrFastTextBufferPrivate
+{
+    GwrCArrayDataMulti  *   d_lines_text;                                       //!< Contain all lines text
+    GwrCArrayEqual      *   d_lines_desc;                                       //!< Contain all lines metadata
+
+    guint32                 lines_card;
+    guint32                 lines_max_len;                                      //!< Longest line length ( in char ) in buffer
+};
+
+#endif                                                                          //  __LIBGWRC_FAST_TEXT_BUFFER_PRIVATE_H__

@@ -1,13 +1,13 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-treestore-node-blocks.hi                                         *
+    *   libgwr-treestore-node-blocks.hhi                                        *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Inspiration             Tim-Philipp Müller                              *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -91,9 +91,6 @@ class   NodeBlock
     libgwr::TMArrayP < Node, guint16 >      * d_hnodes;                         //!< Hidden nodes
     libgwr::TMArrayP < Node, guint16 >      * d_snodes;                         //!< Shown  nodes
 
-    guint16				a_hcard;                                                //!< number of Hidden Nodes
-    guint16				a_scard;                                                //!< number of Shown  Nodes
-
     //! First node ( relative to a_anext member of PNode ) ; this node pointer
     //! is too the first element of d_hnodes or d_vnodes.
     Node            *   a_first_node;
@@ -109,11 +106,11 @@ class   NodeBlock
     inline	    Node	    *       snext               (guint16 _spos);
 
     private:
-    inline		guint16				hcard()		                        { return a_hcard;	}
-    inline		gint				hempty()	                        { return ! a_hcard; }
+    inline		guint16				hcard()		                        { return d_hnodes->card();	}
+    inline		gint				hempty()	                        { return ! hcard(); }
 
-    inline		guint16				scard()		                        { return a_scard;	}
-    inline		gint				sempty()	                        { return ! a_scard; }
+    inline		guint16				scard()		                        { return d_snodes->card();	}
+    inline		gint				sempty()	                        { return ! scard(); }
 
     inline		guint				depth()		                        { return a_depth;   }
     inline      Node	    *       parent()                            { return a_parent;  }

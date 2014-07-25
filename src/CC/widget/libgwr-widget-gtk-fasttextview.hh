@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -76,9 +76,9 @@ class FastTextView
     GtkWidget           *   hbox()          { return d_hbox;                }
 
     public:
-    GtkWidget           *   textview_w()    { return d_gwrgtk_textview;     }
-    GwrGtkTextView      *   textview()      { return GWRGTK_TEXTVIEW(d_gwrgtk_textview);     }
-    GwrGtkTextBuffer    *   textbuffer()    { return d_gwrgtk_textbuffer;   }
+    GtkWidget           *   textview_w()    { return d_gwrgtk_textview;                     }
+    GtkFastTextView     *   textview()      { return GTK_FAST_TEXT_VIEW(d_gwrgtk_textview); }
+    GwrGtkTextBuffer    *   textbuffer()    { return d_gwrgtk_textbuffer;                   }
 
     GtkWidget           *   widget()        { return hbox();                }
     //  ========================================================================
@@ -99,9 +99,7 @@ class FastTextView
                 guint32     _text_block_size            ,
                 guint32     _text_block_store_realloc   ,
                 guint32     _text_desc_store_realloc    ,
-                guint32     _desc_block_size            ,
-                guint32     _desc_block_store_realloc   ,
-                guint32     _desc_desc_store_realloc    );
+                guint32     _desc_realloc               );
 
     virtual ~FastTextView() {}
 };

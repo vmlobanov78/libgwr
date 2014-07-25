@@ -1,13 +1,11 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-array-equal.h                                                    *
+    *   gtkfasttextview.h                                                       *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Part of libwgwr                                                         *
-    *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,56 +26,66 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose :   Array of constant-size data                                 *
+    *   Purpose : Simple and fast gtk compatible textview widget                *
     *                                                                           *
     *****************************************************************************
 */
+#ifndef __GTK_FAST_TEXT_VIEW_H__
+#define __GTK_FAST_TEXT_VIEW_H__
 
-#ifndef     __LIBGWR_ARRAY_EQUAL_H__
-#define     __LIBGWR_ARRAY_EQUAL_H__
 //  ............................................................................
-#include    <glib.h>
-//  ............................................................................
-typedef struct  _GwrCArrayEqual     GwrCArrayEqual;
+#include <glib-object.h>
+#include <gtk/gtk.h>
 
-struct  _GwrCArrayEqual
+#include "C/buffers/libgwrc-fast-text-buffer.h"
+//  ............................................................................
+G_BEGIN_DECLS
+
+#define GTK_FAST_TEXT_VIEW_TYPE             ( gtk_fast_text_view_get_type   ()                                                          )
+#define GTK_FAST_TEXT_VIEW(obj)             ( G_TYPE_CHECK_INSTANCE_CAST    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE, GtkFastTextView      )   )
+#define GTK_FAST_TEXT_VIEW_CLASS(klass)     ( G_TYPE_CHECK_CLASS_CAST       ( (klass)   , GTK_FAST_TEXT_VIEW_TYPE, GtkFastTextViewClass )   )
+#define GTK_IS_FAST_TEXT_VIEW(obj)          ( G_TYPE_CHECK_INSTANCE_TYPE    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE                       )   )
+#define GTK_IS_FAST_TEXT_VIEW_CLASS(klass)  ( G_TYPE_CHECK_CLASS_TYPE       ( (klass)   , GTK_FAST_TEXT_VIEW_TYPE                       )   )
+
+typedef struct _GtkFastTextView          GtkFastTextView;
+typedef struct _GtkFastTextViewClass     GtkFastTextViewClass;
+
+struct _GtkFastTextView
 {
-    gpointer    d_mem;                                                          //!< Location of array in memory
-    guint32     a_block_size;                                                   //!< Size ( in bytes ) of a block
-    guint32     a_realloc_size;                                                 //!< # of blocks to realloc when array is full
-
-    guint32     a_blocks_card;                                                  //!< # of data blocks in the array
-    guint32     a_blocks_used;                                                  //!< # of data blocks used in the array
+    GtkWidgetClass  parent_instance;
 };
-//  ============================================================================
+
+struct _GtkFastTextViewClass
+{
+    GtkWidgetClass  parent_class;
+};
+
+GType           gtk_fast_text_view_get_type (void) G_GNUC_CONST;
+GtkWidget   *   gtk_fast_text_view_new      (GwrFastTextBuffer*);
+
+G_END_DECLS
+
 #if ( __cplusplus )
 extern "C" {
 #endif
 
-extern          void                    gwr_array_equal_dump                    (
-            GwrCArrayEqual          *       _ae             );
+typedef struct  _GwrFastTextBuffer           GwrFastTextBuffer;
 
-extern          GwrCArrayEqual      *   gwr_array_equal_new                     (
-            guint32                         _block_size     ,
-            guint32                         _realloc_size   );
+extern  void                gtk_fast_text_view_set_buffer           (GtkFastTextView*, GwrFastTextBuffer*);
+extern  GwrFastTextBuffer*   gtk_fast_text_view_get_buffer           (GtkFastTextView*);
 
-extern          void                    gwr_array_equal_delete                  (
-            GwrCArrayEqual          *       _ae             );
+extern  void                gtk_fast_text_view_set_font_size        (GtkFastTextView*, guint32);
+extern  void                gtk_fast_text_view_set_color            (GtkFastTextView*, guint32 _color_index, guint8 _r, guint8 _g, guint8 _b);
 
-extern          void                    gwr_array_equal_dealloc                 (
-            GwrCArrayEqual          *       _ae             );
-
-extern          gboolean                gwr_array_equal_add                     (
-            GwrCArrayEqual          *       _ae     ,
-            gpointer                        _data           );
-
-extern          gpointer                gwr_array_equal_get                     (
-            GwrCArrayEqual          *       _ae     ,
-            guint32                         _block_index    );
+extern  void                gtk_fast_text_view_refresh              (GtkFastTextView*);
 
 #if ( __cplusplus )
 }
 #endif
-//  ============================================================================
 
-#endif
+
+
+
+
+
+#endif                                                                          // __GWRGTK_TEXT_VIEW_H__

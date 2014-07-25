@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -56,13 +56,11 @@
 #include	"CC/libgwr-chrono.hh"
 #include	"CC/libgwr-collection.hh"
 
-#include    "C/libgwrc-array-equal.h"
-#include    "C/libgwrc-array-data-multi.h"
+#include	"CC/arrays/libgwr-t-array.hh"
+#include	"CC/arrays/libgwr-t-array-p.hh"
+#include	"CC/arrays/libgwr-t-m-array-p.hh"
+#include	"CC/arrays/libgwr-kv-array.hh"
 
-#include	"CC/libgwr-t-array.hh"
-#include	"CC/libgwr-t-array-p.hh"
-#include	"CC/libgwr-t-m-array-p.hh"
-#include	"CC/libgwr-kv-array.hh"
 #include	"CC/libgwr-object.hh"
 
 #include    "CC/libgwr-str.hh"
@@ -81,7 +79,6 @@
 #include	"CC/widget/libgwr-widget-textview.hh"
 #include	"CC/widget/libgwr-widget-menu.hh"
 #include	"CC/widget/libgwr-widget-extensible-header.hh"
-#include	"CC/widget/libgwr-widget-gtk-fasttextview.hh"
 #include	"CC/logger/libgwr-logger.hh"
 #include	"CC/gen-log/libgwr-gen-log.hh"
 #include	"CC/widget/libgwr-widget-gen-log-tune.hh"

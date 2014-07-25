@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -54,7 +54,7 @@ FastTextView::VScrollBar_change_value(
 {
     FastTextView    *   THIS    =   (FastTextView*)_data;
     //  ........................................................................
-    gwrgtk_textview_set_scroll_pos_y( GWRGTK_TEXTVIEW(THIS->textview()), _value );
+    gtk_fast_text_view_set_scroll_pos_y( GTK_FAST_TEXT_VIEW(THIS->textview()), _value );
     return FALSE;                                                               //  propagate
 }
 gboolean
@@ -66,7 +66,7 @@ FastTextView::HScrollBar_change_value(
 {
     FastTextView    *   THIS    =   (FastTextView*)_data;
     //  ........................................................................
-    gwrgtk_textview_set_scroll_pos_x( GWRGTK_TEXTVIEW(THIS->textview()), _value );
+    gtk_fast_text_view_set_scroll_pos_x( GTK_FAST_TEXT_VIEW(THIS->textview()), _value );
     return FALSE;                                                               //  propagate
 }
 
@@ -74,18 +74,16 @@ FastTextView::FastTextView(
     guint32     _text_block_size            ,
     guint32     _text_block_store_realloc   ,
     guint32     _text_desc_store_realloc    ,
-    guint32     _desc_block_size            ,
-    guint32     _desc_block_store_realloc   ,
-    guint32     _desc_desc_store_realloc    )
+    guint32     _desc_realloc               )
 {
-    d_gwrgtk_textview   =   gwrgtk_textview_new();
+    d_gwrgtk_textview   =   gtk_fast_text_view_new();
     d_gwrgtk_textbuffer =   gwrgtk_text_buffer_new(
                                 _text_block_size, _text_block_store_realloc, _text_desc_store_realloc   ,
-                                _desc_block_size, _desc_block_store_realloc, _desc_desc_store_realloc   );
-    gwrgtk_textview_set_buffer( GWRGTK_TEXTVIEW(textview()), textbuffer() );
+                                _desc_realloc                                                           );
+    gtk_fast_text_view_set_buffer( GTK_FAST_TEXT_VIEW(textview()), textbuffer() );
 
-    d_vscrollbar        =   gtk_scrollbar_new( GTK_ORIENTATION_VERTICAL     , gwrgtk_textview_get_vadjustment(textview()) );
-    d_hscrollbar        =   gtk_scrollbar_new( GTK_ORIENTATION_HORIZONTAL   , gwrgtk_textview_get_hadjustment(textview()) );
+    d_vscrollbar        =   gtk_scrollbar_new( GTK_ORIENTATION_VERTICAL     , gtk_fast_text_view_get_vadjustment(textview()) );
+    d_hscrollbar        =   gtk_scrollbar_new( GTK_ORIENTATION_HORIZONTAL   , gtk_fast_text_view_get_hadjustment(textview()) );
 
     d_hbox              =   gtk_box_new( GTK_ORIENTATION_HORIZONTAL , 0);
     d_vbox              =   gtk_box_new( GTK_ORIENTATION_VERTICAL   , 0);
@@ -107,28 +105,25 @@ FastTextView::print_internal_stats()
     gchar                   stat[1024];
     GwrGtkTextBufferStat    s;
     //  ........................................................................
-    gwrgtk_text_buffer_get_stats_alloc( textbuffer(), &s );
+    gwrgtk_text_buffer_get_stats( textbuffer(), &s );
 
     sprintf(stat, "GwrArrayDataMulti lines DATA (text) stats:");
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
-    sprintf(stat, "  #:%6i size:%8i", s.lt.a_data_card, s.lt.a_data_size );
+    sprintf(stat, "  datas:%6i size:%8i", s.lt.a_data_card, s.lt.a_data_size );
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
     sprintf(stat, "  blocks:%6i (used:%6i) allocations since last reset:%6i",
-        s.lt.a_block_card   , s.lt.a_block_used , s.lt.a_block_alloc    );
+        s.lt.a_blocks_card  , s.lt.a_blocks_used, s.lt.a_blocks_alloc   );
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
     sprintf(stat, "  descs :%6i (used:%6i) allocations since last reset:%6i",
-        s.lt.a_desc_card    , s.lt.a_desc_used  , s.lt.a_desc_alloc     );
+        s.lt.a_descs_card   , s.lt.a_descs_used , s.lt.a_descs_alloc    );
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
 
-    sprintf(stat, "GwrArrayDataMulti lines METADADATA stats:");
+    sprintf(stat, "GwrArrayEqual lines METADADATA stats:");
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
-    sprintf(stat, "  #:%6i size:%8i", s.ld.a_data_card, s.ld.a_data_size );
+    sprintf(stat, "  size:%i", s.ld.a_size_bytes);
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
     sprintf(stat, "  blocks:%6i (used:%6i) allocations since last reset:%6i",
-        s.ld.a_block_card   , s.ld.a_block_used , s.ld.a_block_alloc    );
-    gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
-    sprintf(stat, "  descs :%6i (used:%6i) allocations since last reset:%6i",
-        s.ld.a_desc_card    , s.ld.a_desc_used  , s.ld.a_desc_alloc     );
+        s.ld.a_blocks_card  , s.ld.a_blocks_used, s.ld.a_blocks_alloc   );
     gwrgtk_text_buffer_add_line( textbuffer(), 0, stat );
 }
 

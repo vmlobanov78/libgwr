@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Inspiration             Tim-Philipp Müller                              *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -993,7 +993,6 @@ Store::ext_match_child_str(
 
 	return FALSE;
 }
-
 //  ----------------------------------------------------------------------------
 //  Store::ext_iter_is_shown()
 //  ----------------------------------------------------------------------------
@@ -1026,8 +1025,6 @@ Store::ext_iter_is_hidden(GtkTreeIter    *   _in)
 
     return node->hidden();
 }
-
-
 //  ############################################################################
 //  ############################################################################
 
@@ -1047,7 +1044,7 @@ Store::ext_iter_is_hidden(GtkTreeIter    *   _in)
 //!                             _ret->u1 = Nodes S -> H
 //!
 //! \return FALSE on error, especially when iter visibility did not change ; since
-//!     this function uses recursive methods, please _ALWAYS_ verify that the iter
+//!     this function uses recursive methods, please _ALWAYS_ ensure that the iter
 //!     visibility was not already changed by a previous recursive call :
 //!
 //!            -> call on 1H ->             -> call on 3S : error

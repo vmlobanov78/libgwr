@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -40,6 +40,9 @@
 //  ............................................................................
 typedef struct  _GwrCArrayEqual     GwrCArrayEqual;
 
+//! \struct _GwrCArrayEqual
+//!
+//! \brief  Array of constant size datas.
 struct  _GwrCArrayEqual
 {
     gpointer    d_mem;                                                          //!< Location of array in memory
@@ -50,6 +53,18 @@ struct  _GwrCArrayEqual
     guint32     a_blocks_used;                                                  //!< # of data blocks used in the array
 
     guint32     a_stat_realloc;                                                 //!< # of reallocations since creation / last reset
+};
+//  ............................................................................
+typedef struct  _GwrCArrayEqualStat GwrCArrayEqualStat;
+//! \struct _GwrCArrayEqualStat
+//!
+//! \brief  Convenience struct for memory statistics.
+struct  _GwrCArrayEqualStat
+{
+    guint32             a_size_bytes;
+    guint32             a_blocks_card;
+    guint32             a_blocks_used;
+    guint32             a_blocks_alloc;
 };
 //  ============================================================================
 #if ( __cplusplus )
@@ -79,6 +94,15 @@ extern          gboolean                gwr_array_equal_add                     
 extern          gpointer                gwr_array_equal_get                     (
             GwrCArrayEqual          *       _ae     ,
             guint32                         _block_index    );
+
+extern          gboolean                gwr_array_equal_getb                    (
+            GwrCArrayEqual          *       _ae             ,
+            guint32                         _block_index    ,
+            gpointer                        _dest           );
+
+extern          void                    gwr_array_equal_get_stats(
+            GwrCArrayEqual          *       _ae             ,
+            GwrCArrayEqualStat      *       _ae_stat        );
 
 #if ( __cplusplus )
 }

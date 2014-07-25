@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -261,7 +261,7 @@ void
 Logger::p0_log          (Channel* c, SubChannel* s, const char* _text)
 {
     GwrTextView         *   gtv     =   NULL;
-    GwrGtkTextBuffer    *   b       =   NULL;
+    GwrFastTextBuffer    *   b       =   NULL;
     //..........................................................................
     //  console
     if ( s->enabled_console() )
@@ -313,7 +313,7 @@ Logger::p0_log          (Channel* c, SubChannel* s, const char* _text)
                 sprintf(s2, "%s", _text);
             }
 
-            gwrgtk_text_buffer_add_line(b, s->flags(), _text);
+            gwr_fast_text_buffer_add_line(b, _text, (guint8)s->fgcol(), (guint8)s->bgcol(), (guint16)s->style());
             return;
         }
     }
@@ -351,7 +351,7 @@ void
 Logger::p0_lognl        (Channel* c, SubChannel* s, const char* _text)
 {
     GwrTextView         *   gtv     =   NULL;
-    GwrGtkTextBuffer    *   b       =   NULL;
+    GwrFastTextBuffer    *   b       =   NULL;
     //..........................................................................
     //  console
     if ( s->enabled_console() )
@@ -403,7 +403,7 @@ Logger::p0_lognl        (Channel* c, SubChannel* s, const char* _text)
                 sprintf(s2, "%s", _text);
             }
 
-            gwrgtk_text_buffer_add_line(b, s->flags(), _text);
+            gwr_fast_text_buffer_add_line(b, _text, (guint8)s->fgcol(), (guint8)s->bgcol(), (guint16)s->style());
             return;
         }
     }
@@ -439,7 +439,7 @@ void
 Logger::p0_write        (Channel* c, SubChannel* s, const char* _text)
 {
     GwrTextView         *   gtv     =   NULL;
-    GwrGtkTextBuffer    *   b       =   NULL;
+    GwrFastTextBuffer    *   b       =   NULL;
     //  ........................................................................
     //  console
     if ( s->enabled_console() )
@@ -469,7 +469,7 @@ Logger::p0_write        (Channel* c, SubChannel* s, const char* _text)
                 sprintf(s2, "%s", _text);
             }
 
-            gwrgtk_text_buffer_add_line(b, s->flags(), _text);
+            gwr_fast_text_buffer_add_line(b, _text, (guint8)s->fgcol(), (guint8)s->bgcol(), (guint16)s->style());
             return;
         }
     }
@@ -490,7 +490,7 @@ void
 Logger::p0_write_html   (Channel* c, SubChannel* s, const char* _text)
 {
     GwrTextView         *   gtv     =   NULL;
-    GwrGtkTextBuffer    *   b       =   NULL;
+    GwrFastTextBuffer    *   b       =   NULL;
     //  ........................................................................
     //  console
     if ( s->enabled_console() )
@@ -625,8 +625,8 @@ void                Logger::Channel::set_header(const gchar* _header)           
 const gchar*        Logger::Channel::get_header()                                   {   return d_header;            }
 void                Logger::Channel::set_output_gwr_text_view(GwrTextView* _gtv)    {    a_gwr_text_view = _gtv;    }
 GwrTextView*        Logger::Channel::get_output_gwr_text_view()                     {    return a_gwr_text_view;    }
-void                Logger::Channel::set_output_gwrgtk_text_buffer(GwrGtkTextBuffer* _b)    {    a_gwrgtk_text_buffer = _b;     }
-GwrGtkTextBuffer*   Logger::Channel::get_output_gwrgtk_text_buffer()                        {    return a_gwrgtk_text_buffer;   }
+void                Logger::Channel::set_output_gwrgtk_text_buffer(GwrFastTextBuffer* _b)    {    a_gwrgtk_text_buffer = _b;     }
+GwrFastTextBuffer*  Logger::Channel::get_output_gwrgtk_text_buffer()                        {    return a_gwrgtk_text_buffer;   }
 void                Logger::Channel::set_output_fd(int _fd)                         {   a_fd = _fd;                 }
 int                 Logger::Channel::get_output_fd()                                {   return a_fd;                }
 void                Logger::Channel::set_output_fd_bin(int _fd_bin)                 {   a_fd_bin = _fd_bin;         }

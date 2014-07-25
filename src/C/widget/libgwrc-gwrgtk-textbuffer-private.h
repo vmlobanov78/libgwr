@@ -35,7 +35,7 @@
 #define __LIBGWRC_GWRGTK_TEXT_BUFFER_PRIVATE_H__
 //  ............................................................................
 #include    "C/libgwrc-common.h"
-#include    "C/libgwrc-array-data-multi.h"
+#include    "C/arrays/libgwrc-array-data-multi.h"
 //  ............................................................................
 
 typedef struct  _GwrGtkTextBufferLineDesc   GwrGtkTextBufferLineDesc;

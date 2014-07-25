@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Inspiration             Tim-Philipp Müller                              *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -47,8 +47,29 @@
 #define _LIBGWR_TREESTORE_HH_
 
 //  ...........................................................................
-#include    "libgwr.hh"
+#include	<gtk/gtk.h>
+#include    <glib/gprintf.h>
+//  ...........................................................................
+//  excerpt of "libgwrc.h", for allowing independant project without all libgwr stuff
+#include    <string.h>
 
+#include	"C/libgwrc-macro.h"
+#include	"C/libgwrc-define-logs.h"
+
+#include	"C/libgwrc-types.h"
+//  ...........................................................................
+//  excerpt of "libgwr.hh", for allowing independant project without all libgwr stuff
+#include	"CC/libgwr-define-settings.hh"
+#include    "CC/libgwr-define-optims.hh"
+
+#include	"CC/libgwr-macro.hh"
+#include	"CC/libgwr-counter.hh"
+#include	"CC/libgwr-types.hh"
+
+#include	"CC/arrays/libgwr-t-m-array-p.hh"
+
+#include    "CC/libgwr-object.hh"
+//  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
 GWR_NAMESPACE_START(treestore)
 
@@ -186,7 +207,7 @@ struct Path
 //!   - IData_A.compare_xxx(IData_B)
 //!   - = 0 if IData_A & IData_B cant be ordered
 //!   - < 0 if A is before B
-//!   -  > 0 if A is after B
+//!   - > 0 if A is after B
 //!
 /// ****************************************************************************
 struct IData
@@ -207,10 +228,19 @@ struct IData
     public:
     virtual gboolean        IGetVisibility              ()                      = 0;
 };
+/// ****************************************************************************
+//!
+//! \struct IDataAggregate
+//!
+//! Due to crappy multiple inheritance mechanism in C++ ( without RTTI ),
+//! when a class needs to inherit from IData, it is more simple to use
+//! an aggregate rather than modify the classes hierarchy.
+//!
+/// ****************************************************************************
 template < class T > class IDataAggregate : public IData
 {
     private:
-    T                           *   a_aggregator;
+    T                           *   a_aggregator;                               //!< The class that "inherit" from IData
     Path                        *   a_path;
     //  ........................................................................
     public:

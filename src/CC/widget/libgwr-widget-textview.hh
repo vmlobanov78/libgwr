@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -52,7 +52,7 @@ GWR_NAMESPACE_START(widget)
 //! convenience class. GwrTextView define 3 inner classes : model, view.
 //!
 /// ****************************************************************************
-class GwrTextView
+class   GwrTextView
 {
     //  ========================================================================
     //  fore declarations
@@ -467,7 +467,7 @@ class GwrTextView
 //! \brief  The purpose of this class is to display a text file.
 //!
 /// ****************************************************************************
-class GwrFileView : public GwrTextView
+class   GwrFileView : public GwrTextView
 {
     //  ========================================================================
     //  enum, typedef, ...
@@ -549,9 +549,135 @@ class GwrFileView : public GwrTextView
              GwrFileView(GwrFileView::Url* _url);
     virtual ~GwrFileView();
 };
+/// ****************************************************************************
+//!
+//! \class  GwrTextViewMulti
+//!
+//! \brief  Categorized textview : many GwrTextViewMulti controlled by a GtkTreeView
+//!         with a GtkListStore as model.
+//!
+/// ****************************************************************************
+class   GwrTextViewMulti
+{
+    /// ************************************************************************
+    //!
+    //! \class  Model
+    //!
+    //! \brief
+    //!
+    /// ************************************************************************
+    class   Model
+    {
+        friend class GwrTextViewMulti;
+        friend class libgwr::Object< Model >;
+        //  ====================================================================
+        private:
+        libgwr::TArrayP < libgwr::widget::GwrTextView >     *   d_textviews;
+        GtkListStore                                        *   d_list_store;
+
+        private:
+        inline  libgwr::TArrayP < libgwr::widget::GwrTextView > *   textviews() { return d_textviews; }
+                GwrTextView                                     *   textview(guint32 _ix);
+        inline  GtkListStore                                    *   store()     { return d_list_store; }
+        //  ====================================================================
+                void                textview_add(
+                                        const   gchar                           *   _category_name  ,
+                                                libgwr::widget::GwrTextView     *                   );
+        //  ====================================================================
+        //  ()~()
+        //  ====================================================================
+        private:
+                 Model();
+        virtual ~Model();
+
+    };
+    /// ************************************************************************
+    //!
+    //! \class  View
+    //!
+    //! \brief A GtkTextView parented by a GtkScrolledWindow
+    //!
+    /// ************************************************************************
+    class   View
+    {
+        friend class GwrTextViewMulti;
+        friend class libgwr::Object< View >;
+        //  ====================================================================
+        //  widgets
+        //  ====================================================================
+        private:
+        GtkWidget           *   d_hpaned;
+        GtkWidget           *       d_scr_win;
+        GtkWidget           *           d_treeview;
+
+       inline  GtkWidget    *   hpaned_w()
+                                {
+                                    return d_hpaned;
+                                }
+       inline  GtkPaned     *   hpaned()
+                                {
+                                    return GTK_PANED(hpaned_w());
+                                }
+       inline  GtkWidget    *   treeview_w()
+                                {
+                                    return d_treeview;
+                                }
+       inline  GtkTreeView  *   treeview()
+                                {
+                                    return GTK_TREE_VIEW( treeview_w() );
+                                }
+       inline  GtkWidget    *   widget()
+                                {
+                                    return hpaned_w();
+                                }
+        //  ====================================================================
+                void            textview_switch(GwrTextView*);
+        //  ====================================================================
+        //  members
+        //  ====================================================================
+        LIBGWR_MEMBER_AUTO_TYPE(Model, model);
+        //  ====================================================================
+        //  ()~()
+        //  ====================================================================
+        private:
+                 View(Model*, GwrTextViewMulti*);
+        virtual ~View();
+    };
+    ////////////////////////////////////////////////////////////////////////////
+    LIBGWR_MEMBER_MVC_DMODEL(GwrTextViewMulti::Model);
+    LIBGWR_MEMBER_MVC_DVIEW (GwrTextViewMulti::View );
+    //  ========================================================================
+    public:
+   inline  GtkWidget    *   widget()
+                            {
+                                return v()->widget();
+                            }
 
 
+    //  ========================================================================
+    public:
+    void                        textview_add(
+                                    const   gchar       *   _category_name                  ,
+                                            gboolean        _editable                       ,
+                                            guint32         _monospaced_font_size   =   0   );
 
+    void                        textview_choose(
+                                            guint32         _ix);
+    //  ========================================================================
+    public:
+    static  void    SIGNAL_cursor_changed(GtkTreeView* , gpointer _data);
+    //  ========================================================================
+    public:
+    libgwr::widget::GwrTextView     *   textview(guint32);
+    void                                buffers_disconnect();
+    void                                buffers_reconnect();
+    void                                html_callbacks_set(GwrTextView::HtmlCallback*);
+    //  ========================================================================
+    //  ()~()
+    //  ========================================================================
+             GwrTextViewMulti();
+    virtual ~GwrTextViewMulti();
+};
 
 
 GWR_NAMESPACE_END(widget)

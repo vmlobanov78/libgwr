@@ -7,7 +7,7 @@
     *                                                                           *
     *   Helper for logging                                                      *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -65,10 +65,11 @@
         gchar                   a_att_str[16];
         //  ....................................................................
         public:
-        inline  const   gchar       *       get_header()    { return d_header;          }
+        inline  const   gchar       *       get_header()    {   return d_header;        }
         inline          guint32             flags()         {   return a_att.flags();   }
         inline          guint32             fgcol()         {   return a_att.fgcol();   }
         inline          guint32             bgcol()         {   return a_att.bgcol();   }
+        inline          guint32             style()         {   return a_att.style();   }
         inline          const gchar *       get_console_attributes()
                                             {
                                                 return a_att_str;

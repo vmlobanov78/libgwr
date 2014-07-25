@@ -5,7 +5,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -36,7 +36,7 @@
 #ifndef     __LIBGWR_TYPES_HH__
 #define     __LIBGWR_TYPES_HH__
 
-#include    "libgwr.hh"
+#include    <glib.h>
 
 typedef struct _guint32_x2 guint32_x2;
 

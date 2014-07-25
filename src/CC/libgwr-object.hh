@@ -5,7 +5,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -86,23 +86,21 @@ public:
     template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9> Object(U1 u1, U2 u2, U3 u3, U4 u4, U5 u5, U6 u6, U7 u7, U8 u8, U9 u9) : T(u1, u2, u3, u4, u5, u6, u7, u8, u9) {}
     template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9, typename U10> Object(U1 u1, U2 u2, U3 u3, U4 u4, U5 u5, U6 u6, U7 u7, U8 u8, U9 u9, U10 u10) : T(u1, u2, u3, u4, u5, u6, u7, u8, u9, u10) {}
 
-    virtual     ~Object<T>() {}
+    virtual     ~Object<T>()
+    {
+    }
 };
 
 //
 //  The Object<> struct comes with a convenience macro for
 //  creating new instances of GStruct<> - and its free of charge.
 //
-#define GWR_NEW_CAST( type, ... )   ( static_cast<type*>  ( new libgwr::Object<type>(__VA_ARGS__) )     )
-#define GWR_NEW( type, ... )        (                       new libgwr::Object<type>(__VA_ARGS__)       )
+#define GWR_NEW_CAST( type, ... )   ( static_cast<type*>        ( new libgwr::Object<type>(__VA_ARGS__) )     )
 
+#define GWR_NEW( type, ...      )   (                             new libgwr::Object<type>(__VA_ARGS__)       )
 
-
-
-
-
-
-
+#define GWR_OBJECT(     type,   instance  )     ( static_cast< libgwr::Object< type > >     (instance))
+#define GWR_POBJECT(    type,   instance  )     ( static_cast< libgwr::Object< type > *>    (instance))
 
 GWR_NAMESPACE_END(libgwr)
 

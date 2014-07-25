@@ -7,7 +7,7 @@
     *                                                                           *
     *   Helper for GtkMenu widgets                                              *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -179,9 +179,12 @@ protected:
     //  ------------------------------------------------------------------------
     public:
     MenuItem(
-        const   gchar   *   _label          ,                                       //!< MenuItem label
+        const   gchar   *   _label          ,                                   //!< MenuItem label
                 Menu    *   _menu_parent    ,
         const   gchar   *   _str_id         );
+
+    protected:
+    MenuItem(const gchar* _str_id) : IMenu(_str_id)  {};                        //!< Especially for CheckMenuItem
 
     public:
     virtual ~MenuItem();
@@ -189,7 +192,7 @@ protected:
     public:
     inline  GtkWidget   *   widget()    { return GTK_WIDGET(d_gtk_menu_item);   }
 
-    private:
+    protected:
     void    signal_connect();
     void    signal_disconnect();
 

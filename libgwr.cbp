@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="libgwr" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="src/;src/bash/;src/CC/;src/CC/treestore/;src/CC/logger/;src/CC/gen-log/;src/CC/gen-log/lexer/;src/CC/gen-log/parser/;src/CC/widget/;src/CC/headers/;src/C/widget/;src/C/;doc/;" />
+		<Option virtualFolders="src/;src/bash/;src/CC/;src/CC/treestore/;src/CC/logger/;src/CC/gen-log/;src/CC/gen-log/lexer/;src/CC/gen-log/parser/;src/CC/widget/;src/CC/headers/;src/C/;doc/;src/C/arrays/;src/C/gtk/;src/C/gtk/GtkFastTextView/;src/buffers/;" />
 		<Build>
 			<Target title="D-gen-log">
 				<Option output="bin/Debug/libgwr-gen-log" prefix_auto="1" extension_auto="1" />
@@ -82,7 +82,7 @@
 			<Add option="-Wno-unused-label" />
 			<Add option="-Wno-unused-but-set-variable" />
 			<Add option="`pkg-config --cflags gtk+-$(CB_GTK_VERSION)`" />
-			<Add directory="/home/gwr/Src/libgwr/libgwr-1.0" />
+			<Add directory="/home/gwr/Src/C-C++/libgwr/libgwr-1.0" />
 		</Compiler>
 		<Unit filename="doc/done.txt">
 			<Option virtualFolder="doc/" />
@@ -96,35 +96,87 @@
 			<Option virtualFolder="doc/" />
 			<Option target="D-gen-log" />
 		</Unit>
-		<Unit filename="src/C/libgwrc-array-data-multi.c">
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi.c">
 			<Option compilerVar="CC" />
-			<Option virtualFolder="src/C/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
+			<Option virtualFolder="src/C/arrays/" />
 			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/libgwrc-array-data-multi.h">
-			<Option virtualFolder="src/C/" />
 			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
 			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
 		</Unit>
-		<Unit filename="src/C/libgwrc-array-equal.c">
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal.c">
 			<Option compilerVar="CC" />
-			<Option virtualFolder="src/C/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
+			<Option virtualFolder="src/C/arrays/" />
 			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
 			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
 		</Unit>
-		<Unit filename="src/C/libgwrc-array-equal.h">
-			<Option virtualFolder="src/C/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
+		<Unit filename="src/C/arrays/libgwrc-array-equal.h">
+			<Option virtualFolder="src/C/arrays/" />
 			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
 			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer-private.h">
+			<Option virtualFolder="src/buffers/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/buffers/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.h">
+			<Option virtualFolder="src/buffers/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/gtk/GtkFastTextView/gtkfasttextview.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/gtk/GtkFastTextView/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/gtk/GtkFastTextView/gtkfasttextview.h">
+			<Option virtualFolder="src/C/gtk/GtkFastTextView/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/gtk/libgwrc-gwrgtk-utils.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/gtk/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/gtk/libgwrc-gwrgtk-utils.h">
+			<Option virtualFolder="src/C/gtk/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
 		</Unit>
 		<Unit filename="src/C/libgwrc-color.h">
 			<Option virtualFolder="src/C/" />
@@ -192,58 +244,6 @@
 		<Unit filename="src/C/libgwrc.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/C/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer-private.h">
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer.c">
-			<Option compilerVar="CC" />
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-textbuffer.h">
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-textview.c">
-			<Option compilerVar="CC" />
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-textview.h">
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-utils.c">
-			<Option compilerVar="CC" />
-			<Option virtualFolder="src/C/widget/" />
-			<Option target="D-libgwrc" />
-			<Option target="R-libgwrc" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/C/widget/libgwrc-gwrgtk-utils.h">
-			<Option virtualFolder="src/C/widget/" />
 			<Option target="D-libgwrc" />
 			<Option target="R-libgwrc" />
 			<Option target="D-libgwr" />
@@ -600,16 +600,6 @@
 			<Option target="R-libgwr" />
 		</Unit>
 		<Unit filename="src/CC/widget/libgwr-widget-gen-log-tune.hh">
-			<Option virtualFolder="src/CC/widget/" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/CC/widget/libgwr-widget-gtk-fasttextview.cc">
-			<Option virtualFolder="src/CC/widget/" />
-			<Option target="D-libgwr" />
-			<Option target="R-libgwr" />
-		</Unit>
-		<Unit filename="src/CC/widget/libgwr-widget-gtk-fasttextview.hh">
 			<Option virtualFolder="src/CC/widget/" />
 			<Option target="D-libgwr" />
 			<Option target="R-libgwr" />

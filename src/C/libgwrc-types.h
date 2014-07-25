@@ -36,7 +36,7 @@
 #ifndef     __LIBGWRC_TYPES_H__
 #define     __LIBGWRC_TYPES_H__
 
-#include    "C/libgwrc-common.h"
+
 
 
 

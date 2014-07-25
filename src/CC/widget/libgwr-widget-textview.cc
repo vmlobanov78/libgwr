@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -167,7 +167,7 @@ void                GwrTextView::Model::cursor_roves_initial_offset_memorize()
 
     a_cursor_roves_initial_offset_memorized = TRUE;
 
-    LIBGWR_INF("Memorized offset %i", a_cursor_roves_initial_offset);
+    //LIBGWR_INF("Memorized offset %i", a_cursor_roves_initial_offset);
 }
 void                GwrTextView::Model::cursor_roves_initial_offset_recall()
 {
@@ -176,7 +176,7 @@ void                GwrTextView::Model::cursor_roves_initial_offset_recall()
     if ( ! cursor_roves_initial_offset_memorized() )
         return;
 
-    LIBGWR_INF("Recalling offset %i", a_cursor_roves_initial_offset);
+    //LIBGWR_INF("Recalling offset %i", a_cursor_roves_initial_offset);
 
     gtk_text_buffer_get_iter_at_offset(                                         //  get iter from memorized offset in buffer
         textbuffer()                    ,
@@ -1017,6 +1017,226 @@ GwrFileView::Sgn_button_open_ext_press_event(
 
     return LIBGWR_GTK_EVENT_KEY_PROPAGATE_YES;
 }
+//  ############################################################################
+//
+//  GwrTextViewMulti
+//
+//  ############################################################################
+//  ############################################################################
+//  GwrTextViewMulti::Model
+//  ############################################################################
+GwrTextViewMulti::Model::Model()
+{
+    //  ........................................................................
+    d_list_store    =   gtk_list_store_new (1, G_TYPE_STRING);
+    d_textviews     =   GWR_NEW_CAST( libgwr::TArrayP < libgwr::widget::GwrTextView >, 10, 1);
+ }
+GwrTextViewMulti::Model::~Model()
+{
+    delete d_textviews;
+}
+
+GwrTextView*
+GwrTextViewMulti::Model::textview(guint32 _ix)
+{
+    return textviews()->get(_ix);
+}
+
+void
+GwrTextViewMulti::Model::textview_add(
+    const   gchar                           *   _category_name  ,
+            libgwr::widget::GwrTextView     *   _textview       )
+{
+    GtkTreeIter     iter;
+    //  ........................................................................
+    gtk_list_store_append   ( store(), &iter);
+    gtk_list_store_set      ( store(), &iter            ,
+                              0, _category_name         ,
+                              -1                        );
+    d_textviews->add( _textview );
+}
+//  ############################################################################
+//  GwrTextViewMulti::View
+//  ############################################################################
+GwrTextViewMulti::View::View(GwrTextViewMulti::Model* _model, GwrTextViewMulti* _control)
+{
+    GtkCellRenderer     *   renderer    =   NULL;
+    //  ........................................................................
+    d_hpaned            =   gwrgtk_hpaned_new();
+        d_scr_win       =   gtk_scrolled_window_new( NULL, NULL );
+            d_treeview  =   gtk_tree_view_new ();
+    //  ........................................................................
+    //  treeview setup
+    renderer = gtk_cell_renderer_text_new ();
+    gtk_tree_view_insert_column_with_attributes(
+        treeview()          ,
+        -1                  ,
+        "Categories"        ,
+        renderer            ,
+        "text", 0           ,
+        NULL                );
+
+    /*
+    renderer = gtk_cell_renderer_text_new ();
+    gtk_tree_view_insert_column_with_attributes(
+        treeview()          ,
+        -1                  ,
+        "Objects"           ,
+        renderer            ,
+        "text", 1           ,
+        NULL                );
+
+    GtkTreeViewColumn * c = gtk_tree_view_get_column (treeview(),1);
+    gtk_tree_view_column_set_visible( c, FALSE );
+    */
+    gtk_tree_view_set_model( treeview(), GTK_TREE_MODEL(_model->store()) );
+
+    g_signal_connect( treeview(), "cursor-changed", G_CALLBACK(GwrTextViewMulti::SIGNAL_cursor_changed), (gpointer)_control);
+    //  ........................................................................
+    //  pack 1
+    gtk_container_add   ( GTK_CONTAINER(d_scr_win)  , d_treeview );
+    gtk_paned_add1      ( GTK_PANED(hpaned_w())     , d_scr_win );
+
+    //  pack 2 depends on adding textviews !
+}
+GwrTextViewMulti::View::~View()
+{
+}
+//  ============================================================================
+void
+GwrTextViewMulti::View::textview_switch(GwrTextView* _textview)
+{
+    GtkWidget   *   w2  =   NULL;
+    //  ........................................................................
+    w2 = gtk_paned_get_child2(hpaned());
+
+    if ( w2 )
+    {
+        g_object_ref( (gpointer)w2 );
+        gtk_container_remove( GTK_CONTAINER(hpaned_w()), w2 );
+    }
+
+    gtk_paned_pack2( hpaned(), _textview->widget(), TRUE, TRUE );
+    gtk_widget_show_all( hpaned_w() );
+}
+//  ############################################################################
+//  GwrTextViewMulti
+//  ############################################################################
+GwrTextViewMulti::GwrTextViewMulti()
+{
+    //  ........................................................................
+    d_model =   GWR_NEW_CAST( Model );
+    d_view  =   GWR_NEW_CAST( View, m(), this );
+}
+GwrTextViewMulti::~GwrTextViewMulti()
+{
+}
+//  ============================================================================
+void
+GwrTextViewMulti::textview_add(
+    const   gchar       *   _category_name          ,
+            gboolean        _editable               ,
+            guint32         _monospaced_font_size   )                           //  = 0
+{
+    libgwr::widget::GwrTextView *   textview    =   NULL;
+    //  ........................................................................
+    textview    =   GWR_NEW_CAST( libgwr::widget::GwrTextView, _editable );
+
+    if ( _monospaced_font_size )
+        textview->set_font_monospace( _monospaced_font_size );
+
+    m()->textview_add( _category_name, textview );
+}
+void
+GwrTextViewMulti::textview_choose(
+    guint32 _ix)
+{
+    libgwr::widget::GwrTextView     *   textview    =   NULL;
+    //  ........................................................................
+    textview    =   m()->textview(_ix);
+
+    if ( textview )
+        v()->textview_switch(textview);
+}
+//  ============================================================================
+libgwr::widget::GwrTextView*
+GwrTextViewMulti::textview(guint32 _ix)
+{
+    return m()->textview(_ix);
+}
+
+void
+GwrTextViewMulti::buffers_disconnect()
+{
+    guint32                             i   =   0;
+    libgwr::widget::GwrTextView     *   tv  =   NULL;
+    //  ........................................................................
+    for ( i = 0 ; i != m()->textviews()->card() ; i++ )
+    {
+        tv  =   m()->textview(i);
+
+        tv->buffer_disconnect();
+    }
+}
+void
+GwrTextViewMulti::buffers_reconnect()
+{
+    guint32                             i   =   0;
+    libgwr::widget::GwrTextView     *   tv  =   NULL;
+    //  ........................................................................
+    for ( i = 0 ; i != m()->textviews()->card() ; i++ )
+    {
+        tv  =   m()->textview(i);
+
+        tv->buffer_reconnect();
+
+    }
+}
+void
+GwrTextViewMulti::html_callbacks_set(GwrTextView::HtmlCallback* _hcb)
+{
+    guint32                             i   =   0;
+    libgwr::widget::GwrTextView     *   tv  =   NULL;
+    //  ........................................................................
+    for ( i = 0 ; i != m()->textviews()->card() ; i++ )
+    {
+        tv  =   m()->textview(i);
+
+        tv->html_callback_set( _hcb );
+    }
+}
+//  ============================================================================
+void
+GwrTextViewMulti::SIGNAL_cursor_changed(
+    GtkTreeView     *   _treeview   ,
+    gpointer            _data       )
+{
+    GwrTextViewMulti        *   THIS    =   NULL;
+    GtkTreePath         *   path    =   NULL;
+    GtkTreeViewColumn   *   fcolumn =   NULL;
+    gint                *   indices =   NULL;
+    gint                    indice  =   0;
+    //  ........................................................................
+    THIS    =   (GwrTextViewMulti*)_data;
+
+    gtk_tree_view_get_cursor( _treeview, &path, &fcolumn );
+
+    if ( ! path )
+        return;
+
+    //  gint*   gtk_tree_path_get_indices(GtkTreePath *path);
+    //
+    //  Returns the current indices of path.
+    //  This is an array of integers, each representing a node in a tree.
+    //  This value should not be freed. The length of the array can be obtained
+    //  with gtk_tree_path_get_depth().
+    indices =   gtk_tree_path_get_indices(path);
+
+    indice  =   indices[0];                                                     //  GwrTextViewMulti has GtkListStore => depth = 1
+
+    THIS->textview_choose((guint32)indice);
+}
+
 
 
 GWR_NAMESPACE_END(widget)

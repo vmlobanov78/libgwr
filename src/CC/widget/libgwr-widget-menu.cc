@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -39,10 +39,8 @@
 //  ............................................................................
 #include    "libgwr.hh"
 //  ............................................................................
-namespace libgwr
-{
-namespace widget
-{
+GWR_NAMESPACE_START(libgwr)
+GWR_NAMESPACE_START(widget)
 
 //  ############################################################################
 //
@@ -244,13 +242,21 @@ MenuItem::set_active(gboolean _b)
 //
 //  ############################################################################
 CheckMenuItem::CheckMenuItem(
-    gchar       *   _label      ,
-    Menu        *   _parent     ,
-    gchar       *   _str_id     ,
-    gboolean        _radio      )
-        : MenuItem( _label, _parent, _str_id )
+    gchar       *   _label          ,
+    Menu        *   _menu_parent    ,
+    gchar       *   _str_id         ,
+    gboolean        _radio          )
+    :   MenuItem( _str_id )
 {
+    g_return_if_fail( _label            );
+    g_return_if_fail( _menu_parent      );
     //..........................................................................
+    set_label   ( _label        );
+    set_parent  ( _menu_parent  );
+    set_child   ( NULL          );
+
+    set_mdata   ( GWR_NEW_CAST( MenuItemCBData, str_id(), parent()->udata() ) );
+
     d_gtk_menu_item     = GTK_MENU_ITEM( gtk_check_menu_item_new_with_label( _label ) );
 
     gtk_check_menu_item_set_draw_as_radio(
@@ -262,6 +268,8 @@ CheckMenuItem::CheckMenuItem(
         FALSE);
 
     a_checked = FALSE;
+
+    signal_connect();
 }
 CheckMenuItem::~CheckMenuItem()
 {
@@ -278,6 +286,5 @@ CheckMenuItem::uncheck()
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(widget()), FALSE);
 }
 
-
-}       // namespace widget
-}       // namespace libgwr
+GWR_NAMESPACE_END(widget)
+GWR_NAMESPACE_END(libgwr)

@@ -1,13 +1,11 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-m-array-p.hh                                                     *
+    *   libgwr-t-array.hh                                                       *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Stack implementation                                                    *
-    *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,44 +26,47 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : MArrayP                                                       *
+    *   Class   : TArray                                                        *
     *                                                                           *
-    *   Purpose : C FILE, DIR encapsulation                                     *
+    *   Purpose : Simple array of pointers.                                     *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef     __LIBGWR_M_ARRAY_P_HH__
-#define     __LIBGWR_M_ARRAY_P_HH__
+#ifndef     __LIBGWR_T_ARRAY_HH__
+#define     __LIBGWR_T_ARRAY_HH__
 //  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
 
 /// ****************************************************************************
 //!
-//! \class  MArrayP
+//! \class  TArray
 //!
 //! \brief  Simple template <T> array that
-//!         - store pointers on T in an array
+//!         - store Ts in an array
 //!         - realloc automatically
-//!         ( GArray and GPtrArray doesnt fit my needs ).
+//!         You can add, but not remove Ts.
 //!
 /// ****************************************************************************
-template < typename T, typename S >
-class TMArrayP
+template < typename T >
+class TArray
 {
+    public:
+    static          T           Null;
+
     protected:
     guint32         a_tb;                                                       //!< T size in bytes
-    guint32         a_sm;                                                       //!< Maximum size ( in T* unit ) the array may reach
-    guint32         a_rs;                                                       //!< Realloc size ( in T* unit )
+    guint32         a_sm;                                                       //!< Maximum size ( in T unit ) the array may reach
+    guint32         a_rs;                                                       //!< Realloc size ( in T unit )
 
-    T           **  d_array;
-    guint32         a_cs;                                                       //!< Current size ( in T* unit ) of the array
-    guint32         a_card;                                                     //!< Number of non-NULL T* in the array
+    T            *  d_array;
+    guint32         a_cs;                                                       //!< Current size ( in T unit ) of the array
+    guint32         a_card;                                                     //!< Number of Ts added in the array
 
 
     private:
     inline      gboolean        p0_reallocate   ();
-    inline      gboolean        p0_add          (T* _t);
+    inline      gboolean        p0_add          (T _t);
 
     public:
     inline      guint32         size_max        ()      { return a_sm; }
@@ -75,33 +76,28 @@ class TMArrayP
     inline      guint32         card            ();
     inline      guint32         size_current    ();
 
-    inline      gboolean        clr             (guint32 _ix);
-    inline      gboolean        set             (guint32 _ix, T* _t);
-    inline      gboolean        get             (guint32 _ix, T*& __t);
-    inline      T*              get             (guint32 _ix);
-    inline      gboolean        add             (T* _t);
-
-    inline      void            dup()
-                                {
-                                    printf("--> TArray:size [%03u] - card [%03u]\n", a_cs, a_card);
-                                }
+    inline      gboolean        set             (guint32 _ix, T _t);
+    inline      gboolean        get             (guint32 _ix, T& __t);
+    inline      T               get             (guint32 _ix);
+    inline      T               qget            (guint32 _ix);
+    inline      gboolean        add             (T _t);
 
     public:
-    inline    TArrayP(guint32 _card_max, guint32 _realloc_size)
-        : a_tb( sizeof( gpointer ) ), a_sm( _card_max ), a_rs( _realloc_size )
+    inline    TArray(guint32 _card_max, guint32 _realloc_size)
+        :   a_tb( sizeof( T ) ) , a_sm( _card_max ) , a_rs( _realloc_size ) ,
+            d_array( NULL )     ,
+            a_cs( 0 )           , a_card( 0 )
     {
-        a_cs    = 0;
-        a_card  = 0;
     }
-    virtual ~TArrayP()
+    virtual ~TArray()
     {
-        g_free( d_array );
+        g_free_safe( d_array );
     }
 };
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          gboolean
-TArrayP< T >::p0_reallocate()
+TArray< T >::p0_reallocate()
 {
     T       *   t_new   = NULL;
     //  ........................................................................
@@ -115,16 +111,16 @@ TArrayP< T >::p0_reallocate()
 
     g_free_safe( d_array );                                                     // g_free_safe because of first reallocation
 
-    d_array = (T**)t_new;
+    d_array = (T*)t_new;
 
     return TRUE;
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          void
-TArrayP< T >::reset()
+TArray< T >::reset()
 {
-    g_free( d_array );
+    g_free_safe( d_array );
     d_array = NULL;
     a_cs    = 0;
     a_card  = 0;
@@ -132,142 +128,78 @@ TArrayP< T >::reset()
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          guint32
-TArrayP< T >::card()
+TArray< T >::card()
 {
     return a_card;
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          guint32
-TArrayP< T >::size_current()
+TArray< T >::size_current()
 {
     return a_cs;
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          gboolean
-TArrayP< T >::clr(guint32 _ix)
+TArray< T >::set(guint32 _ix, T _t)
 {
-    g_return_val_if_fail( _ix < a_cs, FALSE );
-
-    d_array[ _ix ] = NULL;
-    a_card--;
-
-    return TRUE;
-}
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          gboolean
-TArrayP< T >::set(guint32 _ix, T* _t)
-{
-    g_return_val_if_fail( _t          , FALSE );
-
-    while ( _ix >= a_cs )
-    {
-        if ( ! p0_reallocate() )
-            return FALSE;
-    }
-
-    if ( ! d_array[ _ix ] )
-        a_card++;
+    g_return_val_if_fail( _ix < a_card, FALSE );
 
     d_array[ _ix ] = _t;
-
     return TRUE;
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          gboolean
-TArrayP< T >::get(guint32 _ix, T*& __t)
+TArray< T >::get(guint32 _ix, T& __t)
 {
-    if ( _ix >= a_cs )
-    {
-        __t = NULL;
-        return FALSE;
-    }
+    g_return_val_if_fail( _ix < a_card, FALSE );
 
     __t = d_array[ _ix ];
     return TRUE;
 }
 template        < typename T >
-inline          T*
-TArrayP< T >::get(guint32 _ix)
+inline          T
+TArray< T >::get(guint32 _ix)
 {
-    g_return_val_if_fail(  _ix < a_cs, NULL );
+    g_return_val_if_fail(  _ix < a_card, TArray< T >::Null );
 
+    return d_array[ _ix ];
+}
+template        < typename T >
+inline          T
+TArray< T >::qget(guint32 _ix)
+{
     return d_array[ _ix ];
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          gboolean
-TArrayP< T >::p0_add(T* _t)
+TArray< T >::p0_add(T _t)
 {
-    guint32     i   = 0;
-    guint32     j   = 0;
     //..........................................................................
-    for ( i = 0 ; i != a_cs ; i++ )
+    if ( a_card < a_cs )
     {
-        if ( d_array[i] == NULL )
-        {
-            d_array[i] = _t;
-            a_card++;
-            return TRUE;
-        }
+        d_array[ a_card ] = _t;
+        a_card++;
+        return TRUE;
     }
-
-    j = a_cs;
 
     if ( ! p0_reallocate() )
         return FALSE;
 
-    d_array[ j ] = _t;
+    d_array[ a_card ] = _t;
     a_card++;
-
     return TRUE;
 }
 template        < typename T >
 inline          gboolean
-TArrayP< T >::add(T* _t)
+TArray< T >::add(T _t)
 {
     return p0_add( _t );
 }
-//  ****************************************************************************
-//  SPECIALIZED : gchar*
-//  ****************************************************************************
-template        <>
-inline          gboolean
-TArrayP< gchar >::add(gchar* _t)
-{
-    return p0_add( g_strdup(_t) );
-}
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        <>
-inline
-TArrayP< gchar >::~TArrayP()
-{
-    guint32     i   = 0;
-    //..........................................................................
-    for ( i = 0 ; i != a_cs ; i++ )
-    {
-        if ( d_array[i] )
-            g_free( d_array[i] );
-    }
 
-    g_free( d_array );
-}
+GWR_NAMESPACE_END(libgwr);
 
-
-
-
-
-
-
-
-
-
-
-
-
-GWR_NAMESPACE_END(libgwr)
-
-#endif                                                                          //  __LIBGWR_M_ARRAY_P_HH__
+#endif                                                                          //  __LIBGWR_T_ARRAY_HH__

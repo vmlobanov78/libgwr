@@ -35,6 +35,7 @@
 */
 
 #include "libgwrc.h"
+#include "C/widget/libgwrc-gwrgtk-textbuffer.h"
 #include "C/widget/libgwrc-gwrgtk-textbuffer-private.h"
 //  ****************************************************************************
 //

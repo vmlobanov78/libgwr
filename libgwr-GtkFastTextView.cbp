@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libgwr-GtkFastTextView" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="src/;src/demo/;" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/DGtkFastTextView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Debug/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/RGtkFastTextView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="D-demo">
+				<Option output="bin/Debug/DGtkFastTextView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Debug" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-ggdb" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config --libs gtk+-$(CB_GTK_VERSION)`" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-fno-exceptions" />
+			<Add option="-Wno-unused-label" />
+			<Add option="-Wno-unused-but-set-variable" />
+			<Add option="`pkg-config --cflags gtk+-$(CB_GTK_VERSION)`" />
+			<Add directory="/home/gwr/Src/C-C++/libgwr/libgwr-1.0" />
+		</Compiler>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer-private.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/gtk/GtkFastTextView/gtkfasttextview.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/gtk/GtkFastTextView/gtkfasttextview.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/GtkFastTextView-demo/GtkFastTextView-demo.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/demo/" />
+		</Unit>
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

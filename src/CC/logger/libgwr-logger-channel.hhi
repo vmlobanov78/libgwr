@@ -7,7 +7,7 @@
     *                                                                           *
     *   Helper for logging                                                      *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -74,7 +74,7 @@
         int                         a_fd;
         int                         a_fd_bin;
 
-        GwrGtkTextBuffer        *   a_gwrgtk_text_buffer;
+        GwrFastTextBuffer        *   a_gwrgtk_text_buffer;
         //----------------------------------------------------------------------
         public:
         guint32             index();
@@ -85,8 +85,8 @@
         void                set_output_gwr_text_view(GwrTextView* _gtv);
         GwrTextView*        get_output_gwr_text_view();
 
-        void                set_output_gwrgtk_text_buffer(GwrGtkTextBuffer* _b);
-        GwrGtkTextBuffer*   get_output_gwrgtk_text_buffer();
+        void                set_output_gwrgtk_text_buffer(GwrFastTextBuffer* _b);
+        GwrFastTextBuffer*   get_output_gwrgtk_text_buffer();
 
         void                set_output_fd           (int);
         int                 get_output_fd           ();

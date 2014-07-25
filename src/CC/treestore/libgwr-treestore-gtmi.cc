@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Inspiration             Tim-Philipp Müller                              *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -147,15 +147,15 @@ Store::get_iter(
 
     //  convert this assertion to a FALSE return value
     //  because of the "no selected item" bug
-    //  g_assert( path );
+    //  assertion : g_assert( path );
     if ( ! path )
     {
         //NODE_WNG("Store::get_iter():NULL GtkTreePath");
         return FALSE;
     }
 
-    indices = gtk_tree_path_get_indices(path);
-    depth   = gtk_tree_path_get_depth(path);
+    indices = gtk_tree_path_get_indices (path);
+    depth   = gtk_tree_path_get_depth   (path);
 
     // get the position
     pos		= indices[i++];

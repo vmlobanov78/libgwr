@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,7 +28,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose :   Array of data constitued of smaller arrays of data.         *
+    *   Purpose :   Array containing datas of any sizes.                        *
     *                                                                           *
     *****************************************************************************
 */
@@ -42,7 +42,7 @@ _OPTIM_01_ :
 #include    <stdio.h>
 #include    <string.h>
 
-#include    "libgwrc.h"
+#include    "libgwrc-array-data-multi.h"
 
 //  ****************************************************************************
 //  STATIC
@@ -424,17 +424,17 @@ gwr_array_data_multi_get_data(
 //  gwr_array_data_multi_get_stats_alloc()
 //  ----------------------------------------------------------------------------
 void
-gwr_array_data_multi_get_stats_alloc(
+gwr_array_data_multi_get_stats(
         GwrCArrayDataMulti      *       _adm                        ,
         GwrCArrayDataMultiStat  *       _adm_stat                   )
 {
-    _adm_stat->a_block_card     =   _adm->d_blocks->a_blocks_card;
-    _adm_stat->a_block_used     =   _adm->d_blocks->a_blocks_used;
-    _adm_stat->a_block_alloc    =   _adm->d_blocks->a_stat_realloc;
+    _adm_stat->a_blocks_card    =   _adm->d_blocks->a_blocks_card;
+    _adm_stat->a_blocks_used    =   _adm->d_blocks->a_blocks_used;
+    _adm_stat->a_blocks_alloc   =   _adm->d_blocks->a_stat_realloc;
 
-    _adm_stat->a_desc_card      =   _adm->d_infos->a_blocks_card;
-    _adm_stat->a_desc_used      =   _adm->d_infos->a_blocks_used;
-    _adm_stat->a_desc_alloc     =   _adm->d_infos->a_stat_realloc;
+    _adm_stat->a_descs_card     =   _adm->d_infos->a_blocks_card;
+    _adm_stat->a_descs_used     =   _adm->d_infos->a_blocks_used;
+    _adm_stat->a_descs_alloc    =   _adm->d_infos->a_stat_realloc;
 
     _adm_stat->a_data_card      =   _adm->d_infos->a_blocks_used;
     _adm_stat->a_data_size      =   _adm->a_data_size;

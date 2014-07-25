@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,7 +28,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose :   Array of data constitued of smaller arrays of data.         *
+    *   Purpose :   Array containing datas of any sizes.                        *
     *                                                                           *
     *****************************************************************************
 */
@@ -38,10 +38,12 @@
 //  ............................................................................
 #include    <glib.h>
 //  ............................................................................
-#include    "libgwrc.h"
+#include    "libgwrc-array-equal.h"
 //  ............................................................................
 typedef struct  _GwrCADMData            GwrCADMData;
-
+//! \struct _GwrCADMData
+//!
+//! \brief  Convenience struct referencing a data in memory.
 struct  _GwrCADMData
 {
     gpointer    a_mem;                                                          //!< Data location
@@ -49,52 +51,60 @@ struct  _GwrCADMData
 };
 //  ............................................................................
 typedef struct  _GwrCADMBlock           GwrCADMBlock;
-
+//! \struct _GwrCADMBlock
+//!
+//! \brief  Block of data that maintain the count of used bytes in it.
 struct  _GwrCADMBlock
 {
-    gpointer    d_mem;                                                          //!< Base memory       of the GwrCArrayDataMultiBlock
-    guint32     a_size;                                                         //!< Size ( in bytes ) of the GwrCArrayDataMultiBlock
-    guint32     a_used_bytes;                                                   //!< Size ( in bytes ) of used bytes in the GwrCArrayDataMultiBlock
+    gpointer    d_mem;                                                          //!< Base memory
+    guint32     a_size;                                                         //!< Size ( in bytes )
+    guint32     a_used_bytes;                                                   //!< Size ( in bytes ) of used bytes
 };
 
-extern  guint32     GwrCADMBlock_S;
+extern  guint32     GwrCADMBlock_S;                                             //!< Sizeof struct GwrCADMBlock
 //  ............................................................................
 typedef struct  _GwrCADMDataInfo        GwrCADMDataInfo;
-
+//! \struct _GwrCADMDataInfo
+//!
+//! \brief  Info for accessing data in a GwrCArrayDataMulti.
 struct  _GwrCADMDataInfo
 {
-    guint16     a_block_index;                                                  //!< Index of GwrCADMultiBlock where data is stored
-    guint32     a_offset;                                                       //!< Offset of data in the GwrCADMultiBlock
-    guint16     a_len;                                                          //!< Len    of data in the GwrCADMultiBlock
+    guint16     a_block_index;                                                  //!< Index of GwrCADMBlock where data is stored
+    guint32     a_offset;                                                       //!< Offset of data in the GwrCADMBlock
+    guint16     a_len;                                                          //!< Len    of data in the GwrCADMBlock
 };
 
-extern  guint32     GwrCADMDataInfo_S;
+extern  guint32     GwrCADMDataInfo_S;                                          //!< Sizeof struct GwrCADMDataInfo
 //  ............................................................................
 typedef struct  _GwrCArrayDataMulti     GwrCArrayDataMulti;
-
+//! \struct _GwrCArrayDataMulti
+//!
+//! \brief  Array containing datas of any sizes.
 struct  _GwrCArrayDataMulti
 {
-    GwrCArrayEqual  *   d_blocks;                                               //!< Array of GwrCADMultiBlocks
+    GwrCArrayEqual  *   d_blocks;                                               //!< Array of GwrCADMBlocks
     GwrCArrayEqual  *   d_infos;                                                //!< Array of GwrCADMDataInfos
 
-    guint32             a_block_size;                                           //!< Size ( in bytes ) that GwrCADMultiBlock can cpntain
-    guint32             a_data_size;                                            //!< Size ( in bytes ) of all the data contained in the GwrCADMultiBlocks
+    guint32             a_block_size;                                           //!< Size ( in bytes ) that GwrCADMBlock can contain
+    guint32             a_data_size;                                            //!< Size ( in bytes ) of all the datas contained in the GwrCADMBlocks
 };
 //  ............................................................................
 typedef struct  _GwrCArrayDataMultiStat GwrCArrayDataMultiStat;
-
+//! \struct _GwrCArrayDataMultiStat
+//!
+//! \brief  Convenience struct for memory statistics.
 struct  _GwrCArrayDataMultiStat
 {
     guint32             a_data_card;                                            //!< # of data stored
-    guint32             a_data_size;                                            //!< size of data stored
+    guint32             a_data_size;                                            //!< Total size of data stored
 
-    guint32             a_block_card;
-    guint32             a_block_used;
-    guint32             a_block_alloc;
+    guint32             a_blocks_card;
+    guint32             a_blocks_used;
+    guint32             a_blocks_alloc;
 
-    guint32             a_desc_card;
-    guint32             a_desc_used;
-    guint32             a_desc_alloc;
+    guint32             a_descs_card;
+    guint32             a_descs_used;
+    guint32             a_descs_alloc;
 };
 //  ============================================================================
 #if ( __cplusplus )
@@ -125,7 +135,7 @@ extern          gboolean                gwr_array_data_multi_get_data           
             guint32                         _data_index     ,
             GwrCADMData             *       _data           );
 
-extern          void                    gwr_array_data_multi_get_stats_alloc    (
+extern          void                    gwr_array_data_multi_get_stats          (
             GwrCArrayDataMulti      *       _adm                        ,
             GwrCArrayDataMultiStat  *       _adm_stat                   );
 

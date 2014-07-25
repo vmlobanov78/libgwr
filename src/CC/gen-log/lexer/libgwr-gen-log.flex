@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libkconfig                                                      *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Copyright (C) 2002      Roman Zippel        <zippel@linux-m68k.org>     *
     *   Copyright (C) xxxx-xxxx Linux kernel's documentation team               *
     *                                                                           *

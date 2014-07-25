@@ -7,7 +7,7 @@
     *                                                                           *
     *   Helper for logging                                                      *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -184,9 +184,9 @@ public:
     void    p0_write        (Channel*, SubChannel*, const gchar* _txt);
     void    p0_write_html   (Channel*, SubChannel*, const gchar* _txt);
 
-    void    p0_blog     (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
-    void    p0_blognl   (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
-    void    p0_bwrite   (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
+    void    p0_blog         (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
+    void    p0_blognl       (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
+    void    p0_bwrite       (Channel*, SubChannel*, guint32 _sub_id, const gchar* _txt);
 
     public:
     #include    "libgwr-logger-log.hhi"

@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *   Inspiration             Tim-Philipp Müller                              *
     *                                                                           *
     *   --------------------------------------------------------------------    *
@@ -311,9 +311,6 @@ NodeBlock::NodeBlock(
     guint32     _depth,
     Node    *   _parent)
 {
-    a_hcard		    = 0;
-    a_scard		    = 0;
-
     a_first_node    = NULL;
     a_last_node     = NULL;
 
@@ -365,7 +362,7 @@ NodeBlock::check()
     guint32         card    = 0;
 
     //..........................................................................
-    card    = a_hcard + a_scard;
+    card    = hcard() + scard();
 
     //  ........................................................................
     //  verify chaining
@@ -407,6 +404,7 @@ NodeBlock::check()
 
     //  ........................................................................
     //  verify indexes
+    /*
     if ( a_hcard != d_hnodes->card() )
     {
         printf("*** (PNODEBLOCK) *** a_hcard != GArray->len\n");
@@ -417,9 +415,10 @@ NodeBlock::check()
         printf("*** (PNODEBLOCK) *** a_hcard != GArray->len\n");
         _GWR_BREAK_;
     }
-
+    */
     //  ........................................................................
     //  verify shown indexes
+    /*
     for (  i = 0 ; i != a_scard ; i++ )
     {
         node = d_snodes->get( i );
@@ -430,9 +429,10 @@ NodeBlock::check()
             _GWR_BREAK_;
         }
     }
-
+    */
     //  ........................................................................
     //  verify hidden indexes
+    /*
     for (  i = 0 ; i != a_hcard ; i++ )
     {
         node = d_hnodes->get( i );
@@ -443,7 +443,7 @@ NodeBlock::check()
             _GWR_BREAK_;
         }
     }
-
+    */
     return TRUE;
 }
 //  ----------------------------------------------------------------------------
@@ -457,10 +457,8 @@ NodeBlock::check()
 void
 NodeBlock::children_clr_fields()
 {
-    g_return_if_fail( ( a_hcard == 0 ) && ( a_scard == 0 ) );
+    g_return_if_fail( ( hcard() == 0 ) && ( scard() == 0 ) );
 
-    a_scard         = 0;
-    a_hcard         = 0;
     a_first_node    = NULL;
     a_last_node     = NULL;
 }
@@ -480,10 +478,10 @@ NodeBlock::get_shown_node(
 {
     Node			*node   = NULL;
     //.........................................................................
-    if ( a_scard == 0 )
+    if ( scard() == 0 )
     {
         // gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
-        // cant do this : g_return_val_if_fail( index == 0, NULL );
+        // we cant do this : g_return_val_if_fail( index == 0, NULL );
         if ( _pos != 0 )
             return NULL;
 
@@ -494,8 +492,8 @@ NodeBlock::get_shown_node(
     else
     {
         // gtk+ calls us with bad indexes !!! ( when scrooling liftbars ) :
-        // cant do this : g_return_val_if_fail( index < a_card, NULL );
-        if ( _pos >= a_scard )
+        // we cant do this : g_return_val_if_fail( index < a_card, NULL );
+        if ( _pos >= scard() )
             return NULL;
     }
 
@@ -519,13 +517,13 @@ NodeBlock::get_hidden_node(
 {
     Node			*node   = NULL;
     //.........................................................................
-    if ( a_hcard == 0 )
+    if ( hcard() == 0 )
     {
         g_assert( ! _pos );
         return NULL;
     }
 
-    g_return_val_if_fail( _pos < a_hcard, NULL );
+    g_return_val_if_fail( _pos < hcard(), NULL );
 
     node    =   d_hnodes->get( _pos );                                          //  get the node
     //BLOCK_INF("BLK(%-20s) d:%03i p:%03i c:%03i [%s]", "node_get", a_depth, pos, a_card, node->log());
@@ -572,15 +570,15 @@ NodeBlock::node_add(
     p = parent();
 
     shown   =   p->shown()                                      ?
-                ( _data->IGetVisibility()  ? TRUE : FALSE ) :               //  parent shown  : shown = visibility
-                ( FALSE )                                   ;               //  parent hidden : shown = FALSE
+                ( _data->IGetVisibility()  ? TRUE : FALSE ) :                   //  parent shown  : shown = visibility
+                ( FALSE )                                   ;                   //  parent hidden : shown = FALSE
 
     // create a new node with pos = 0 :
     // we cant set the positions now, because we dont know at what position
     // it will be stored, and in what array ( visible / hidden )
     node = GWR_NEW_CAST( Node, _uid, a_depth, 0, 0, a_parent, _data);
 
-    card = a_hcard + a_scard;                                                   //  total number of nodes
+    card = hcard() + scard();                                                   //  total number of nodes
 
     //  ........................................................................
     //  if no sort required, simply append either to shown or hidden array.
@@ -666,13 +664,11 @@ lab_sort_append:
     }
 
     goto lab_generic_append;
-
     //  ........................................................................
     //  sort type error
 lab_bad_sort_type_value:
 
     g_assert(FALSE);
-
     //  ........................................................................
     //  end of append case, common for sort and no-sort cases
 lab_generic_append:
@@ -683,10 +679,8 @@ lab_generic_append:
         //  append shown node & set its spos
         d_snodes->add( node );
 
-        node->set_spos( a_scard );                                              //  a_spos = ( a_scard - 1 ) + 1 = a_scard
+        node->set_spos( scard() - 1 );                                              //  a_spos = ( a_scard - 1 ) + 1 = a_scard
         node->invalidate_hpos();                                                //  invalidate hpos
-
-        a_scard++;
 
         node->flags_set_shown(1);
 
@@ -700,14 +694,12 @@ lab_generic_append:
     {
         //  append hidden node
         d_hnodes->add( node );
-        node->set_hpos( a_hcard );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
+        node->set_hpos( hcard() - 1 );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
         node->invalidate_spos();                                                //  invalidate spos
 
         //
         //  ...there is no hnext stuff...
         //
-
-        a_hcard++;
 
         node->flags_set_shown(0);
 
@@ -736,7 +728,7 @@ lab_generic_insert:
     //  'node' is the first chaining Node
     else
     {
-        node->set_aprev(NULL);                                              //  _GWR_REDUNDANT_
+        node->set_aprev(NULL);                                                  //  _GWR_REDUNDANT_
         a_first_node = node;
     }
 
@@ -746,7 +738,7 @@ lab_generic_insert:
         node->flags_set_shown(1);
 
         //  find next shown Node of node
-        nvn = node->find_anext_shown();                                  //  this is slow
+        nvn = node->find_anext_shown();                                         //  this is slow
 
         //  there is a Next Visible(shown) Node
         if ( nvn )
@@ -761,11 +753,9 @@ lab_generic_insert:
         else
         {
             d_snodes->add( node );
-            node->set_spos( a_scard );
+            node->set_spos( scard() - 1 );
             node->invalidate_hpos();                                            //  invalidate hpos
         }
-
-        a_scard++;
 
         node->flags_set_shown(1);
 
@@ -798,14 +788,12 @@ lab_generic_insert:
         */
         //  append hidden node
         d_hnodes->add( node );
-        node->set_hpos( a_hcard );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
+        node->set_hpos( hcard() - 1 );                                              //  a_hpos = ( a_hcard - 1 ) + 1 = a_hcard
         node->invalidate_spos();                                                //  invalidate spos
 
         //
         //  ...there is no hnext stuff...
         //
-
-        a_hcard++;
 
         node->flags_set_shown(0);
 
@@ -844,7 +832,7 @@ NodeBlock::dec_spos_from_node(guint16 _spos)
     }
 }
 //  ----------------------------------------------------------------------------
-//  NodeBLock::inc_spos_from_node()
+//  NodeBlock::inc_spos_from_node()
 //  ----------------------------------------------------------------------------
 //! \fn     NodeBlock:inc_spos_from_node()
 //!
@@ -1041,8 +1029,6 @@ NodeBlock::remove_shown_node(
 
     dec_spos_from_node( pos );
 
-    a_scard--;
-
     //  now remove all children
     //count = count + 1 + node->remove_all_children();
 
@@ -1086,8 +1072,6 @@ NodeBlock::remove_hidden_node(
     //
     //  ... no hpos ...
     //
-
-    a_hcard--;
 
     //  now remove all children
     count = count + 1 + node->remove_children();
@@ -1245,13 +1229,13 @@ NodeBlock::r_parent_has_been_shown()
     //  first some checks
     {
 
-        if ( scard() )                                                              //  parent has been shown => it was hidden before => all Nodes must be hidden
+        if ( scard() )                                                          //  parent has been shown => it was hidden before => all Nodes must be hidden
         {
             Store::s_ret_gboolean  = FALSE;
             return;
         }
 
-        if ( ! hcard() )                                                            //  no Node to show : end !
+        if ( ! hcard() )                                                        //  no Node to show : end !
             return;
     }
 
@@ -1281,9 +1265,9 @@ lab_loop:
     n->children()->r_parent_has_been_shown();                                   //  recursive call
 
 lab_next:
-    n = na;                                                                 //  roll
+    n = na;                                                                     //  roll
 
-    if ( ! n )                                                              //  if no anext, we're done
+    if ( ! n )                                                                  //  if no anext, we're done
         goto lab_end;
 
     goto lab_loop;                                                              //  loop
@@ -1386,9 +1370,7 @@ NodeBlock::node_move_from_hidden_to_shown(Node* _n)
         //  ...there is no hidden chaining...
         //
 
-        a_hcard--;                                                              //  dec Hidden card here allow simple test 'i < a_hcard' in for...next loop
-
-        for ( i = _n->hpos() ; i < a_hcard ; i++ )                              //  from next hidden node in array to end of array, dec hpos
+        for ( i = _n->hpos() ; i < hcard() ; i++ )                              //  from next hidden node in array to end of array, dec hpos
         {
             h = d_hnodes->get( i );
             h->dec_hpos();
@@ -1401,17 +1383,16 @@ NodeBlock::node_move_from_hidden_to_shown(Node* _n)
     //  insert node in shown array
     {
 
-        ns = _n->find_anext_shown();                                                //  find anext shown
+        ns = _n->find_anext_shown();                                            //  find anext shown
 
         //  insert before an existing visible Node
         if ( ns )
         {
             //  chaining
             nsp = ns->spos();
-            d_snodes->ins( nsp, _n );                                               //  insert
+            d_snodes->ins( nsp, _n );                                           //  insert
             //  indexes
-            _n->set_spos(nsp);                                                      //  _n -> spos
-            a_scard++;                                                              //  inc visible card
+            _n->set_spos(nsp);                                                  //  _n -> spos
 
             inc_spos_from_node( 1 + nsp );
         }
@@ -1419,10 +1400,9 @@ NodeBlock::node_move_from_hidden_to_shown(Node* _n)
         else
         {
             //  chaining
-            d_snodes->add( _n );                                                    //  append
+            d_snodes->add( _n );                                                //  append
             //  s-indexes
-            _n->set_spos(a_scard);                                                  //  _n -> spos
-            a_scard++;                                                              //  inc visible card
+            _n->set_spos(scard() - 1);                                              //  _n -> spos
         }
 
         _n->flags_set_shown(1);
@@ -1462,7 +1442,6 @@ NodeBlock::node_move_from_shown_to_hidden(Node* _n)
         //  chaining
         nsp         = _n->spos();
         d_snodes->del( nsp );                                                   //  remove _n from array
-        a_scard--;
 
         dec_spos_from_node(nsp);                                                //  dec all Nodes spos after _n
 
@@ -1481,9 +1460,7 @@ NodeBlock::node_move_from_shown_to_hidden(Node* _n)
         //
         //  ( But the hidden array not sorted may be not practical for debug ! )
         d_hnodes->add( _n );                                                    //  append
-        _n->set_hpos( a_hcard );
-
-        a_hcard++;                                                              //  dec hidden card
+        _n->set_hpos( hcard() - 1 );
 
     }
 

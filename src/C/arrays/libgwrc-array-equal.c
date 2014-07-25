@@ -1,13 +1,13 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-array-equal.c                                                    *
+    *   libgwrc-array-equal.c                                                   *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
     *   Part of libwgwr                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,7 +28,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose :   Purpose :   Array of constant-size data                     *
+    *   Purpose : Array of constant-size data                                   *
     *                                                                           *
     *****************************************************************************
 */
@@ -36,7 +36,7 @@
 #include    <stdio.h>
 #include    <string.h>
 
-#include    "libgwr-array-equal.h"
+#include    "libgwrc-array-equal.h"
 
 //  ****************************************************************************
 //  STATIC
@@ -58,7 +58,8 @@ gwr_array_array_equal_realloc(
 
     _ae->d_mem  =   v;                                                          //  replace old array with new array
 
-    _ae->a_blocks_card  =   _ae->a_blocks_card  +   _ae->a_realloc_size;        //  update blocks card
+    _ae->a_blocks_card      =   _ae->a_blocks_card  +   _ae->a_realloc_size;    //  update blocks card
+    _ae->a_stat_realloc     =   _ae->a_stat_realloc +   1;                      //  update stat::reallocations
 
     return TRUE;
 }
@@ -72,13 +73,14 @@ void
 gwr_array_equal_dump(
         GwrCArrayEqual          *       _ae     )
 {
-    printf("GwrCArrayEqual:[%p] m[%p] bs[%06i] r[%06i] c[%03i] u[%03i]\n"       ,
+    printf("GwrCArrayEqual:[%p] m[%p] bs[%06i] r[%06i] c[%03i] u[%03i] a[%03i]\n",
         _ae                 ,
         _ae->d_mem          ,
         _ae->a_block_size   ,
         _ae->a_realloc_size ,
         _ae->a_blocks_card  ,
-        _ae->a_blocks_used  );
+        _ae->a_blocks_used  ,
+        _ae->a_stat_realloc );
 }
 //  ----------------------------------------------------------------------------
 //  gwr_array_equal_new()
@@ -91,13 +93,16 @@ gwr_array_equal_new(
     GwrCArrayEqual          *   a   =   NULL;
     //  ........................................................................
     //  create  GwrCArrayEqual structure
-    a                   =   (GwrCArrayEqual*)g_new0( GwrCArrayEqual , 1 );
+    a                       =   (GwrCArrayEqual*)g_new0( GwrCArrayEqual , 1 );
 
-    a->d_mem            =   NULL;
-    a->a_blocks_card    =   0;
-    a->a_blocks_used    =   0;
-    a->a_block_size     =   _block_size;
-    a->a_realloc_size   =   _realloc_size;
+    a->d_mem                =   NULL;
+    a->a_block_size         =   _block_size;
+    a->a_realloc_size       =   _realloc_size;
+
+    a->a_blocks_card        =   0;
+    a->a_blocks_used        =   0;
+
+    a->a_stat_realloc       =   0;
 
     return a;
 }
@@ -112,7 +117,15 @@ void
 gwr_array_equal_dealloc(
         GwrCArrayEqual          *       _ae             )
 {
-    if ( _ae->d_mem )g_free( _ae->d_mem );
+    if ( _ae->d_mem )
+        g_free( _ae->d_mem );
+}
+void
+gwr_array_equal_reset(
+            GwrCArrayEqual      *       _ae             )
+{
+    _ae->a_blocks_used      =   0;
+    _ae->a_stat_realloc     =   0;
 }
 //  ----------------------------------------------------------------------------
 //  gwr_array_equal_add()
@@ -148,4 +161,31 @@ gwr_array_equal_get(
 
     return _ae->d_mem + _ae->a_block_size * _block_index;
 }
+//  ----------------------------------------------------------------------------
+//  gwr_array_equal_getb()
+//  ----------------------------------------------------------------------------
+gboolean
+gwr_array_equal_getb(
+        GwrCArrayEqual          *       _ae             ,
+        guint32                         _block_index    ,
+        gpointer                        _dest           )
+{
+    g_return_val_if_fail( _block_index < _ae->a_blocks_used, FALSE );           //  index verification
 
+    memcpy( _dest, _ae->d_mem + _ae->a_block_size * _block_index, _ae->a_block_size );
+
+    return TRUE;
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_get_stats()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_equal_get_stats(
+        GwrCArrayEqual      *       _ae             ,
+        GwrCArrayEqualStat  *       _ae_stat        )
+{
+    _ae_stat->a_size_bytes      =   _ae->a_blocks_card * _ae->a_block_size;
+    _ae_stat->a_blocks_card     =   _ae->a_blocks_card;
+    _ae_stat->a_blocks_used     =   _ae->a_blocks_used;
+    _ae_stat->a_blocks_alloc    =   _ae->a_stat_realloc;
+}

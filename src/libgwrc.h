@@ -7,7 +7,7 @@
     *                                                                           *
     *   Part of libgwrc                                                         *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -49,11 +49,11 @@
 #include	"C/libgwrc-color.h"
 #include	"C/libgwrc-hash.h"
 
-#include	"C/libgwrc-array-equal.h"
-#include	"C/libgwrc-array-data-multi.h"
+#include	"C/arrays/libgwrc-array-equal.h"
+#include	"C/arrays/libgwrc-array-data-multi.h"
 
-#include	"C/widget/libgwrc-gwrgtk-utils.h"
-#include	"C/widget/libgwrc-gwrgtk-textview.h"
-#include	"C/widget/libgwrc-gwrgtk-textbuffer.h"
+#include	"C/gtk/libgwrc-gwrgtk-utils.h"
+#include	"C/gtk/GtkFastTextView/gtkfasttextview.h"
+#include	"C/buffers/libgwrc-fast-text-buffer.h"
 //  ...........................................................................
 #endif                                                                          //  __LIBGWRC_H__

@@ -1,11 +1,13 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-t-array-p.hh                                                     *
+    *   libgwr-m-array-p.hh                                                     *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Stack implementation                                                    *
+    *                                                                           *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -26,21 +28,21 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : TArrayP                                                       *
+    *   Class   : MArrayP                                                       *
     *                                                                           *
-    *   Purpose : Simple array of pointers.                                     *
+    *   Purpose : C FILE, DIR encapsulation                                     *
     *                                                                           *
     *****************************************************************************
 */
 
-#ifndef     __LIBGWR_T_ARRAY_P_HH__
-#define     __LIBGWR_T_ARRAY_P_HH__
+#ifndef     __LIBGWR_M_ARRAY_P_HH__
+#define     __LIBGWR_M_ARRAY_P_HH__
 //  ...........................................................................
 GWR_NAMESPACE_START(libgwr)
 
 /// ****************************************************************************
 //!
-//! \class  TArrayP
+//! \class  MArrayP
 //!
 //! \brief  Simple template <T> array that
 //!         - store pointers on T in an array
@@ -48,8 +50,8 @@ GWR_NAMESPACE_START(libgwr)
 //!         ( GArray and GPtrArray doesnt fit my needs ).
 //!
 /// ****************************************************************************
-template < typename T >
-class TArrayP
+template < typename T, typename S >
+class TMArrayP
 {
     protected:
     guint32         a_tb;                                                       //!< T size in bytes
@@ -64,21 +66,19 @@ class TArrayP
     private:
     inline      gboolean        p0_reallocate   ();
     inline      gboolean        p0_add          (T* _t);
-    inline      void            p0_reset        ();
 
     public:
     inline      guint32         size_max        ()      { return a_sm; }
     inline      guint32         realloc_size    ()      { return a_rs; }
 
     inline      void            reset           ();
-    inline      guint32         card            ()                              const;
+    inline      guint32         card            ();
     inline      guint32         size_current    ();
 
     inline      gboolean        clr             (guint32 _ix);
     inline      gboolean        set             (guint32 _ix, T* _t);
     inline      gboolean        get             (guint32 _ix, T*& __t);
     inline      T*              get             (guint32 _ix);
-    inline      T*              qget            (guint32 _ix);
     inline      gboolean        add             (T* _t);
 
     inline      void            dup()
@@ -88,7 +88,7 @@ class TArrayP
 
     public:
     inline    TArrayP(guint32 _card_max, guint32 _realloc_size)
-        : a_tb( sizeof( T* ) ), a_sm( _card_max ), a_rs( _realloc_size )
+        : a_tb( sizeof( gpointer ) ), a_sm( _card_max ), a_rs( _realloc_size )
     {
         a_cs    = 0;
         a_card  = 0;
@@ -122,23 +122,17 @@ TArrayP< T >::p0_reallocate()
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          void
-TArrayP< T >::p0_reset()
+TArrayP< T >::reset()
 {
     g_free( d_array );
     d_array = NULL;
     a_cs    = 0;
     a_card  = 0;
 }
-template        < typename T >
-inline          void
-TArrayP< T >::reset()
-{
-    p0_reset();
-}
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          guint32
-TArrayP< T >::card()                                                            const
+TArrayP< T >::card()
 {
     return a_card;
 }
@@ -203,12 +197,6 @@ TArrayP< T >::get(guint32 _ix)
 
     return d_array[ _ix ];
 }
-template        < typename T >
-inline          T*
-TArrayP< T >::qget(guint32 _ix)
-{
-    return d_array[ _ix ];
-}
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        < typename T >
 inline          gboolean
@@ -252,20 +240,6 @@ TArrayP< gchar >::add(gchar* _t)
 {
     return p0_add( g_strdup(_t) );
 }
-template        <>
-inline          void
-TArrayP< gchar >::reset()
-{
-    guint32     i   = 0;
-    //..........................................................................
-    for ( i = 0 ; i != a_cs ; i++ )
-    {
-        if ( d_array[i] )
-            g_free( d_array[i] );
-    }
-
-    p0_reset();
-}
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template        <>
 inline
@@ -288,6 +262,12 @@ TArrayP< gchar >::~TArrayP()
 
 
 
-GWR_NAMESPACE_END(libgwr);
 
-#endif                                                                          //  __LIBGWR_T_ARRAY_P_HH__
+
+
+
+
+
+GWR_NAMESPACE_END(libgwr)
+
+#endif                                                                          //  __LIBGWR_M_ARRAY_P_HH__

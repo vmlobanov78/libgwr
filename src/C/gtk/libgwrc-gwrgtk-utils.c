@@ -1,13 +1,13 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   libgwr-widget-gtk-utils.cc                                              *
+    *   libgwr-gwrgtk-utils.c                                                   *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
     *   part of libgwr                                                          *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -28,28 +28,19 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Class   : Menu, MenuItem, MenuItemData                                  *
-    *                                                                           *
-    *   Parent  : None                                                          *
+    *   Purpose : GTK utils                                                     *
     *                                                                           *
     *****************************************************************************
 */
 
 
 //  ............................................................................
-#include    "../libgwr.h"
+#include    "C/libgwrc-macro.h"
+#include    "libgwrc-gwrgtk-utils.h"
 //  ............................................................................
-namespace libgwr
-{
-namespace widget
-{
-
-
-//  ----------------------------------------------------------------------------
-//  ----------------------------------------------------------------------------
 static  gchar   p_va_buf[4096];
 
-void    gtk_error_box(const gchar* format, ...)
+void    gwrgtk_error_box(const gchar* format, ...)
 {
     GtkWidget   *   dialog  = NULL;
     //  ........................................................................
@@ -76,14 +67,11 @@ void    gtk_error_box(const gchar* format, ...)
     gtk_widget_destroy(dialog);
 }
 
-namespace   gtk
-{
-
-GtkWidget   *   hbox_new(gboolean _homogeneous, gint _spacing)
+GtkWidget   *   gwrgtk_hbox_new(gboolean _homogeneous, gint _spacing)
 {
     GtkWidget   *   w   = NULL;
     //  ........................................................................
-    #if GTK_VERSION_GE(3,2)
+    #if GWR_GTK_VERSION_GE(3,2)
     w   =   gtk_box_new( GTK_ORIENTATION_HORIZONTAL, _spacing );
     gtk_box_set_homogeneous( GTK_BOX(w), _homogeneous );
     #else
@@ -91,11 +79,11 @@ GtkWidget   *   hbox_new(gboolean _homogeneous, gint _spacing)
     #endif
     return w;
 }
-GtkWidget   *   vbox_new(gboolean _homogeneous, gint _spacing)
+GtkWidget   *   gwrgtk_vbox_new(gboolean _homogeneous, gint _spacing)
 {
     GtkWidget   *   w   = NULL;
     //  ........................................................................
-    #if GTK_VERSION_GE(3,2)
+    #if GWR_GTK_VERSION_GE(3,2)
         w   =   gtk_box_new( GTK_ORIENTATION_VERTICAL, _spacing );
         gtk_box_set_homogeneous( GTK_BOX(w), _homogeneous );
     #else
@@ -104,22 +92,22 @@ GtkWidget   *   vbox_new(gboolean _homogeneous, gint _spacing)
     return w;
 }
 
-GtkWidget   *   hpaned_new()
+GtkWidget   *   gwrgtk_hpaned_new()
 {
     GtkWidget   *   w   = NULL;
     //  ........................................................................
-    #if GTK_VERSION_GE(3,2)
+    #if GWR_GTK_VERSION_GE(3,2)
         w   =   gtk_paned_new( GTK_ORIENTATION_HORIZONTAL );
     #else
         w   =   gtk_hpaned_new();
     #endif
     return w;
 }
-GtkWidget   *   vpaned_new()
+GtkWidget   *   gwrgtk_vpaned_new()
 {
     GtkWidget   *   w   = NULL;
     //  ........................................................................
-    #if GTK_VERSION_GE(3,2)
+    #if GWR_GTK_VERSION_GE(3,2)
         w   =   gtk_paned_new( GTK_ORIENTATION_VERTICAL );
     #else
         w   =   gtk_vpaned_new();
@@ -127,7 +115,7 @@ GtkWidget   *   vpaned_new()
     return w;
 }
 
-void        paned_set_space_repartition(
+void        gwrgtk_paned_set_space_repartition(
     GtkPaned    *   _paned,
     guint           _first_child_percentage)
 {
@@ -154,7 +142,7 @@ void        paned_set_space_repartition(
 
     //  Orientation : from gtk 3.2, GtkHPaned & GtkVPaned are deprecated,
     //  and GTK_IS_HPANED is broken.
-    #if GTK_VERSION_GE(3,2)
+    #if GWR_GTK_VERSION_GE(3,2)
         g_object_get( G_OBJECT(_paned), "orientation", &o, NULL );
     #else
     {
@@ -187,10 +175,10 @@ void        paned_set_space_repartition(
 }
 
 
-GtkWidget*  hseparator_new()
+GtkWidget*  gwrgtk_hseparator_new()
 {
     //  GTK >= 3.0
-    #if GTK_VERSION_GE(3,0)
+    #if GWR_GTK_VERSION_GE(3,0)
     {
         return  gtk_separator_new( GTK_ORIENTATION_HORIZONTAL );
     }
@@ -205,10 +193,10 @@ GtkWidget*  hseparator_new()
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-void            modify_fg_color   (GtkWidget* _w, GtkStateType _st, guint16 _r, guint16 _g, guint16 _b)
+void            gwrgtk_modify_fg_color   (GtkWidget* _w, GtkStateType _st, guint16 _r, guint16 _g, guint16 _b)
 {
     //  GTK >= 3.0
-    #if GTK_VERSION_GE(3,0)
+    #if GWR_GTK_VERSION_GE(3,0)
     {
         GtkStateFlags   sf;
         GdkRGBA         color;
@@ -258,11 +246,11 @@ void            modify_fg_color   (GtkWidget* _w, GtkStateType _st, guint16 _r, 
     }
     #endif
 }
-void            modify_bg_color   (GtkWidget* _w, GtkStateType _st, guint16 _r, guint16 _g, guint16 _b)
+void            gwrgtk_modify_bg_color   (GtkWidget* _w, GtkStateType _st, guint16 _r, guint16 _g, guint16 _b)
 {
 }
 
-void            button_set_label_font( GtkWidget* _button, const gchar* _fontname, PangoStyle _style, PangoWeight _weight, guint32 _absolute_size_in_device_units)
+void            gwrgtk_button_set_label_font( GtkWidget* _button, const gchar* _fontname, PangoStyle _style, PangoWeight _weight, guint32 _absolute_size_in_device_units)
 {
     GtkWidget               *   l   =   gtk_bin_get_child( GTK_BIN(_button) );
 
@@ -280,73 +268,4 @@ void            button_set_label_font( GtkWidget* _button, const gchar* _fontnam
     gtk_label_set_attributes( GTK_LABEL(l), pal );
 }
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Matrix::Matrix(guint32 _n_rows, guint32 _n_columns, gboolean _homogeneous)
-{
-    a_nrow  =   _n_rows;
-    a_ncol  =   _n_columns;
-    //  ........................................................................
-    #if GTK_VERSION_GE(3,4)
 
-        d_widget    =   gtk_grid_new();
-        gtk_grid_set_column_homogeneous( GTK_GRID(d_widget), FALSE );
-
-    #else
-
-        d_widget    =    gtk_table_new( _n_rows, _n_columns, _homogeneous );
-
-    #endif
-}
-Matrix::~Matrix()
-{
-}
-void
-Matrix::attach(GtkWidget* _child, guint32 _left, guint32 _top, GtkAttachOptions _xopt, GtkAttachOptions _yopt, guint _xpadding, guint _ypadding)
-{
-    #if GTK_VERSION_GE(3,4)
-
-        GtkWidget   *   w       =   _child;
-        GtkWidget   *   hbox    =   NULL;
-        GtkWidget   *   vbox    =   NULL;
-
-        if ( ( _xopt == GTK_SHRINK ) && ( _yopt != GTK_SHRINK ) )
-        {
-            gtk_widget_set_hexpand( _child, FALSE );
-            hbox = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, FALSE );
-            gtk_box_pack_start( GTK_BOX(hbox), _child, FALSE, FALSE, 0 );
-            w   =   hbox;
-        }
-
-        if ( ( _xopt != GTK_SHRINK ) && ( _yopt == GTK_SHRINK ) )
-        {
-            gtk_widget_set_vexpand( _child, FALSE );
-            vbox = gtk_box_new( GTK_ORIENTATION_VERTICAL, FALSE );
-            gtk_box_pack_start( GTK_BOX(vbox), _child, FALSE, FALSE, 0 );
-            w   =   vbox;
-        }
-
-        if ( ( _xopt == GTK_SHRINK ) && ( _yopt == GTK_SHRINK ) )
-        {
-            gtk_widget_set_hexpand( _child, FALSE );
-            gtk_widget_set_vexpand( _child, FALSE );
-
-            hbox = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, FALSE );
-            vbox = gtk_box_new( GTK_ORIENTATION_VERTICAL, FALSE );
-
-            gtk_box_pack_start( GTK_BOX(hbox), _child, FALSE, FALSE, 0 );
-            gtk_box_pack_start( GTK_BOX(vbox), hbox, FALSE, FALSE, 0 );
-
-            w   =   vbox;
-        }
-
-        gtk_grid_attach( GTK_GRID(widget()), w, _left, _top, 1, 1 );
-
-    #else
-
-        gtk_table_attach( GTK_TABLE(widget()), _child, (guint)_left, (guint)_left + 1, (guint)_top, (guint)_top + 1, _xopt, _yopt, _xpadding, _ypadding );
-
-    #endif
-}
-
-}   // namespace gtk
-}   // namespace widget
-}   // namespace libgwr

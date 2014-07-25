@@ -7,7 +7,7 @@
     *                                                                           *
     *   part of libkconfig                                                      *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -107,7 +107,7 @@ Theme::Theme(
     set_cix_core        ( _log_channel_index );
     set_cix             ( _log_channel_index );
 
-    d_flavours_ix_array             =GWR_NEW_CAST( libgwr::TArray< guint32 >, 20, 2 );
+    d_flavours_ix_array             = GWR_NEW_CAST( libgwr::TArray< guint32 >, 20, 2 );
 }
 Theme::~Theme()
 {

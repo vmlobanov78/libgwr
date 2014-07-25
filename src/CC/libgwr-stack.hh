@@ -5,7 +5,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Copyright (C) 2011-2013 Guillaume Wardavoir                             *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -133,51 +133,6 @@ StackGS< T >::peek(T& __t)
     return TRUE;
 }
 
-/*
-/// ****************************************************************************
-//!
-//! \class  PStack
-//!
-//! \brief  Simple template stack class. The reset method free all elements in
-//!     the stack.
-//!
-/// ****************************************************************************
-template < typename T >
-class PStack : public libgwr::Stack< T >                                        //  _GWR_TODO_ : use GPtrArray
-{
-    public:
-    inline      void        reset   (eFreeMode);
-};
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template        < typename T >
-inline          void
-PStack< T >::reset(eFreeMode _fm)
-{
-    guint32 i = 0;
-    //  ........................................................................
-    if ( _fm == e_free_none )
-        goto lab_reset;
-
-    if ( _fm == e_free_g_free )
-        for ( guint32 i = 0 ; i != this->a_card ; i ++ )                        //  _GWR_GCC_BUG_ 'this->' is mandatory !
-            g_free( (void*)g_array_index( this->d_array, T, i ) );
-
-    if ( _fm == e_free_delete )
-        for ( guint32 i = 0 ; i != this->a_card ; i ++ )
-            delete g_array_index( this->d_array, T, i );
-
-lab_reset:
-    Stack< T >::reset();
-}
-enum eFreeMode
-{
-    e_free_none     = 0,
-    e_free_g_free   = 1,
-    e_free_delete   = 2
-};
-
-
-*/
 
 
 
