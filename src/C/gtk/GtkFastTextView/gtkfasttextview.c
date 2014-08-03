@@ -104,7 +104,7 @@ typedef struct _GtkFastTextViewPrivate  GtkFastTextViewPrivate;
 
 struct _GtkFastTextViewPrivate
 {
-    GwrFastTextBuffer    *   buffer;                                             //!< The buffer we get text to display from
+    GwrFastTextBuffer    *   buffer;                                            //!< The buffer we get text to display from
 
     guint8                  cR[32];                                             //!< Colors allowed for display, Red  component
     guint8                  cG[32];                                             //!< Colors allowed for display, Green component
@@ -377,14 +377,14 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
     static  gchar                       text    [4096];
 
     static  GtkFastTextViewPrivate  *   vp      =   NULL;
-    static  GwrFastTextBuffer        *   b       =   NULL;
-    static  GwrFastTextBufferPrivate *   bp      =   NULL;
+    static  GwrFastTextBuffer       *   b       =   NULL;
+    static  GwrFastTextBufferPrivate*   bp      =   NULL;
     static  GftvHandleProps         *   vhp     =   NULL;
     static  GftvHandleProps         *   hhp     =   NULL;
 
     static  cairo_surface_t         *   surface;
 
-    GwrFastTextBufferLine                line;
+    GwrFastTextBufferLine               line;
     guint16                             ll;
 
     static  double                      clip_x1, clip_y1, clip_x2, clip_y2;     //  cairo drawing area
@@ -439,11 +439,6 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
                     ( clip_y1 + clip_height) - GTK_FAST_TEXT_VIEW_HBAR_AREA_THICKNESS :
                     0;
 
-    //vhp->pos    =   10;
-    //vhp->size   =   20;
-    //hhp->pos    =   10;
-    //hhp->size   =   20;
-
     vhp->x      =   sb_area_x + 1.0;
     vhp->y      =   vhp->gfx_l_start;
     vhp->w      =   GTK_FAST_TEXT_VIEW_VBAR_AREA_THICKNESS - 3.0;
@@ -488,10 +483,15 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
     //  text draw
     for ( i = 0 ; i != vp->width_char_y ; i++ )
     {
-        if ( ! gwr_fast_text_buffer_get_line( b, y0 + i, &line ) )                //  no more lines
+        if ( ! gwr_fast_text_buffer_get_line( b, y0 + i, &line ) )              //  no more lines
             break;
 
-        ll = line.a_attr.a_ln;
+        if ( line.a_attr.a_xd )
+        {
+            printf("xd:%i\n", line.a_attr.a_xd);
+        }
+
+        ll = line.a_str_len;
 
         if ( x0 > (guint32)( ll - 1 ) )                                         //  not enough chars in string to reach the cairo clip
             continue;
@@ -501,6 +501,7 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
         memcpy( text, line.a_str + x0, w3 );                                    //  copy text
         text[w3] = 0;                                                           //  add final 0
 
+        //  cairo rgb are between 0.0 and 1.0
         cairo_set_source_rgb(
             cr                                              ,
             (gdouble)vp->cR[ line.a_attr.a_fg ] / 256.0     ,
@@ -760,7 +761,9 @@ static  void        gtk_fast_text_view_SIGNAL_map(
     //  before gtk_fast_text_view_recompute_adjustments() or gtk_fast_text_view_compute_chars_capacity().
     //  So at first display of widget, we do a whole computation
 
-    //printf("gtk_fast_text_view_SIGNAL_map()\n");
+    GdkWindow* ww = gtk_widget_get_window (_w);
+
+    printf("gtk_fast_text_view_SIGNAL_map():%p\n", ww);
 
     g_return_if_fail( GTK_IS_FAST_TEXT_VIEW(_w) );
 

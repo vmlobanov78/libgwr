@@ -45,17 +45,22 @@ struct  _GwrFastTextBufferLineAttr
 {
     guint8          a_fg;                                                       //!< Foreground color
     guint8          a_bg;                                                       //!< Background color
-    guint16         a_st;                                                       //!< Style infos
-    guint16         a_ln;                                                       //!< String len
+    guint8          a_st;                                                       //!< Style infos
+    guint8          a_xd;
 };
 
 typedef struct  _GwrFastTextBufferLine       GwrFastTextBufferLine;
 
 struct  _GwrFastTextBufferLine
 {
-    GwrFastTextBufferLineAttr        a_attr;
+    GwrFastTextBufferLineAttr       a_attr;
+
     gchar                       *   a_str;                                      //!< String
-}   __attribute__ ((packed));
+    guint16                         a_str_len;
+
+    gpointer                        a_extra_data;
+    guint16                         a_extra_data_len;
+};
 
 extern      guint32     GwrFastTextBufferLine_S;
 //  ----------------------------------------------------------------------------
@@ -73,62 +78,58 @@ struct  _GwrFastTextBufferStat
     GwrCArrayDataMultiStat  lt;
     GwrCArrayEqualStat      ld;
 };
+
 //  ============================================================================
 #if ( __cplusplus )
 extern "C" {
 #endif
 
-/*
-extern  inline  guint16                 gwr_fast_text_buffer_line_get_length      (
-            GwrFastTextBufferLine    *       _line           );
+extern          GwrFastTextBuffer   *   gwr_fast_text_buffer_new                (
+                guint32                     _lines_text_block_size              ,
+                guint32                     _lines_text_blocks_storage_capacity ,
+                guint32                     _lines_text_blocks_storage_realloc  ,
+                guint32                     _lines_text_infos_storage_capacity  ,
+                guint32                     _lines_text_infos_storage_realloc   ,
 
-extern  inline  void                    gwr_fast_text_buffer_line_set_length      (
-            GwrFastTextBufferLine    *       _line           ,
-            guint16                         _len            );
+                guint32                     _lines_desc_infos_blocks_storage_capacity   ,
+                guint32                     _lines_desc_infos_blocks_storage_realloc    ,
 
-extern  inline  void                    gwr_fast_text_buffer_line_add_length      (
-            GwrFastTextBufferLine    *       _line           ,
-            guint16                         _add            );
-
-extern  inline  guint16                 gwr_fast_text_buffer_line_get_style       (
-            GwrFastTextBufferLine    *       _line           );
-*/
-extern  inline  void                    gwr_fast_text_buffer_line_set_attributes(
-            GwrFastTextBufferLine    *       _line           ,
-            guint32                         _attributes     );
-
-#if ( __cplusplus )
-}
-#endif
-//  ============================================================================
-#if ( __cplusplus )
-extern "C" {
-#endif
-
-extern          GwrFastTextBuffer    *   gwr_fast_text_buffer_new               (
-            guint32                         _lines_text_block_size      ,
-            guint32                         _lines_text_blocks_realloc  ,
-            guint32                         _lines_text_infos_realloc   ,
-            guint32                         _lines_desc_realloc         );
+                guint32                     _extra_data_block_size              ,
+                guint32                     _extra_data_blocks_storage_capacity ,
+                guint32                     _extra_data_blocks_storage_realloc  ,
+                guint32                     _extra_data_infos_storage_capacity  ,
+                guint32                     _extra_data_infos_storage_realloc   );
 
 extern          void                    gwr_fast_text_buffer_reset              (
-            GwrFastTextBuffer        *       _buffer         );
+            GwrFastTextBuffer       *       _buffer         );
 
 extern          gboolean                gwr_fast_text_buffer_get_line           (
-            GwrFastTextBuffer        *       _buffer         ,
+            GwrFastTextBuffer       *       _buffer         ,
             guint32                         _line_index     ,
-            GwrFastTextBufferLine    *       _line           );
+            GwrFastTextBufferLine   *       _line           );
 
 extern          void                    gwr_fast_text_buffer_add_line           (
-            GwrFastTextBuffer        *       _buffer         ,
+            GwrFastTextBuffer       *       _buffer         ,
     const   gchar*                          _text           ,
             guint8                          _fg             ,
             guint8                          _bg             ,
             guint16                         _st             );
 
+extern          void                    gwr_fast_text_buffer_add_line_with_extra_data   (
+            GwrFastTextBuffer       *       _buffer         ,
+    const   gchar                   *       _text           ,
+            guint8                          _fg             ,
+            guint8                          _bg             ,
+            guint16                         _st             ,
+            gpointer                        _extra_data     ,
+            guint16                         _extra_data_len );
+
+extern      void                        gwr_fast_text_buffer_dump(
+            GwrFastTextBuffer       *       _buffer    );
+
 extern          void                    gwr_fast_text_buffer_get_stats          (
-            GwrFastTextBuffer        *       _buffer ,
-            GwrFastTextBufferStat    *       _s      );
+            GwrFastTextBuffer       *       _buffer ,
+            GwrFastTextBufferStat   *       _s      );
 
 #if ( __cplusplus )
 }

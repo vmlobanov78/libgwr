@@ -35,10 +35,13 @@
 #include    <gtk/gtk.h>
 #include    <string.h>
 #include    <sys/times.h>
+#include    "C/arrays/libgwrc-array-data-block.h"
 #include    "C/gtk/GtkFastTextView/gtkfasttextview.h"
+
 //  ............................................................................
 gchar           SampleText  [1024];
-guint32         Iterations          =   20000;
+gchar           SampleData  [1024];
+guint32         Iterations          =   1;
 gboolean        Use_colors          =   FALSE;
 //  ............................................................................
 GwrFastTextBuffer   *   tb1     =   NULL;
@@ -74,22 +77,30 @@ struct timespec Delta2;
 gchar           Str     [1024];
 gchar           Temp    [1024];
 gchar           Str_ns  [1024];
+//  ############################################################################
+//  main DEMO
+//  ############################################################################
+
 //  ............................................................................
 void Format_ns(long _ns)
 {
     if ( _ns < 1000 )
     {
-        sprintf ( Temp      , "%i", _ns);
+        sprintf ( Temp      , "%ld", _ns);
         strcat  ( Str_ns    , Temp );
         return;
     }
 
     Format_ns(_ns / 1000 );
 
-    sprintf ( Temp, ".%03i", _ns % 1000);
+    sprintf ( Temp, ".%03ld", _ns % 1000);
     strcat  ( Str_ns, Temp );
 }
 //  ............................................................................
+void    Dump_fast_buffer()
+{
+    gwr_fast_text_buffer_dump(tb1);
+}
 void    Get_user_settings()
 {
     Iterations  =   (guint32)( gtk_spin_button_get_value( GTK_SPIN_BUTTON(w_frm_spin_nlines) ) );
@@ -118,7 +129,7 @@ void    Chrono_stop()
     Str_ns[0] = 0;
     Format_ns( Delta.tv_nsec / 1000000 );
 
-    sprintf(Str, "elapsed:(s):%i (ms):%s", Delta.tv_sec, Str_ns);
+    sprintf(Str, "elapsed:(s):%ld (ms):%s", Delta.tv_sec, Str_ns);
 }
 //  ............................................................................
 void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
@@ -138,10 +149,13 @@ void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
         if ( Use_colors )
         {
 
+            sprintf(SampleData, "http://%05i", i);
+
             switch ( i % 3 )
             {
 
-            case    0   :   gwr_fast_text_buffer_add_line(tb1, SampleText, 1, 0, 0);    break;
+            //case    0   :   gwr_fast_text_buffer_add_line(tb1, SampleText, 1, 0, 0);    break;
+            case    0   :   gwr_fast_text_buffer_add_line_with_extra_data(tb1, SampleText, 1, 0, 0, SampleData, 12);    break;
             case    1   :   gwr_fast_text_buffer_add_line(tb1, SampleText, 2, 0, 0);    break;
             case    2   :   gwr_fast_text_buffer_add_line(tb1, SampleText, 3, 0, 0);    break;
 
@@ -181,6 +195,8 @@ void    Signal_button2_clicked(GtkWidget* _w, gpointer _data)
         if ( Use_colors )
         {
 
+            sprintf(SampleData, "http://%05i", i);
+
             switch ( i % 3 )
             {
 
@@ -207,20 +223,14 @@ void    Signal_button2_clicked(GtkWidget* _w, gpointer _data)
 //  ............................................................................
 int main( int argc, char *argv[])
 {
+
     //  ........................................................................
+
     gtk_init(&argc, &argv);
-    /*
-    tb  =   gwr_fast_text_buffer_new               (
-            guint32                         _lines_text_block_size      ,
-            guint32                         _lines_text_blocks_realloc  ,
-            guint32                         _lines_text_infos_realloc   ,
-            guint32                         _lines_desc_realloc         );
-    */
     tb1 =   gwr_fast_text_buffer_new               (
-                                            1024                        ,
-                                            3                           ,
-                                            1024                        ,
-                                            1024                        );
+                                            100, 1, 1, 1, 1            ,
+                                            1, 1                        ,
+                                            100, 1, 1, 1, 1             );
     //  ........................................................................
     tb2_tag_r   =   gtk_text_tag_new("CR");
     tb2_tag_g   =   gtk_text_tag_new("CG");
@@ -241,7 +251,8 @@ int main( int argc, char *argv[])
 
             w_frm_grid          =   gtk_grid_new();
             w_frm_chk_colors    =   gtk_check_button_new_with_label("Use colors");
-            w_frm_spin_nlines   =   gtk_spin_button_new_with_range(1000.0, 100000.0, 1000.0);
+            //w_frm_spin_nlines   =   gtk_spin_button_new_with_range(1000.0, 100000.0, 1000.0);
+            w_frm_spin_nlines   =   gtk_spin_button_new_with_range(1.0, 100000.0, 1.0);
 
             w_hbox              =   gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -301,4 +312,40 @@ int main( int argc, char *argv[])
 
     return 0;
 }
+
+
+//  ############################################################################
+//  GwrCArrayEqual TEST
+//  ############################################################################
+/*
+int main( int argc, char *argv[])
+{
+    //  ........................................................................
+    guint32             i       =   0;
+    gchar               tmp[256]  ;
+    gchar               str[4]  ;
+    gchar           *   ttr  ;
+    GwrCADBlock24   *   dbk24   =   NULL;
+
+    GwrCArrayEqual  *   aeq     =   NULL;
+    //  ........................................................................
+    aeq = gwr_array_equal_new("test", 4, 2, 2);
+
+    for ( i = 0 ; i != 10 ; i ++ )
+    {
+        sprintf( tmp, "%04i", i);
+        memcpy(str, tmp, 4 );
+        gwr_array_equal_add_data( aeq, str );
+        gwr_array_equal_dump( aeq );
+    }
+
+    for ( i = 0 ; i != 10 ; i ++ )
+    {
+        ttr = (gchar*)gwr_array_equal_get_data( aeq, i );
+
+        printf("i[%03i]:%c%c%c%c\n", i, ttr[0], ttr[1], ttr[2], ttr[3] );
+    }
+    return 0;
+}
+*/
 

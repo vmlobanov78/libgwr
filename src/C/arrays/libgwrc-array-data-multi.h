@@ -50,19 +50,6 @@ struct  _GwrCADMData
     guint16     a_size;                                                         //!< Data size
 };
 //  ............................................................................
-typedef struct  _GwrCADMBlock           GwrCADMBlock;
-//! \struct _GwrCADMBlock
-//!
-//! \brief  Block of data that maintain the count of used bytes in it.
-struct  _GwrCADMBlock
-{
-    gpointer    d_mem;                                                          //!< Base memory
-    guint32     a_size;                                                         //!< Size ( in bytes )
-    guint32     a_used_bytes;                                                   //!< Size ( in bytes ) of used bytes
-};
-
-extern  guint32     GwrCADMBlock_S;                                             //!< Sizeof struct GwrCADMBlock
-//  ............................................................................
 typedef struct  _GwrCADMDataInfo        GwrCADMDataInfo;
 //! \struct _GwrCADMDataInfo
 //!
@@ -74,7 +61,7 @@ struct  _GwrCADMDataInfo
     guint16     a_len;                                                          //!< Len    of data in the GwrCADMBlock
 };
 
-extern  guint32     GwrCADMDataInfo_S;                                          //!< Sizeof struct GwrCADMDataInfo
+extern  guint32     GwrCADMDataInfo_SSIZE;                                      //!< Sizeof struct GwrCADMDataInfo
 //  ............................................................................
 typedef struct  _GwrCArrayDataMulti     GwrCArrayDataMulti;
 //! \struct _GwrCArrayDataMulti
@@ -82,11 +69,11 @@ typedef struct  _GwrCArrayDataMulti     GwrCArrayDataMulti;
 //! \brief  Array containing datas of any sizes.
 struct  _GwrCArrayDataMulti
 {
-    GwrCArrayEqual  *   d_blocks;                                               //!< Array of GwrCADMBlocks
-    GwrCArrayEqual  *   d_infos;                                                //!< Array of GwrCADMDataInfos
+    GwrCArrayEqual    *   d_blocks;                                       //!< Array of GwrCADMBlock24 structs
+    GwrCArrayEqual    *   d_infos;                                        //!< Array of GwrCADMDataInfo structs
 
-    guint32             a_block_size;                                           //!< Size ( in bytes ) that GwrCADMBlock can contain
-    guint32             a_data_size;                                            //!< Size ( in bytes ) of all the datas contained in the GwrCADMBlocks
+    guint32                     a_blocks_size;                                  //!< Size ( in bytes ) of GwrCADMBlock24
+    guint32                     a_data_size;                                    //!< Size ( in bytes ) of all the datas contained in the GwrCADMBlocks
 };
 //  ............................................................................
 typedef struct  _GwrCArrayDataMultiStat GwrCArrayDataMultiStat;
@@ -111,13 +98,12 @@ struct  _GwrCArrayDataMultiStat
 extern "C" {
 #endif
 
-extern          void                    gwr_array_data_multi_dump               (
-            GwrCArrayDataMulti      *       _adm            );
-
 extern          GwrCArrayDataMulti  *   gwr_array_data_multi_new                (
-            guint32                         _data_block_size    ,
-            guint32                         _blocks_realloc     ,
-            guint32                         _infos_realloc      );
+            guint32                         _blocks_size                ,
+            guint32                         _blocks_storage_capacity    ,
+            guint32                         _blocks_storage_realloc     ,
+            guint32                         _infos_storage_capacity     ,
+            guint32                         _infos_storage_realloc      );
 
 extern          void                    gwr_array_data_multi_delete             (
             GwrCArrayDataMulti      *       _adm            );
@@ -125,15 +111,37 @@ extern          void                    gwr_array_data_multi_delete             
 extern          void                    gwr_array_data_multi_reset              (
             GwrCArrayDataMulti      *       _adm            );
 
-extern          gboolean                gwr_array_data_multi_add_data           (
+extern          void                    gwr_array_data_multi_add_data           (
             GwrCArrayDataMulti      *       _adm            ,
             gpointer                        _data           ,
-            guint16                         _len            );
+            guint16                         _data_len       );
 
-extern          gboolean                gwr_array_data_multi_get_data           (
+extern          void                    gwr_array_data_multi_add_data_and_extra_data_index  (
+            GwrCArrayDataMulti      *       _adm                ,
+            gpointer                        _data               ,
+            guint16                         _len                ,
+            guint32                         _extra_data_index   ,
+            guint8                  *       _xdi_len            );
+
+extern          void                    gwr_array_data_multi_get_data                   (
             GwrCArrayDataMulti      *       _adm            ,
             guint32                         _data_index     ,
             GwrCADMData             *       _data           );
+
+extern          gboolean                gwr_array_data_multi_get_data_and_gpointer      (
+            GwrCArrayDataMulti      *       _adm                ,
+            guint32                         _data_index         ,
+            GwrCADMData             *       _data               ,
+            gpointer                *       _gpointer           );
+
+extern          void                    gwr_array_data_multi_dump               (
+            GwrCArrayDataMulti      *       _adm            );
+
+extern          void                    gwr_array_data_multi_dump_datas         (
+            GwrCArrayDataMulti      *       _adm            );
+
+extern          void                    gwr_array_data_multi_dump_infos         (
+            GwrCArrayDataMulti      *       _adm            );
 
 extern          void                    gwr_array_data_multi_get_stats          (
             GwrCArrayDataMulti      *       _adm                        ,

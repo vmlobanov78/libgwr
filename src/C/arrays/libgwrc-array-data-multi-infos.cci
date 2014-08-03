@@ -1,0 +1,132 @@
+/*
+    *****************************************************************************
+    *                                                                           *
+    *   libgwrc-array-data-multi-infos.cci                                      *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Part of libwgwr                                                         *
+    *                                                                           *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   This program is free software; you can redistribute it and/or modify    *
+    *   it under the terms of the GNU General Public License as published by    *
+    *   the Free Software Foundation; either version 2 of the License, or       *
+    *   (at your option) any later version.                                     *
+    *                                                                           *
+    *   This program is distributed in the hope that it will be useful,         *
+    *   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+    *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+    *   GNU General Public License for more details.                            *
+    *                                                                           *
+    *   You should have received a copy of the GNU General Public License       *
+    *   along with this program; if not, write to the Free Software             *
+    *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,   *
+    *   USA.                                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Purpose :   Array containing datas of any sizes.                        *
+    *                                                                           *
+    *****************************************************************************
+*/
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_dump_datas()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_dump_datas(
+        GwrCArrayDataMulti  *           _adm            )
+{
+    guint32                     i   =   0;
+    GwrCADBlock24           *   b   =   NULL;
+
+    guint32                     s1  =   0;
+    //  ........................................................................
+    printf("--- GwrCArrayDataMulti : Dumping data blocks ---\n");
+    gwr_array_equal_dump( _adm->d_blocks );
+    for ( i = 0 ; i != _adm->d_blocks->a_data_card ; i++ )
+    {
+        b = gwr_array_equal_get_data( _adm->d_blocks, i );
+        if ( ! b )
+        {
+            printf("ERR:Block [%i] could not be obtained\n", i);
+            continue;
+        }
+
+        gwr_array_dbk24_dump( b );
+        s1  =   s1  +   gwr_array_dbk24_used_bytes( b );
+    }
+
+    printf("---> Data size [%i]\n", s1);
+}
+
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_dump_infos()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_dump_infos(
+        GwrCArrayDataMulti  *           _adm            )
+{
+    guint32                     i   =   0;
+    GwrCADMDataInfo         *   di  =   NULL;
+
+    guint32                     s2  =   0;
+    //  ........................................................................
+    printf("--- GwrCArrayDataMulti : Dumping data infos ---\n");
+    gwr_array_equal_dump( _adm->d_infos );
+    for ( i = 0 ; i != _adm->d_infos->a_data_card ; i++ )
+    {
+        di = gwr_array_equal_get_data( _adm->d_infos, i );
+        if ( ! di )
+        {
+            printf("ERR:Info [%i] could not be obtained\n", i);
+            continue;
+        }
+
+        gwr_array_data_multi_data_info_dump( di );
+        s2  =   s2  +   di->a_len;
+    }
+
+    printf("---> Data size [%i]\n", s2);
+}
+
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_dump()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_dump(
+        GwrCArrayDataMulti  *           _adm            )
+{
+    //  ........................................................................
+    printf("+---------------------------+\n");
+    printf("| GwrCArrayDataMulti:dump() |\n");
+    printf("+---------------------------+\n");
+
+    gwr_array_data_multi_dump_datas(_adm);
+    gwr_array_data_multi_dump_infos(_adm);
+
+    printf("---> Data size [%i]\n", _adm->a_data_size);
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_get_stats()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_get_stats(
+        GwrCArrayDataMulti      *       _adm                        ,
+        GwrCArrayDataMultiStat  *       _adm_stat                   )
+{
+    /*
+    _adm_stat->a_blocks_card    =   _adm->d_blocks->a_blocks_card;
+    _adm_stat->a_blocks_used    =   _adm->d_blocks->a_blocks_used;
+    _adm_stat->a_blocks_alloc   =   _adm->d_blocks->a_stat_realloc;
+
+    _adm_stat->a_descs_card     =   _adm->d_infos->a_blocks_card;
+    _adm_stat->a_descs_used     =   _adm->d_infos->a_blocks_used;
+    _adm_stat->a_descs_alloc    =   _adm->d_infos->a_stat_realloc;
+
+    _adm_stat->a_data_card      =   _adm->d_infos->a_blocks_used;
+    _adm_stat->a_data_size      =   _adm->a_data_size;
+    */
+}

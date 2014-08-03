@@ -26,7 +26,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose : Private data for GwrFastTextBuffer                             *
+    *   Purpose : Private data for GwrFastTextBuffer                            *
     *                                                                           *
     *****************************************************************************
 */
@@ -37,15 +37,15 @@
 #include    "C/arrays/libgwrc-array-data-multi.h"
 //  ............................................................................
 
-//  f   =   foreground
-//  b   =   background
-//  s   =   style
-//  l   =   length  max = 2^9 - 1 = 511
+//  f   =   foreground  ( max 32 colors )
+//  b   =   background  ( max 32 colros )
+//  s   =   style       ( max 4 flags )
+//  l   =   length      ( max = 2^9 - 1 = 511 )
+//  x   =   extra data : index size
 //
 //  76543210 76543210 76543210 76543210
 //  00000000 00000000 00000000 00000000
-//  00000000 0lllllll llssssbb bbbfffff
-//  0sssssss ssssslll llllllbb bbbfffff
+//  xxx00000 00000000 00ssssbb bbbfffff
 enum
 {
     eGFTB_LD_FG_MASK    =   (guint32)   0x0000001f      ,
@@ -54,26 +54,38 @@ enum
     eGFTB_LD_BG_MASK    =   (guint32)   0x000003e0      ,
     eGFTB_LD_BG_OFFSET  =   (guint32)   5               ,
 
-    eGFTB_LD_ST_MASK    =   (guint32)   0x00003c00      ,
+    eGFTB_LD_ST_MASK    =   (guint32)   0x0000c000      ,
     eGFTB_LD_ST_OFFSET  =   (guint32)   10              ,
 
-    eGFTB_LD_LN_MASK    =   (guint32)   0x0007fc00      ,
-    eGFTB_LD_LN_OFFSET  =   (guint32)   10
+    eGFTB_LD_XD_MASK    =   (guint32)   0xe0000000  ,
+    eGFTB_LD_XD_OFFSET  =   (guint32)   29
 };
-
-typedef struct  _GwrFastTextBufferLineDesc   GwrFastTextBufferLineDesc;
+//  ............................................................................
+typedef struct  _GwrFastTextBufferLineDesc      GwrFastTextBufferLineDesc;
 
 struct  _GwrFastTextBufferLineDesc
 {
     guint32     a_data1;
 }   __attribute__ ((packed));
+//  ............................................................................
+typedef struct  _GwrFastTextBufferLineBytes     GwrFastTextBufferLineBytes;
 
-typedef struct  _GwrFastTextBufferPrivate    GwrFastTextBufferPrivate;
+struct  _GwrFastTextBufferLineBytes
+{
+    gchar       *   a_text;
+    guint16         a_text_len;
+    guint32         a_padding;
+    guint16         a_html_offset;
+    guint16         a_html_len;
+};
+//  ............................................................................
+typedef struct  _GwrFastTextBufferPrivate       GwrFastTextBufferPrivate;
 
 struct  _GwrFastTextBufferPrivate
 {
     GwrCArrayDataMulti  *   d_lines_text;                                       //!< Contain all lines text
     GwrCArrayEqual      *   d_lines_desc;                                       //!< Contain all lines metadata
+    GwrCArrayDataMulti  *   d_extra_data;                                       //!< Contain all extra datas
 
     guint32                 lines_card;
     guint32                 lines_max_len;                                      //!< Longest line length ( in char ) in buffer

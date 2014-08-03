@@ -1,10 +1,13 @@
 # depslib dependency file v1.0
-1405190680 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi.c
+1407006673 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi.c
 	<stdio.h>
 	<string.h>
+	"libgwrc-array-data-block.h"
 	"libgwrc-array-data-multi.h"
+	"libgwrc-array-data-multi-infos.cci"
+	"libgwrc-array-data-multi-core.cci"
 
-1405190686 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi.h
+1407010040 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi.h
 	<glib.h>
 	"libgwrc-array-equal.h"
 
@@ -348,41 +351,44 @@
 	<glib/gthread.h>
 	<pthread.h>
 
-1403336800 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal.h
-	<glib.h>
+1406979140 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal.h
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-equal-simple.h"
 
-1405190690 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal.c
+1407006458 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal.c
 	<stdio.h>
 	<string.h>
+	"libgwrc-array-data-block.h"
 	"libgwrc-array-equal.h"
 
-1405778302 source:/home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.c
+1406997222 source:/home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.c
 	<string.h>
-	"libgwrc-fast-text-buffer.h"
 	"libgwrc-fast-text-buffer-private.h"
+	"libgwrc-fast-text-buffer.h"
 
-1405190774 /home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.h
+1406906308 /home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer.h
 	<glib.h>
 	"C/arrays/libgwrc-array-equal.h"
 	"C/arrays/libgwrc-array-data-multi.h"
 
-1403336800 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-equal.h
-	<glib.h>
+1406979140 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-equal.h
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-equal-simple.h"
 
-1405190686 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-multi.h
+1407010040 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-multi.h
 	<glib.h>
 	"libgwrc-array-equal.h"
 
-1405777504 /home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer-private.h
+1406646172 /home/gwr/Src/C-C++/libgwr/src/C/buffers/libgwrc-fast-text-buffer-private.h
 	"C/arrays/libgwrc-array-data-multi.h"
 
-1405757436 source:/home/gwr/Src/C-C++/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.c
+1406652234 source:/home/gwr/Src/C-C++/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.c
 	"string.h"
 	"math.h"
 	"gtkfasttextview.h"
 	"C/buffers/libgwrc-fast-text-buffer-private.h"
 
-1405190756 /home/gwr/Src/C-C++/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.h
+1406568589 /home/gwr/Src/C-C++/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.h
 	<glib-object.h>
 	<gtk/gtk.h>
 	"C/buffers/libgwrc-fast-text-buffer.h"
@@ -2487,22 +2493,94 @@
 1386191034 /usr/include/gtk-3.0/gtk/deprecated/gtkvseparator.h
 	<gtk/gtkseparator.h>
 
-1405190774 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer.h
+1406906308 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer.h
 	<glib.h>
 	"C/arrays/libgwrc-array-equal.h"
 	"C/arrays/libgwrc-array-data-multi.h"
 
-1405777504 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer-private.h
+1406646172 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer-private.h
 	"C/arrays/libgwrc-array-data-multi.h"
 
-1405835415 source:/home/gwr/Src/C-C++/libgwr/src/GtkFastTextView-demo/GtkFastTextView-demo.c
+1407041432 source:/home/gwr/Src/C-C++/libgwr/src/GtkFastTextView-demo/GtkFastTextView-demo.c
 	<gtk/gtk.h>
 	<string.h>
 	<sys/times.h>
+	"C/arrays/libgwrc-array-data-block.h"
 	"C/gtk/GtkFastTextView/gtkfasttextview.h"
 
-1405190756 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/gtk/GtkFastTextView/gtkfasttextview.h
+1406568589 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/gtk/GtkFastTextView/gtkfasttextview.h
 	<glib-object.h>
 	<gtk/gtk.h>
 	"C/buffers/libgwrc-fast-text-buffer.h"
+
+1406993094 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi-infos.cci
+
+1407008684 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-multi-core.cci
+
+1406897385 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal-simple.h
+	<glib.h>
+
+1406897385 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-equal-simple.h
+	<glib.h>
+
+1407002715 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-equal-simple.c
+	<stdio.h>
+	<string.h>
+	"libgwrc-array-equal-simple.h"
+
+1406735711 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block.h"
+
+1406880964 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-common.h
+	<glib.h>
+	<string.h>
+	<stdio.h>
+
+1406880873 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block.h
+	<glib.h>
+	"libgwrc-array-data-block16.h"
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-data-block32.h"
+
+1406897125 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block16.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block16.h"
+
+1406887786 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block16.h
+	"libgwrc-array-common.h"
+
+1406905254 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block24.h
+	"libgwrc-array-common.h"
+
+1406884967 /home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block32.h
+	"libgwrc-array-common.h"
+
+1407041276 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block24.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block24.h"
+
+1406881006 source:/home/gwr/Src/C-C++/libgwr/src/C/arrays/libgwrc-array-data-block32.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block32.h"
+
+1406880873 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-block.h
+	<glib.h>
+	"libgwrc-array-data-block16.h"
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-data-block32.h"
+
+1406887786 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-block16.h
+	"libgwrc-array-common.h"
+
+1406880964 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-common.h
+	<glib.h>
+	<string.h>
+	<stdio.h>
+
+1406905254 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-block24.h
+	"libgwrc-array-common.h"
+
+1406884967 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-block32.h
+	"libgwrc-array-common.h"
 

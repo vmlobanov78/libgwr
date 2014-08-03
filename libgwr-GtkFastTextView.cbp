@@ -40,7 +40,6 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -52,17 +51,59 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=gnu99" />
 			<Add option="-fno-exceptions" />
+			<Add option="-fno-rtti" />
 			<Add option="-Wno-unused-label" />
 			<Add option="-Wno-unused-but-set-variable" />
 			<Add option="`pkg-config --cflags gtk+-$(CB_GTK_VERSION)`" />
 			<Add directory="/home/gwr/Src/C-C++/libgwr/libgwr-1.0" />
 		</Compiler>
+		<Unit filename="src/C/arrays/libgwrc-array-common.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block16.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block16.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block24.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block24.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block32.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block32.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi-core.cci">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi-infos.cci">
+			<Option virtualFolder="src/" />
+		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-multi.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-multi.h">
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal-simple.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal-simple.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-equal.c">
