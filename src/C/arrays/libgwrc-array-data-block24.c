@@ -172,10 +172,10 @@ gwr_array_dbk24_add(
         gpointer                        _data           ,
         guint32                         _data_size      )
 {
-    guint32     a   =   gwr_array_dbk24_available_bytes(_dbk24);
-    guint32     u   =   Gwr_array_dbk24_get_blob_used_bytes(_dbk24);
+    //D guint32     a   =   gwr_array_dbk24_available_bytes(_dbk24);
+    //D guint32     u   =   Gwr_array_dbk24_get_blob_used_bytes(_dbk24);
     //  ........................................................................
-    //printf("* gwr_array_dbk24_add(%i):a[%i] u[%i]\n", _data_size, a, u );
+    //D printf("* gwr_array_dbk24_add(%i):a[%i] u[%i]\n", _data_size, a, u );
 
     memcpy(
         _dbk24->d_mem + Gwr_array_dbk24_get_blob_used_bytes(_dbk24) ,
@@ -184,7 +184,7 @@ gwr_array_dbk24_add(
 
     Gwr_array_dbk24_set_blob_used_bytes( _dbk24, Gwr_array_dbk24_get_blob_used_bytes(_dbk24) + _data_size );
 
-    //gwr_array_dbk24_dump( _dbk24 );
+    //D gwr_array_dbk24_dump( _dbk24 );
 }
 //  ----------------------------------------------------------------------------
 //  gwr_array_dbk24_add_with_extra_data_index()
@@ -227,4 +227,17 @@ gwr_array_dbk24_dump(
             Gwr_array_dbk24_get_blob_size(_dbk24)       -
             Gwr_array_dbk24_get_blob_used_bytes(_dbk24) );
 }
+//  ----------------------------------------------------------------------------
+//  gwr_array_dbk24_get_mfp()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_dbk24_get_mfp(
+        GwrCADBlock24           *       _dbk24          ,
+        GwrCAMFP                *       _out            )
+{
+    _out->a_ss  =   sizeof( GwrCADBlock24 );
+    _out->a_sa  =   (guint32)Gwr_array_dbk24_get_blob_size(_dbk24);
+    _out->a_su  =   (guint32)Gwr_array_dbk24_get_blob_used_bytes(_dbk24);
+}
+
 

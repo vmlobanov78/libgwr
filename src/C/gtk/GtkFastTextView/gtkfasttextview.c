@@ -33,6 +33,15 @@
     *                                                                           *
     *****************************************************************************
 */
+                                                                                /*
+--------------------------------------------------------------------------------
+                            GENERAL REMARKS
+
+*   We connect to "key-press-event" only to keep the focus, by returning
+    TRUE from our handler
+
+--------------------------------------------------------------------------------
+                                                                                */
 
 #include    "string.h"
 #include    "math.h"
@@ -104,7 +113,12 @@ typedef struct _GtkFastTextViewPrivate  GtkFastTextViewPrivate;
 
 struct _GtkFastTextViewPrivate
 {
-    GwrFastTextBuffer    *   buffer;                                            //!< The buffer we get text to display from
+    GwrFastTextBuffer   *   buffer;                                             //!< The buffer we get text to display from
+
+    GdkWindow           *   a_gdk_window;
+    guint32                 a_cursor_current;
+
+    GtkFastTextViewXdCallback   a_xd_callback;
 
     guint8                  cR[32];                                             //!< Colors allowed for display, Red  component
     guint8                  cG[32];                                             //!< Colors allowed for display, Green component
@@ -134,21 +148,31 @@ static  void        gtk_fast_text_view_get_preferred_height(GtkWidget *widget, i
 static  void        gtk_fast_text_view_realize             (GtkWidget*);
 static  void        gtk_fast_text_view_size_allocate       (GtkWidget*, GtkAllocation*);
 static  gboolean    gtk_fast_text_view_draw                (GtkWidget*, cairo_t*);
+
+static  void        gtk_fast_text_view_dispose              (GObject* object);
+static  void        gtk_fast_text_view_finalize             (GObject* object);
 //  ****************************************************************************
 //
 //  Forward declarations - NON-GTK
 //
 //  ****************************************************************************
 static  void        gtk_fast_text_view_recompute                    (GtkFastTextView*);
-static  void        gtk_fast_text_view_compute_scrollbars           (GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*);
-static  void        gtk_fast_text_view_compute_font_dimensions      (GtkFastTextViewPrivate*, cairo_t*);
-static  void        gtk_fast_text_view_compute_chars_capacity       (GtkFastTextViewPrivate*);
+static  void        gtk_fast_text_view_compute_0_font_dimensions    (GtkFastTextViewPrivate*, cairo_t*);
+static  void        gtk_fast_text_view_compute_1_chars_capacity     (GtkFastTextViewPrivate*);
+static  void        gtk_fast_text_view_compute_2_check_offsets      (GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*);
+static  void        gtk_fast_text_view_compute_3_scrollbars         (GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*);
+
+inline static gboolean  gtk_fast_text_view_get_line_index_at_pointer(GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*, gdouble _y, guint32* _index);
+
+static  void        gtk_fast_text_view_show_cursor_extra_data       (GtkWidget*, GtkFastTextViewPrivate*);
+static  void        gtk_fast_text_view_show_cursor_normal           (GtkWidget*, GtkFastTextViewPrivate*);
 
 static  void        gtk_fast_text_view_scroll_vertical_up           (GtkFastTextView*, guint32 _ymove);
 static  void        gtk_fast_text_view_scroll_vertical_down         (GtkFastTextView*, guint32 _ymove);
 //  ----------------------------------------------------------------------------
 static  void        gtk_fast_text_view_SIGNAL_map                   (GtkWidget*, gpointer                 );
 
+static  gboolean    gtk_fast_text_view_SIGNAL_key_press_event       (GtkWidget*, GdkEventKey*   , gpointer);
 static  gboolean    gtk_fast_text_view_SIGNAL_key_release_event     (GtkWidget*, GdkEventKey*   , gpointer);
 
 static  gboolean    gtk_fast_text_view_SIGNAL_button_press_event    (GtkWidget*, GdkEvent*      , gpointer);
@@ -167,6 +191,9 @@ G_DEFINE_TYPE(GtkFastTextView, gtk_fast_text_view, GTK_TYPE_WIDGET);
 static void
 gtk_fast_text_view_class_init(GtkFastTextViewClass* _klass)
 {
+    GdkDisplay      *   display     =   gdk_display_get_default();
+    GError          *   ge          =   NULL;
+    //  ........................................................................
     // Override GtkWidget methods
     GtkWidgetClass* widget_class        = GTK_WIDGET_CLASS(_klass);
     widget_class->get_preferred_width   = gtk_fast_text_view_get_preferred_width;  //!< Minimal & natural sizes
@@ -175,10 +202,31 @@ gtk_fast_text_view_class_init(GtkFastTextViewClass* _klass)
     widget_class->draw                  = gtk_fast_text_view_draw;                 //!< For drawing the model's content
     widget_class->realize               = gtk_fast_text_view_realize;              //!< For creating a GdkWindow
 
+    G_OBJECT_CLASS(_klass)->dispose     = gtk_fast_text_view_dispose;
+    G_OBJECT_CLASS(_klass)->finalize    = gtk_fast_text_view_finalize;
+
+    _klass->cursors.normal      =   gdk_cursor_new( GDK_LEFT_PTR );
+    _klass->cursors.xd_pixbuf   =   gdk_pixbuf_new_from_file("raw/img/hand2.png", &ge );
+    if ( ! ge )
+    {
+        _klass->cursors.xd      =   gdk_cursor_new_from_pixbuf(display, _klass->cursors.xd_pixbuf,0,0);
+    }
+    else
+    {
+        _klass->cursors.xd      =   gdk_cursor_new(GDK_HAND2);
+    }
     //  Override GtkContainer methods : empty
 
     //  Add private indirection member
 	g_type_class_add_private(_klass, sizeof(GtkFastTextViewPrivate));
+
+    //  Define a custom signal for extra data
+    //sid =   g_signal_new(
+    //            "gftw-extra-data-callback",
+    //            G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST,
+    //            0, NULL, NULL,
+    //            g_cclosure_marshal_VOID__POINTER,
+    //            G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_init()
@@ -204,15 +252,20 @@ gtk_fast_text_view_init(GtkFastTextView *_textview)
     priv->font_width        =   0.0;
     priv->font_height       =   0.0;
 
-    priv->vhp.drag_on      =   FALSE;
-    priv->vhp.offset       =   0;
+    priv->vhp.drag_on       =   FALSE;
+    priv->vhp.offset        =   0;
 
-    priv->hhp.drag_on      =   FALSE;
-    priv->hhp.offset       =   0;
+    priv->hhp.drag_on       =   FALSE;
+    priv->hhp.offset        =   0;
+
+    priv->a_cursor_current  =   0;
+
+    priv->a_xd_callback     =   NULL;
 
     gtk_widget_set_can_focus( GTK_WIDGET(_textview), TRUE );
 
     g_signal_connect( _textview, "map"                  , G_CALLBACK(gtk_fast_text_view_SIGNAL_map)                , (gpointer)_textview);
+    g_signal_connect( _textview, "key-press-event"      , G_CALLBACK(gtk_fast_text_view_SIGNAL_key_press_event)    , (gpointer)_textview);
     g_signal_connect( _textview, "key-release-event"    , G_CALLBACK(gtk_fast_text_view_SIGNAL_key_release_event)  , (gpointer)_textview);
 
     g_signal_connect( _textview, "button-press-event"   , G_CALLBACK(gtk_fast_text_view_SIGNAL_button_press_event)      , (gpointer)_textview);
@@ -275,10 +328,10 @@ void            gtk_fast_text_view_realize(GtkWidget* _w)
     GdkWindowAttr       attributes;
     gint                attributes_mask;
     //  ........................................................................
-    if ( ! gtk_widget_get_has_window (_w) )
-    {
-        GTK_WIDGET_CLASS (gtk_fast_text_view_parent_class)->realize (_w);
-    }
+    if ( ! gtk_widget_get_has_window(_w) )                                      //  unuseful code
+    {                                                                           //  since GtkFastTextView
+        GTK_WIDGET_CLASS(gtk_fast_text_view_parent_class)->realize (_w);        //  has its own GdkWindow
+    }                                                                           //  - keeped as sample code -
     else
     {
         gtk_widget_set_realized( _w, TRUE );
@@ -320,7 +373,11 @@ void            gtk_fast_text_view_realize(GtkWidget* _w)
         gtk_style_context_set_background(
             gtk_widget_get_style_context (_w)   ,
             window                              );
+
+        GTK_FAST_TEXT_VIEW_PRIVATE( GTK_FAST_TEXT_VIEW(_w) )->a_gdk_window   =   window;
     }
+
+
 }
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_size_allocate()
@@ -365,6 +422,26 @@ void            gtk_fast_text_view_size_allocate(GtkWidget* _w, GtkAllocation* _
     gtk_fast_text_view_recompute(v);
 
     //printf("gtk_fast_text_view_size_allocate():%i %i %i %i\n", _allocation->x, _allocation->y, _allocation->width, _allocation->height);
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_dispose()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_dispose()
+//!
+//! \brief
+void            gtk_fast_text_view_dispose(GObject* _obj)
+{
+    G_OBJECT_CLASS(gtk_fast_text_view_parent_class)->dispose(_obj);
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_finalize()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_finalize()
+//!
+//! \brief
+void            gtk_fast_text_view_finalize(GObject* _obj)
+{
+    G_OBJECT_CLASS(gtk_fast_text_view_parent_class)->finalize(_obj);
 }
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_draw()
@@ -426,8 +503,8 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
 
         vp->font_size_changed   =   FALSE;
 
-        gtk_fast_text_view_compute_font_dimensions(vp, cr);
-        gtk_fast_text_view_compute_chars_capacity(vp);
+        gtk_fast_text_view_compute_0_font_dimensions(vp, cr);
+        gtk_fast_text_view_compute_1_chars_capacity(vp);
     }
     //printf("gtk_fast_text_view_draw():fx=%i wx=%i\n", vp->font_width, vp->width_char_x);
     //  ........................................................................
@@ -486,10 +563,6 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
         if ( ! gwr_fast_text_buffer_get_line( b, y0 + i, &line ) )              //  no more lines
             break;
 
-        if ( line.a_attr.a_xd )
-        {
-            printf("xd:%i\n", line.a_attr.a_xd);
-        }
 
         ll = line.a_str_len;
 
@@ -501,6 +574,10 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
         memcpy( text, line.a_str + x0, w3 );                                    //  copy text
         text[w3] = 0;                                                           //  add final 0
 
+        //D guint8  rr  =     vp->cR[line.a_attr.a_fg];
+        //D guint8  gg  =     vp->cG[line.a_attr.a_fg];
+        //D guint8  bb  =     vp->cB[line.a_attr.a_fg];
+
         //  cairo rgb are between 0.0 and 1.0
         cairo_set_source_rgb(
             cr                                              ,
@@ -510,8 +587,6 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
 
         cairo_move_to           (cr, 1.0, 8.0 + i * vp->font_height);
         cairo_show_text         (cr, text);
-
-        //printf("fg:%i bg:%i [%s]\n", line.a_fg, line.a_bg, text);
     }
 
     return TRUE;
@@ -524,156 +599,6 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
 //  ============================================================================
 //  RECOMPUTE
 //  ============================================================================
-//  ----------------------------------------------------------------------------
-//  gtk_fast_text_view_compute_font_dimensions()
-//  ----------------------------------------------------------------------------
-//! \fn     gtk_fast_text_view_compute_font_dimensions()
-//!
-//! \brief  Compute font dimensions.
-static  void    gtk_fast_text_view_compute_font_dimensions(
-    GtkFastTextViewPrivate  *   _vp    ,
-    cairo_t                 *   _cr     )
-{
-    static  cairo_font_extents_t        extents;
-    //  ........................................................................
-    cairo_font_extents      ( _cr, &extents );
-
-    _vp->font_height        =   (guint32)( extents.height          );
-    _vp->font_width         =   (guint32)( extents.max_x_advance   );
-
-    //printf("gtk_fast_text_view_compute_font_dimensions():fw=%i\n", _vp->font_width);
-}
-//  ----------------------------------------------------------------------------
-//  gtk_fast_text_view_compute_scrollbars()
-//  ----------------------------------------------------------------------------
-//! \fn     gtk_fast_text_view_compute_scrollbars()
-//!
-//! \brief  Compute scrollbars lengths & start offsets.
-static  void    gtk_fast_text_view_compute_scrollbars(
-    GtkFastTextViewPrivate      *   _vp     ,
-    GwrFastTextBufferPrivate    *   _bp     )
-{
-    gdouble                 r   =   0.0;
-    GftvHandleProps     *   vhp =   &( _vp->vhp );
-    GftvHandleProps     *   hhp =   &( _vp->hhp );
-    //  ........................................................................
-    //  allocations
-    vhp->gfx_l_space_before =   1.0;
-    vhp->gfx_l_space_after  =   1.0;
-
-    hhp->gfx_l_space_before =   1.0;
-    hhp->gfx_l_space_after  =   1.0;
-
-    vhp->gfx_l_alloc    =   MAX(
-        _vp->alloc_height
-            - vhp->gfx_l_space_before                                           //  top space
-            - vhp->gfx_l_space_after                                            //  bottom space
-            - 1.0                                                               //  HScrollBar separator
-            - GTK_FAST_TEXT_VIEW_HBAR_AREA_THICKNESS                            //  HScrollBar space
-            - 1.0   ,                                                           //  gtk resizing keep last line for him
-        0.0         );
-
-    hhp->gfx_l_alloc    =   MAX(
-        _vp->alloc_width
-            - hhp->gfx_l_space_before                                           //  left space
-            - hhp->gfx_l_space_after                                            //  right space
-            - 1.0                                                               //  VScrollBar separator
-            - GTK_FAST_TEXT_VIEW_VBAR_AREA_THICKNESS                            //  VScrollBar space
-            - 1.0   ,                                                           //  gtk resizing keep last line for him
-        0.0         );
-    //  ........................................................................
-    //  vertical scrollbar
-    if ( _bp->lines_card )
-    {
-        r                           =   (gdouble)_vp->width_char_y / (gdouble)_bp->lines_card;
-
-        vhp->gfx_l_size =   r * (gdouble)vhp->gfx_l_alloc;
-        vhp->gfx_l_size =   floor( vhp->gfx_l_size );                           //  work with rounded pixels coords
-
-        GWR_BOUND_LE( vhp->gfx_l_size, (gdouble)vhp->gfx_l_alloc            );
-        GWR_BOUND_GE( vhp->gfx_l_size, GTK_FAST_TEXT_VIEW_HANDLE_LENGTH_MIN );
-
-        //  0 <= r <= 1
-        if ( _bp->lines_card > 1 )
-            r                       =   (gdouble)vhp->offset / ( (gdouble)_bp->lines_card - 1.0 );
-        else
-            r                       =   0.0;
-
-        vhp->gfx_l_start        =   ( vhp->gfx_l_alloc - vhp->gfx_l_size ) * r;
-        vhp->gfx_l_start        =   floor( vhp->gfx_l_start );                  //  work with rounded pixels coords
-        vhp->gfx_l_start        =   vhp->gfx_l_start + 1.0;
-
-        vhp->gfx_l_start_min    =   vhp->gfx_l_space_before;
-        vhp->gfx_l_start_max    =   vhp->gfx_l_alloc - vhp->gfx_l_size + vhp->gfx_l_space_before;
-    }
-    else
-    {
-        vhp->gfx_l_size         =   vhp->gfx_l_alloc;
-        vhp->gfx_l_start        =   vhp->gfx_l_start_min;
-    }
-    //printf("compute scrollbars:V:pos=%f size=%f step=%f\n", _vp->vhp.gfx_l_start, _vp->vhp.gfx_l_size, _vp->vhp.inc_step);
-    //  ........................................................................
-    //  horizontal scrollbar
-    if ( _bp->lines_card )
-    {
-        r                           =   (gdouble)_vp->width_char_x / (gdouble)_bp->lines_max_len;
-
-        hhp->gfx_l_size =   r * (gdouble)hhp->gfx_l_alloc;
-        hhp->gfx_l_size =   floor( hhp->gfx_l_size );                           //  work with rounded pixels coords
-
-        GWR_BOUND_LE( hhp->gfx_l_size, (gdouble)hhp->gfx_l_alloc            );
-        GWR_BOUND_GE( hhp->gfx_l_size, GTK_FAST_TEXT_VIEW_HANDLE_LENGTH_MIN );
-
-        if ( _bp->lines_max_len > 1 )
-            r                       =   (gdouble)hhp->offset / ( (gdouble)_bp->lines_max_len );
-        else
-            r                       =   0.0;
-
-        hhp->gfx_l_start        =   ( hhp->gfx_l_alloc - hhp->gfx_l_size ) * r;
-        hhp->gfx_l_start        =   floor( hhp->gfx_l_start );                  //  work with rounded pixels coords
-        hhp->gfx_l_start        =   hhp->gfx_l_start + 1.0;
-
-        hhp->gfx_l_start_min    =   hhp->gfx_l_space_before;
-        hhp->gfx_l_start_max    =   hhp->gfx_l_alloc - hhp->gfx_l_size + hhp->gfx_l_space_before;
-    }
-    else
-    {
-        hhp->gfx_l_size         =   hhp->gfx_l_alloc;
-        hhp->gfx_l_start        =   hhp->gfx_l_start_min;
-    }
-    //printf("compute scrollbars:V:pos=%f size=%f step=%f\n", _vp->vhp.gfx_l_start, _vp->vhp.gfx_l_size, _vp->vhp.inc_step);
-}
-//  ----------------------------------------------------------------------------
-//  gtk_fast_text_view_compute_chars_capacity()
-//  ----------------------------------------------------------------------------
-//! \fn     gtk_fast_text_view_compute_chars_capacity()
-//!
-//! \brief  Compute the number of chars the widget can display from
-//!         screen allocation.
-static  void    gtk_fast_text_view_compute_chars_capacity(
-    GtkFastTextViewPrivate   *   _vp     )
-{
-    _vp->text_area_width    =   MAX(
-        _vp->alloc_width
-            - 1.0                                                               //  left space
-            - 1.0                                                               //  right space
-            - 1.0                                                               //  VScrollBar separator
-            - GTK_FAST_TEXT_VIEW_VBAR_AREA_THICKNESS                            //  VScrollBar space
-            - 1.0   ,                                                           //  gtk resizing keep last line for him
-        0.0         );
-
-    _vp->text_area_height   =   MAX(
-        _vp->alloc_height
-            - 1.0                                                               //  top space
-            - 1.0                                                               //  bottom space
-            - 1.0                                                               //  HScrollBar separator
-            - GTK_FAST_TEXT_VIEW_HBAR_AREA_THICKNESS                            //  HScrollBar space
-            - 1.0   ,                                                           //  gtk resizing keep last line for him
-        0.0         );
-
-    _vp->width_char_x       =   _vp->text_area_width    / _vp->font_width;
-    _vp->width_char_y       =   _vp->text_area_height   / _vp->font_height;
-}
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_recompute()
 //  ----------------------------------------------------------------------------
@@ -698,10 +623,310 @@ static  void    gtk_fast_text_view_recompute(
         return;
     //  ........................................................................
     //  text relative computations
-    gtk_fast_text_view_compute_chars_capacity(vp);
+    gtk_fast_text_view_compute_1_chars_capacity(vp);
+    //  ........................................................................
+    //  check offset values
+    gtk_fast_text_view_compute_2_check_offsets(vp, bp);
     //  ........................................................................
     //  scrollbars relative computations
-    gtk_fast_text_view_compute_scrollbars(vp, bp);
+    gtk_fast_text_view_compute_3_scrollbars(vp, bp);
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_compute_0_font_dimensions()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_compute_0_font_dimensions()
+//!
+//! \brief  Compute font dimensions.
+static  void    gtk_fast_text_view_compute_0_font_dimensions(
+    GtkFastTextViewPrivate  *   _vp    ,
+    cairo_t                 *   _cr     )
+{
+    static  cairo_font_extents_t        extents;
+    //  ........................................................................
+    cairo_font_extents      ( _cr, &extents );
+
+    _vp->font_height        =   (guint32)( extents.height          );
+    _vp->font_width         =   (guint32)( extents.max_x_advance   );
+
+    //printf("gtk_fast_text_view_compute_font_dimensions():fw=%i\n", _vp->font_width);
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_compute_1_chars_capacity()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_compute_1_chars_capacity()
+//!
+//! \brief  Compute the number of chars the widget can display from
+//!         screen allocation.
+static  void    gtk_fast_text_view_compute_1_chars_capacity(
+    GtkFastTextViewPrivate   *   _vp     )
+{
+    _vp->text_area_width    =   MAX(
+        _vp->alloc_width
+            - 1.0                                                               //  left space
+            - 1.0                                                               //  right space
+            - 1.0                                                               //  VScrollBar separator
+            - GTK_FAST_TEXT_VIEW_VBAR_AREA_THICKNESS                            //  VScrollBar space
+            - 1.0   ,                                                           //  gtk resizing keep last line for him
+        0.0         );
+
+    _vp->text_area_height   =   MAX(
+        _vp->alloc_height
+            - 1.0                                                               //  top space
+            - 1.0                                                               //  bottom space
+            - 1.0                                                               //  HScrollBar separator
+            - GTK_FAST_TEXT_VIEW_HBAR_AREA_THICKNESS                            //  HScrollBar space
+            - 1.0   ,                                                           //  gtk resizing keep last line for him
+        0.0         );
+
+    _vp->width_char_x       =   _vp->text_area_width    / _vp->font_width;
+    _vp->width_char_y       =   _vp->text_area_height   / _vp->font_height;
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_compute_2_check_offsets()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_compute_2_check_offsets()
+//!
+//! \brief  Correct offset following buffer & window size modifications.
+static  void    gtk_fast_text_view_compute_2_check_offsets(
+    GtkFastTextViewPrivate      *   _vp     ,
+    GwrFastTextBufferPrivate    *   _bp     )
+{
+    static  GftvHandleProps         *   vhp     =   NULL;
+    static  GftvHandleProps         *   hhp     =   NULL;
+    //  ........................................................................
+    vhp =   &( _vp->vhp );
+    hhp =   &( _vp->hhp );
+    //  ........................................................................
+    //  vertical offset
+
+    //  offset is after the buffer's text ! In this case, change the offset,
+    //  trying to show _vp->width_char_y lines.
+    if ( ( vhp->offset + 1 ) > _bp->lines_card )
+    {
+        //  new offset should be :
+        //
+        //      ( _bp->lines_card - 1 ) - _vp->width_char_y  + 1
+        //  =   _bp->lines_card         - _vp->width_char_y
+        //
+        //  So we test if _bp->lines_card >= _vp->width_char_y                  (1)
+        vhp->offset =   _bp->lines_card >= _vp->width_char_y    ?
+                        _bp->lines_card -  _vp->width_char_y    :
+                        0                                       ;
+    }
+    //  offset is in the the buffer's text
+    else
+    {
+        //  if buffer's last line end is before last displayable line, decrease offset
+        //
+        //  ld  =   vhp->offset     +   _vp->width_char_y - 1                   ( last displayable line index )
+        //  lb  =   _vp->lines_card -   1                                       ( last buffer line index )
+        //
+        //  So  we test  :
+        //
+        //      lb < ld
+        //  <=> _vp->lines_card - 1 < vhp->offset + _vp->width_char_y - 1
+        //  <=> _vp->lines_card     < vhp->offset + _vp->width_char_y
+        if ( _bp->lines_card < ( vhp->offset + _vp->width_char_y ) )
+        {
+            vhp->offset =   _bp->lines_card >= _vp->width_char_y    ?           //  same as (1) above
+                            _bp->lines_card -  _vp->width_char_y    :
+                            0                                       ;
+        }
+    }
+    //  ........................................................................
+    //  horizontal offset same as above, so no comments
+
+    if ( ( hhp->offset + 1 ) > _bp->lines_max_len )
+    {
+        hhp->offset =   _bp->lines_max_len >= _vp->width_char_x    ?
+                        _bp->lines_max_len -  _vp->width_char_x    :
+                        0;
+    }
+    else
+    {
+        if ( _bp->lines_max_len < ( hhp->offset + _vp->width_char_x ) )
+        {
+            hhp->offset =   _bp->lines_max_len >= _vp->width_char_x     ?
+                            _bp->lines_max_len -  _vp->width_char_x     :
+                            0                                           ;
+        }
+    }
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_compute_3_scrollbars()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_compute_3_scrollbars()
+//!
+//! \brief  Compute scrollbars lengths & start offsets.
+static  void    gtk_fast_text_view_compute_3_scrollbars(
+    GtkFastTextViewPrivate      *   _vp     ,
+    GwrFastTextBufferPrivate    *   _bp     )
+{
+    gdouble                 r   =   0.0;
+    GftvHandleProps     *   vhp =   &( _vp->vhp );
+    GftvHandleProps     *   hhp =   &( _vp->hhp );
+    //  ........................................................................
+    //  vertical scrollbar
+    {
+
+    //  ........................................................................
+    //  scrollbar allocation ( in pixels )
+    vhp->gfx_l_space_before =   1.0;
+    vhp->gfx_l_space_after  =   1.0;
+
+    vhp->gfx_l_alloc    =   MAX(
+        _vp->alloc_height
+            - vhp->gfx_l_space_before                                           //  top space
+            - vhp->gfx_l_space_after                                            //  bottom space
+            - 1.0                                                               //  HScrollBar separator
+            - GTK_FAST_TEXT_VIEW_HBAR_AREA_THICKNESS                            //  HScrollBar space
+            - 1.0   ,                                                           //  gtk resizing keep last line for him
+        0.0         );
+    //  ........................................................................
+    //  scrollbar size ( in pixels )
+    r   =   _bp->lines_card                                         ?           //  ratio [0.0;1.0] of lines the widget can display
+            (gdouble)_vp->width_char_y / (gdouble)_bp->lines_card   :
+            1.0                                                     ;
+
+    vhp->gfx_l_size =   r * (gdouble)vhp->gfx_l_alloc;                          //  apply ratio to get scrollbar size
+    vhp->gfx_l_size =   floor( vhp->gfx_l_size );                               //  ( work with rounded pixels coords )
+
+    GWR_BOUND_LE( vhp->gfx_l_size, (gdouble)vhp->gfx_l_alloc            );      //  scrollbar size limitation 1 ( unuseful  ! )
+    GWR_BOUND_GE( vhp->gfx_l_size, GTK_FAST_TEXT_VIEW_HANDLE_LENGTH_MIN );      //  scrollbar size limitation 2
+    //  ........................................................................
+    //  determine scrollbar start position
+
+    //  0 <= r <= 1
+    r   =   ( _bp->lines_card > 1 )                                     ?
+            (gdouble)vhp->offset / ( (gdouble)_bp->lines_card /*- 1.0*/ )   :
+            0.0                                                         ;
+
+    vhp->gfx_l_start_min    =   vhp->gfx_l_space_before;
+    vhp->gfx_l_start_max    =   vhp->gfx_l_alloc - vhp->gfx_l_size + vhp->gfx_l_space_before;
+
+    vhp->gfx_l_start        =   ( vhp->gfx_l_alloc - vhp->gfx_l_size ) * r;
+    vhp->gfx_l_start        =   floor( vhp->gfx_l_start );                  //  work with rounded pixels coords
+    vhp->gfx_l_start        =   vhp->gfx_l_start + 1.0;
+    }
+    //printf("compute scrollbars:V:pos=%f size=%f step=%f\n", _vp->vhp.gfx_l_start, _vp->vhp.gfx_l_size, _vp->vhp.inc_step);
+    //  ........................................................................
+    //  horizontal scrollbar
+    {
+
+    //  ........................................................................
+    //  scrollbar allocation ( in pixels )
+    hhp->gfx_l_space_before =   1.0;
+    hhp->gfx_l_space_after  =   1.0;
+
+    hhp->gfx_l_alloc    =   MAX(
+        _vp->alloc_width
+            - hhp->gfx_l_space_before                                           //  left space
+            - hhp->gfx_l_space_after                                            //  right space
+            - 1.0                                                               //  VScrollBar separator
+            - GTK_FAST_TEXT_VIEW_VBAR_AREA_THICKNESS                            //  VScrollBar space
+            - 1.0   ,                                                           //  gtk resizing keep last line for him
+        0.0         );
+
+    //  ........................................................................
+    //  scrollbar size ( in pixels )
+    if ( _bp->lines_card )
+    {
+        r   =   (gdouble)_vp->width_char_x / (gdouble)_bp->lines_max_len;
+
+        hhp->gfx_l_size =   r * (gdouble)hhp->gfx_l_alloc;
+        hhp->gfx_l_size =   floor( hhp->gfx_l_size );                           //  work with rounded pixels coords
+
+        GWR_BOUND_LE( hhp->gfx_l_size, (gdouble)hhp->gfx_l_alloc            );
+        GWR_BOUND_GE( hhp->gfx_l_size, GTK_FAST_TEXT_VIEW_HANDLE_LENGTH_MIN );
+
+        r   =   ( _bp->lines_max_len > 1 )                              ?
+                (gdouble)hhp->offset / ( (gdouble)_bp->lines_max_len )  :
+                0.0                                                     ;
+
+        hhp->gfx_l_start        =   ( hhp->gfx_l_alloc - hhp->gfx_l_size ) * r;
+        hhp->gfx_l_start        =   floor( hhp->gfx_l_start );                  //  work with rounded pixels coords
+        hhp->gfx_l_start        =   hhp->gfx_l_start + 1.0;
+
+        hhp->gfx_l_start_min    =   hhp->gfx_l_space_before;
+        hhp->gfx_l_start_max    =   hhp->gfx_l_alloc - hhp->gfx_l_size + hhp->gfx_l_space_before;
+    }
+    else
+    {
+        hhp->gfx_l_size         =   hhp->gfx_l_alloc;
+        hhp->gfx_l_start        =   hhp->gfx_l_start_min;
+    }
+    //printf("compute scrollbars:V:pos=%f size=%f step=%f\n", _vp->vhp.gfx_l_start, _vp->vhp.gfx_l_size, _vp->vhp.inc_step);
+
+    }
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_get_line_index_at_pointer()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_get_line_index_at_pointer()
+//!
+//! \brief  Get GwrFastTextBuffer's line index from pointer y coord.
+//!
+//! \return TRUE if a line exists at that index in the GwrFastTextBuffer ;
+//!     FALSE else.
+inline
+static gboolean gtk_fast_text_view_get_line_index_at_pointer(
+    GtkFastTextViewPrivate      *   _vp     ,
+    GwrFastTextBufferPrivate    *   _bp     ,
+    gdouble                         _y      ,
+    guint32                     *   _index  )
+{
+    *_index =   ( (guint32)_y ) / _vp->font_height;
+
+    *_index =   *_index +   _vp->vhp.offset;
+
+    if ( *_index < _bp->lines_card )
+        return TRUE;
+
+    return FALSE;
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_show_cursor_normal()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_show_cursor_normal()
+//!
+//! \brief  Guess.
+static  void    gtk_fast_text_view_show_cursor_normal(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
+{
+    GtkFastTextViewClass    *   klass;
+    //  ........................................................................
+    if ( _vp->a_cursor_current == 0 )
+        return;
+
+    klass   =   G_TYPE_INSTANCE_GET_CLASS(
+                    _w                              ,
+                    gtk_fast_text_view_get_type()   ,
+                    GtkFastTextViewClass            );
+
+    gdk_window_set_cursor( _vp->a_gdk_window, klass->cursors.normal );
+
+    _vp->a_cursor_current = 0;
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_show_cursor_extra_data()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_show_cursor_extra_data()
+//!
+//! \brief  Guess.
+static  void        gtk_fast_text_view_show_cursor_extra_data(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
+{
+    GtkFastTextViewClass    *   klass;
+    //  ........................................................................
+    if ( _vp->a_cursor_current == 1 )
+        return;
+
+    klass   =   G_TYPE_INSTANCE_GET_CLASS(
+                    _w                              ,
+                    gtk_fast_text_view_get_type()   ,
+                    GtkFastTextViewClass            );
+
+    gdk_window_set_cursor( _vp->a_gdk_window, klass->cursors.xd );
+
+    _vp->a_cursor_current = 1;
 }
 //  ----------------------------------------------------------------------------
 void            gtk_fast_text_view_set_color            (GtkFastTextView* _v, guint32 _color_index, guint8 _r, guint8 _g, guint8 _b)
@@ -723,21 +948,21 @@ void            gtk_fast_text_view_scroll_vertical_up   (GtkFastTextView* _v, gu
     else
         vp->vhp.offset  =   vp->vhp.offset - _ymove;
 
-    gtk_fast_text_view_compute_scrollbars(vp, (GwrFastTextBufferPrivate*)vp->buffer->priv);
+    gtk_fast_text_view_compute_3_scrollbars(vp, (GwrFastTextBufferPrivate*)vp->buffer->priv);
     gtk_widget_queue_draw(GTK_WIDGET(_v));
 }
 void            gtk_fast_text_view_scroll_vertical_down (GtkFastTextView* _v, guint32 _ymove)
 {
-    GtkFastTextViewPrivate  *   vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(_v);
-    GwrFastTextBuffer        *   b   =   vp->buffer;
-    GwrFastTextBufferPrivate *   bp  =   (GwrFastTextBufferPrivate*)(b->priv);
+    GtkFastTextViewPrivate      *   vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(_v);
+    GwrFastTextBuffer           *   b   =   vp->buffer;
+    GwrFastTextBufferPrivate    *   bp  =   (GwrFastTextBufferPrivate*)(b->priv);
     //  ........................................................................
     if ( ( vp->vhp.offset  + _ymove ) > ( bp->lines_card - vp->width_char_y ) )
         vp->vhp.offset  =   bp->lines_card - vp->width_char_y;
     else
         vp->vhp.offset  =   vp->vhp.offset + _ymove;
 
-    gtk_fast_text_view_compute_scrollbars(vp, (GwrFastTextBufferPrivate*)vp->buffer->priv);
+    gtk_fast_text_view_compute_3_scrollbars(vp, (GwrFastTextBufferPrivate*)vp->buffer->priv);
     gtk_widget_queue_draw(GTK_WIDGET(_v));
 }
 //  ============================================================================
@@ -760,11 +985,6 @@ static  void        gtk_fast_text_view_SIGNAL_map(
     //  "map" signal is connected because gtk_fast_text_view_draw() can be called
     //  before gtk_fast_text_view_recompute_adjustments() or gtk_fast_text_view_compute_chars_capacity().
     //  So at first display of widget, we do a whole computation
-
-    GdkWindow* ww = gtk_widget_get_window (_w);
-
-    printf("gtk_fast_text_view_SIGNAL_map():%p\n", ww);
-
     g_return_if_fail( GTK_IS_FAST_TEXT_VIEW(_w) );
 
     v   =   GTK_FAST_TEXT_VIEW( _w );
@@ -779,8 +999,8 @@ static  void        gtk_fast_text_view_SIGNAL_map(
     cairo_select_font_face  (c, "Monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size     (c, vp->font_size);
 
-    gtk_fast_text_view_compute_font_dimensions(vp, c);
-    gtk_fast_text_view_compute_chars_capacity(vp);
+    gtk_fast_text_view_compute_0_font_dimensions(vp, c);
+    gtk_fast_text_view_compute_1_chars_capacity(vp);
 
     cairo_destroy(c);
     cairo_surface_destroy(s);
@@ -790,6 +1010,13 @@ static  void        gtk_fast_text_view_SIGNAL_map(
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_SIGNAL_key_release_event()
 //  ----------------------------------------------------------------------------
+static gboolean     gtk_fast_text_view_SIGNAL_key_press_event(
+    GtkWidget       *   _w      ,
+    GdkEventKey     *   _evt    ,
+    gpointer            _data   )
+{
+    return TRUE;
+}
 static gboolean     gtk_fast_text_view_SIGNAL_key_release_event(
     GtkWidget       *   _w      ,
     GdkEventKey     *   _evt    ,
@@ -800,6 +1027,8 @@ static gboolean     gtk_fast_text_view_SIGNAL_key_release_event(
     GwrFastTextBuffer        *   b   =   NULL;
     gboolean                    r   =   TRUE;
     //  ........................................................................
+    //D printf("key release\n");
+
     v   =   GTK_FAST_TEXT_VIEW( _data );
     vp  =   GTK_FAST_TEXT_VIEW_PRIVATE( v );
     b   =   vp->buffer;
@@ -865,15 +1094,19 @@ static  gboolean    gtk_fast_text_view_SIGNAL_button_press_event(
     GdkEvent        *   _evt    ,
     gpointer            _data   )
 {
-    GdkEventButton          *   evb =   NULL;
-    GtkFastTextView         *   v   =   NULL;
-    GtkFastTextViewPrivate  *   vp  =   NULL;
+    GdkEventButton              *   evb =   NULL;
+    GtkFastTextView             *   v   =   NULL;
+    GtkFastTextViewPrivate      *   vp  =   NULL;
+    GwrFastTextBufferPrivate    *   bp  =   NULL;
+    GwrFastTextBufferLine           line;
+    guint32                         lix =   0;
     //  ........................................................................
     //printf("VIEW:button-press\n");
     //  ........................................................................
     evb =   (GdkEventButton*)_evt;
     v   =   (GtkFastTextView*)_data;
     vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(v);
+    bp  =   (GwrFastTextBufferPrivate*)(vp->buffer->priv);
     //  ........................................................................
     //  only button 1 is intersting for us
     if ( evb->button != 1 )
@@ -888,6 +1121,8 @@ static  gboolean    gtk_fast_text_view_SIGNAL_button_press_event(
         //printf("VBar x=%f y=%f\n", evb->x, evb->y);
         vp->vhp.drag_on         =   TRUE;
         vp->vhp.drag_start_pos  =   evb->y;
+
+        return  FALSE;
     }
     //  ........................................................................
     //  click on Horizontal ScrollBar
@@ -899,8 +1134,45 @@ static  gboolean    gtk_fast_text_view_SIGNAL_button_press_event(
         //printf("HBar x=%f y=%f\n", evb->x, evb->y);
         vp->hhp.drag_on         =   TRUE;
         vp->hhp.drag_start_pos  =   evb->x;
-    }
 
+        return  FALSE;
+    }
+    //  ........................................................................
+    //  click somewhere else
+    if ( vp->a_cursor_current == 1 )
+    {
+        printf("callback\n");
+
+        if ( gtk_fast_text_view_get_line_index_at_pointer( vp, bp, evb->y, &lix ) )
+        {
+            gwr_fast_text_buffer_get_line_and_extra_data(vp->buffer, lix, &line);
+            if ( line.a_extra_data )
+            {
+                //D printf("Extra data click:[%p][%3i][", line.a_extra_data, line.a_extra_data_len);
+                //D for ( guint32 i = 0 ; i != line.a_extra_data_len ; i++ )
+                //D {
+                //D     printf("%c", *((gchar*)(line.a_extra_data + i)) );
+                //D }
+                //D printf("]\n");
+                if ( vp->a_xd_callback )
+                {
+                    vp->a_xd_callback( line.a_extra_data, line.a_extra_data_len );
+                }
+                else
+                {
+                    g_warning( "Extra Data click but:no callback defined");
+                }
+            }
+            else
+            {
+                g_warning( "Extra Data click but:no extra data");
+            }
+        }
+        else
+        {
+            g_warning( "Extra Data click but:no line");
+        }
+    }
     //  false to propagate
     return FALSE;
 }
@@ -912,10 +1184,12 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
     GdkEvent        *   _evt    ,
     gpointer            _data   )
 {
-    GdkEventMotion          *   evm =   NULL;
-    GtkFastTextView         *   v   =   NULL;
-    GtkFastTextViewPrivate  *   vp  =   NULL;
-    GwrFastTextBufferPrivate *   bp  =   NULL;
+    GdkEventMotion              *   evm =   NULL;
+    GtkFastTextView             *   v   =   NULL;
+    GtkFastTextViewPrivate      *   vp  =   NULL;
+    GwrFastTextBufferPrivate    *   bp  =   NULL;
+    GwrFastTextBufferLine           line;
+    guint32                         line_index   =   0;
     //  ........................................................................
     //printf("VIEW:motion-notify\n");
     //  ........................................................................
@@ -924,6 +1198,7 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
     vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(v);
     bp  =   (GwrFastTextBufferPrivate*)(vp->buffer->priv);
     //  ........................................................................
+    //  we are dragging vertical scrollbar
     if ( vp->vhp.drag_on )
     {
         vp->vhp.gfx_l_start     =   vp->vhp.gfx_l_start + ( evm->y - vp->vhp.drag_start_pos );
@@ -944,8 +1219,11 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
         //printf("VBar drag offset=%i\n", vp->vhp.offset);
 
         gtk_widget_queue_draw(GTK_WIDGET(_w));
+
+        return FALSE;
     }
     //  ........................................................................
+    //  we are dragging horizontal scrollbar
     if ( vp->hhp.drag_on )
     {
         vp->hhp.gfx_l_start     =   vp->hhp.gfx_l_start + ( evm->x - vp->hhp.drag_start_pos );
@@ -965,6 +1243,35 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
 
         gtk_widget_queue_draw(GTK_WIDGET(_w));
         //printf("HBar drag %f\n", evm->x - vp->hhp.pos);
+
+        return FALSE;
+    }
+    //  ........................................................................
+    //  we are dragging nothing, test for xtra data
+    if ( gtk_fast_text_view_get_line_index_at_pointer( vp, bp, evm->y, &line_index ) )
+    {
+        gwr_fast_text_buffer_get_line_and_extra_data(vp->buffer, line_index, &line);
+
+        if ( line.a_extra_data )
+        {
+            //D printf("xtra data:%p %i\n", line.a_extra_data, line.a_extra_data_len);
+            if ( evm->x <= vp->text_area_width )
+            {
+                gtk_fast_text_view_show_cursor_extra_data(_w, vp);
+            }
+            else
+            {
+                gtk_fast_text_view_show_cursor_normal(_w, vp);
+            }
+        }
+        else
+        {
+            gtk_fast_text_view_show_cursor_normal(_w, vp);
+        }
+    }
+    else
+    {
+        gtk_fast_text_view_show_cursor_normal(_w, vp);
     }
     //  ........................................................................
     return FALSE;
@@ -981,6 +1288,10 @@ GwrFastTextBuffer*  gtk_fast_text_view_get_buffer           (GtkFastTextView* _w
 void                gtk_fast_text_view_set_font_size        (GtkFastTextView* _w, guint32 _size)
 {
     GTK_FAST_TEXT_VIEW_PRIVATE(_w)->font_size  =   _size;
+}
+void                gtk_fast_text_view_set_xd_callback      (GtkFastTextView* _w, GtkFastTextViewXdCallback _cb)
+{
+    GTK_FAST_TEXT_VIEW_PRIVATE(_w)->a_xd_callback = _cb;
 }
 //  ----------------------------------------------------------------------------
 void                gtk_fast_text_view_refresh              (GtkFastTextView* _v)

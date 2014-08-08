@@ -54,12 +54,14 @@ gwr_array_array_equal_simple_realloc(
         ( _aes->a_slots_card + _aes->a_realloc_size ) );
     g_return_val_if_fail( v, FALSE );
 
-    memcpy( v, _aes->d_mem, _aes->a_data_size * _aes->a_slots_card );            //  copy data of old array into new array
+    memcpy( v, _aes->d_mem, _aes->a_data_size * _aes->a_slots_card );           //  copy data of old array into new array
 
-    _aes->d_mem  =   v;                                                          //  replace old array with new array
+    g_free( _aes->d_mem );                                                      //  free old memory
 
-    _aes->a_slots_card      =   _aes->a_slots_card  +   _aes->a_realloc_size;    //  update blocks card
-    _aes->a_stat_realloc     =   _aes->a_stat_realloc +   1;                      //  update stat::reallocations
+    _aes->d_mem  =   v;                                                         //  replace old array with new array
+
+    _aes->a_slots_card  =   _aes->a_slots_card      +   _aes->a_realloc_size;   //  update blocks card
+    _aes->a_stat_realloc=   _aes->a_stat_realloc    +   1;                      //  update stat::reallocations
 
     return TRUE;
 }
@@ -71,13 +73,16 @@ gwr_array_array_equal_simple_realloc(
 //  ----------------------------------------------------------------------------
 GwrCArrayEqualSimple*
 gwr_array_equal_simple_new(
-        guint32                         _block_size     ,
-        guint32                         _realloc_size   )
+    const   gchar           *           _name           ,
+            guint32                     _block_size     ,
+            guint32                     _realloc_size   )
 {
     GwrCArrayEqualSimple    *   a   =   NULL;
     //  ........................................................................
     //  create  GwrCArrayEqual structure
     a                       =   (GwrCArrayEqualSimple*)g_new0( GwrCArrayEqualSimple , 1 );
+
+    a->d_name               =   g_strdup(_name);
 
     a->d_mem                =   NULL;
     a->a_data_size          =   _block_size;
@@ -96,6 +101,7 @@ gwr_array_equal_simple_delete(
         GwrCArrayEqualSimple        *       _aes             )
 {
     gwr_array_equal_simple_dealloc(_aes);
+    g_free(_aes->d_name);
     g_free( _aes );
 }
 
@@ -105,6 +111,7 @@ gwr_array_equal_simple_dealloc(
 {
     if ( _aes->d_mem )
         g_free( _aes->d_mem );
+
 }
 
 void
@@ -115,10 +122,10 @@ gwr_array_equal_simple_reset(
     _aes->a_stat_realloc    =   0;
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_equal_simple_add()
+//  gwr_array_equal_simple_add_data()
 //  ----------------------------------------------------------------------------
 void
-gwr_array_equal_simple_add(
+gwr_array_equal_simple_add_data(
         GwrCArrayEqualSimple        *       _aes     ,
         gpointer                            _data   )
 {
@@ -128,17 +135,17 @@ gwr_array_equal_simple_add(
     }
 
     memcpy(                                                                     //  copy data
-        _aes->d_mem + _aes->a_data_size * _aes->a_slots_used ,
-        _data                                               ,
-        _aes->a_data_size                                   );
+        _aes->d_mem + _aes->a_data_size * _aes->a_slots_used    ,
+        _data                                                   ,
+        _aes->a_data_size                                       );
 
     _aes->a_slots_used  =   _aes->a_slots_used  +   1;                          //  update used blocks card
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_equal_simple_addb()
+//  gwr_array_equal_simple_addb_data()
 //  ----------------------------------------------------------------------------
 gboolean
-gwr_array_equal_simple_addb(
+gwr_array_equal_simple_addb_data(
         GwrCArrayEqualSimple    *           _aes     ,
         gpointer                            _data   )
 {
@@ -157,10 +164,10 @@ gwr_array_equal_simple_addb(
     return TRUE;
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_equal_simple_get()
+//  gwr_array_equal_simple_get_data()
 //  ----------------------------------------------------------------------------
 gpointer
-gwr_array_equal_simple_get(
+gwr_array_equal_simple_get_data(
         GwrCArrayEqualSimple    *           _aes             ,
         guint32                             _block_index    )
 {
@@ -169,10 +176,10 @@ gwr_array_equal_simple_get(
     return _aes->d_mem + _aes->a_data_size * _block_index;
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_equal_simple_getb()
+//  gwr_array_equal_simple_getb_data()
 //  ----------------------------------------------------------------------------
 gboolean
-gwr_array_equal_simple_getb(
+gwr_array_equal_simple_getb_data(
         GwrCArrayEqualSimple    *           _aes             ,
         guint32                             _block_index    ,
         gpointer                            _dest           )
@@ -188,7 +195,8 @@ gwr_array_equal_simple_getb(
 //  ----------------------------------------------------------------------------
 void
 gwr_array_equal_simple_dump(
-        GwrCArrayEqualSimple    *       _aes     )
+        GwrCArrayEqualSimple    *       _aes        ,
+        gboolean                        _dump_data  )
 {
     guint32     i,j;
     gpointer    p;
@@ -201,6 +209,9 @@ gwr_array_equal_simple_dump(
         _aes->a_slots_card      ,
         _aes->a_slots_used      ,
         _aes->a_stat_realloc    );
+
+    if ( ! _dump_data )
+        return;
 
     for ( i = 0 ; i != _aes->a_slots_used ; i++ )
     {
@@ -221,8 +232,21 @@ gwr_array_equal_simple_get_stats(
         GwrCArrayEqualSimple        *       _aes             ,
         GwrCArrayEqualSimpleStat    *       _aes_stat        )
 {
-    _aes_stat->a_size_bytes     =   _aes->a_slots_card * _aes->a_data_size;
     _aes_stat->a_slots_card     =   _aes->a_slots_card;
     _aes_stat->a_slots_used     =   _aes->a_slots_used;
     _aes_stat->a_realloc        =   _aes->a_stat_realloc;
+
+    gwr_array_equal_simple_get_mfp( _aes, &( _aes_stat->a_mfp ) );
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_equal_simple_get_mfp()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_equal_simple_get_mfp(
+        GwrCArrayEqualSimple    *       _aes    ,
+        GwrCAMFP                *       _out    )
+{
+    _out->a_ss      =   sizeof(GwrCArrayEqualSimple);
+    _out->a_sa      =   _aes->a_data_size * _aes->a_slots_card;
+    _out->a_su      =   _aes->a_data_size * _aes->a_slots_used;
 }

@@ -43,7 +43,7 @@ G_BEGIN_DECLS
 
 #define GTK_FAST_TEXT_VIEW_TYPE             ( gtk_fast_text_view_get_type   ()                                                          )
 #define GTK_FAST_TEXT_VIEW(obj)             ( G_TYPE_CHECK_INSTANCE_CAST    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE, GtkFastTextView      )   )
-#define GTK_FAST_TEXT_VIEW_CLASS(klass)     ( G_TYPE_CHECK_CLASS_CAST       ( (klass)   , GTK_FAST_TEXT_VIEW_TYPE, GtkFastTextViewClass )   )
+#define GTK_FAST_TEXT_VIEW_CLASS(klass)     ( G_TYPE_CHECK_CLASS_CAST       ( (klass)   , GTK_FAST_TEXT_VIEW_CLASS_TYPE, GtkFastTextViewClass )   )
 #define GTK_IS_FAST_TEXT_VIEW(obj)          ( G_TYPE_CHECK_INSTANCE_TYPE    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE                       )   )
 #define GTK_IS_FAST_TEXT_VIEW_CLASS(klass)  ( G_TYPE_CHECK_CLASS_TYPE       ( (klass)   , GTK_FAST_TEXT_VIEW_TYPE                       )   )
 
@@ -57,13 +57,22 @@ struct _GtkFastTextView
 
 struct _GtkFastTextViewClass
 {
-    GtkWidgetClass  parent_class;
+    GtkWidgetClass      parent_class;
+
+    struct
+    {
+        GdkPixbuf       *   xd_pixbuf;
+        GdkCursor       *   normal;
+        GdkCursor       *   xd;
+    } cursors;
 };
 
 GType           gtk_fast_text_view_get_type (void) G_GNUC_CONST;
 GtkWidget   *   gtk_fast_text_view_new      (GwrFastTextBuffer*);
 
 G_END_DECLS
+
+typedef void(*GtkFastTextViewXdCallback)(gpointer, guint16) ;
 
 #if ( __cplusplus )
 extern "C" {
@@ -76,6 +85,8 @@ extern  GwrFastTextBuffer*  gtk_fast_text_view_get_buffer           (GtkFastText
 
 extern  void                gtk_fast_text_view_set_font_size        (GtkFastTextView*, guint32);
 extern  void                gtk_fast_text_view_set_color            (GtkFastTextView*, guint32 _color_index, guint8 _r, guint8 _g, guint8 _b);
+
+extern  void                gtk_fast_text_view_set_xd_callback      (GtkFastTextView*, GtkFastTextViewXdCallback);
 
 extern  void                gtk_fast_text_view_refresh              (GtkFastTextView*);
 

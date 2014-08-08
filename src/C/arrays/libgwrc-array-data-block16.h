@@ -52,37 +52,49 @@ struct  _GwrCADBlock16
 }  __attribute__(( packed ));
 
 extern  guint32     GwrCADBlock16_SSIZE;                                          //!< sizeof( GwrCADBlock16 )
-//  ............................................................................
-GwrCADBlock16*  gwr_array_dbk16_new(
+//  ============================================================================
+#if ( __cplusplus )
+extern "C" {
+#endif
+
+extern          GwrCADBlock16*  gwr_array_dbk16_new(
                     guint16                         _block_size         );
 
-void            gwr_array_dbk16_alloc(
+extern          void            gwr_array_dbk16_alloc(
                     GwrCADBlock16               *   _block              ,
                     guint16                         _block_size         );
 
-void            gwr_array_dbk16_dealloc(
+extern          void            gwr_array_dbk16_dealloc(
                     GwrCADBlock16               *   _block              );
 
-void            gwr_array_dbk16_reset(
+extern          void            gwr_array_dbk16_reset(
                     GwrCADBlock16               *   _block              );
 
-guint32         gwr_array_dbk16_available_bytes(
+extern          guint32         gwr_array_dbk16_available_bytes(
                     GwrCADBlock16               *   _block              );
 
-void            gwr_array_dbk16_add(
+extern          void            gwr_array_dbk16_add(
                     GwrCADBlock16               *   _block              ,
                     gpointer                        _data               ,
                     guint16                         _data_size          );
 
-void            gwr_array_dbk16_add_with_extra_data_index(
+extern          void            gwr_array_dbk16_add_with_extra_data_index(
                     GwrCADBlock16               *   _block              ,
                     gpointer                        _data               ,
                     guint16                         _data_size          ,
                     guint32                         _extra_data_index   ,
                     guint8                      *   _xdi_len            );
 
-void            gwr_array_dbk16_dump(
+extern          void            gwr_array_dbk16_dump(
                     GwrCADBlock16               *   _block              );
+
+extern          void            gwr_array_dbk16_get_mfp(
+                    GwrCADBlock16           *       _dbk16          ,
+                    GwrCAMFP                *       _out            );
+
+#if ( __cplusplus )
+}
+#endif
 
 
 #endif                                                                          //  __LIBGWRC_ARRAY_DATA_BLOCK_16_H__

@@ -36,7 +36,7 @@
 #ifndef     __LIBGWRC_ARRAY_EQUAL_SIMPLE_H__
 #define     __LIBGWRC_ARRAY_EQUAL_SIMPLE_H__
 //  ............................................................................
-#include    <glib.h>
+#include    "libgwrc-array-common.h"
 //  ............................................................................
 typedef struct  _GwrCArrayEqualSimple     GwrCArrayEqualSimple;
 
@@ -45,6 +45,7 @@ typedef struct  _GwrCArrayEqualSimple     GwrCArrayEqualSimple;
 //! \brief  Array of constant size datas.
 struct  _GwrCArrayEqualSimple
 {
+    gchar   *   d_name;
     gpointer    d_mem;                                                          //!< Location of array in memory
     guint32     a_data_size;                                                    //!< Size ( in bytes ) of a data
     guint32     a_realloc_size;                                                 //!< # of slots to realloc when no more available
@@ -61,10 +62,11 @@ typedef struct  _GwrCArrayEqualSimpleStat GwrCArrayEqualSimpleStat;
 //! \brief  Convenience struct for memory statistics.
 struct  _GwrCArrayEqualSimpleStat
 {
-    guint32             a_size_bytes;
     guint32             a_slots_card;
     guint32             a_slots_used;
     guint32             a_realloc;
+
+    GwrCAMFP            a_mfp;
 };
 //  ============================================================================
 #if ( __cplusplus )
@@ -72,6 +74,7 @@ extern "C" {
 #endif
 
 extern          GwrCArrayEqualSimple*   gwr_array_equal_simple_new              (
+    const   gchar                   *       _name           ,
             guint32                         _block_size     ,
             guint32                         _realloc_size   );
 
@@ -84,29 +87,34 @@ extern          void                    gwr_array_equal_simple_reset            
 extern          void                    gwr_array_equal_simple_dealloc          (
             GwrCArrayEqualSimple    *       _aes            );
 
-extern          void                    gwr_array_equal_simple_add              (
+extern          void                    gwr_array_equal_simple_add_data         (
             GwrCArrayEqualSimple    *       _aes            ,
             gpointer                        _data           );
 
-extern          gboolean                gwr_array_equal_simple_addb             (
+extern          gboolean                gwr_array_equal_simple_addb_data        (
             GwrCArrayEqualSimple    *       _aes            ,
             gpointer                        _data           );
 
-extern          gpointer                gwr_array_equal_simple_get              (
+extern          gpointer                gwr_array_equal_simple_get_data         (
             GwrCArrayEqualSimple    *       _aes            ,
             guint32                         _block_index    );
 
-extern          gboolean                gwr_array_equal_simple_getb             (
+extern          gboolean                gwr_array_equal_simple_getb_data        (
             GwrCArrayEqualSimple    *       _aes            ,
             guint32                         _block_index    ,
             gpointer                        _dest           );
 
 extern          void                    gwr_array_equal_simple_dump             (
-            GwrCArrayEqualSimple    *       _aes            );
+            GwrCArrayEqualSimple    *       _aes            ,
+            gboolean                        _dump_data      );
 
-extern          void                    gwr_array_equal_simple_get_stats    (
+extern          void                    gwr_array_equal_simple_get_stats        (
             GwrCArrayEqualSimple    *       _aes            ,
             GwrCArrayEqualSimpleStat*       _ae_stat        );
+
+extern          void                    gwr_array_equal_simple_get_mfp          (
+            GwrCArrayEqualSimple    *       _aes            ,
+            GwrCAMFP                *       _out            );
 
 #if ( __cplusplus )
 }

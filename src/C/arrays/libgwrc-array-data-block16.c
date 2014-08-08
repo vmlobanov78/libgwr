@@ -143,3 +143,22 @@ gwr_array_dbk16_dump(
         _dbk16->d_mem,  _dbk16->a_size, _dbk16->a_used_bytes    ,
         gwr_array_dbk16_available_bytes( _dbk16)     );
 }
+//  ----------------------------------------------------------------------------
+//  gwr_array_dbk16_get_mfp()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_dbk16_get_mfp(
+        GwrCADBlock16           *       _dbk16          ,
+        GwrCAMFP                *       _out            )
+{
+    _out->a_ss  =   sizeof( GwrCADBlock16 );
+    _out->a_sa  =   (guint32)(_dbk16->a_size);
+    _out->a_su  =   (guint32)(_dbk16->a_used_bytes);
+}
+
+
+
+
+
+
+

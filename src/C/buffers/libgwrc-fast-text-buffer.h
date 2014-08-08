@@ -46,7 +46,7 @@ struct  _GwrFastTextBufferLineAttr
     guint8          a_fg;                                                       //!< Foreground color
     guint8          a_bg;                                                       //!< Background color
     guint8          a_st;                                                       //!< Style infos
-    guint8          a_xd;
+    guint8          a_xdis;
 };
 
 typedef struct  _GwrFastTextBufferLine       GwrFastTextBufferLine;
@@ -75,8 +75,9 @@ typedef struct  _GwrFastTextBufferStat       GwrFastTextBufferStat;
 
 struct  _GwrFastTextBufferStat
 {
-    GwrCArrayDataMultiStat  lt;
-    GwrCArrayEqualStat      ld;
+    GwrCArrayDataMultiStat  ld;
+    GwrCArrayEqualStat      li;
+    GwrCArrayDataMultiStat  lx;
 };
 
 //  ============================================================================
@@ -85,25 +86,27 @@ extern "C" {
 #endif
 
 extern          GwrFastTextBuffer   *   gwr_fast_text_buffer_new                (
-                guint32                     _lines_text_block_size              ,
-                guint32                     _lines_text_blocks_storage_capacity ,
-                guint32                     _lines_text_blocks_storage_realloc  ,
-                guint32                     _lines_text_infos_storage_capacity  ,
-                guint32                     _lines_text_infos_storage_realloc   ,
+            guint32                         _lines_text_data_block_size                 ,
+            guint32                         _lines_text_data_blocks_storage_realloc     ,
+            guint32                         _lines_text_info_blocks_storage_realloc     ,
 
-                guint32                     _lines_desc_infos_blocks_storage_capacity   ,
-                guint32                     _lines_desc_infos_blocks_storage_realloc    ,
+            guint32                         _lines_desc_info_blocks_storage_capacity    ,
+            guint32                         _lines_desc_infos_blocks_storage_realloc    ,
 
-                guint32                     _extra_data_block_size              ,
-                guint32                     _extra_data_blocks_storage_capacity ,
-                guint32                     _extra_data_blocks_storage_realloc  ,
-                guint32                     _extra_data_infos_storage_capacity  ,
-                guint32                     _extra_data_infos_storage_realloc   );
+            guint32                         _extra_data_data_block_size                 ,
+            guint32                         _extra_data_data_blocks_storage_realloc     ,
+            guint32                         _extra_data_info_block_size                 ,
+            guint32                         _extra_data_info_blocks_storage_realloc     );
 
 extern          void                    gwr_fast_text_buffer_reset              (
             GwrFastTextBuffer       *       _buffer         );
 
 extern          gboolean                gwr_fast_text_buffer_get_line           (
+            GwrFastTextBuffer       *       _buffer         ,
+            guint32                         _line_index     ,
+            GwrFastTextBufferLine   *       _line           );
+
+extern          gboolean                gwr_fast_text_buffer_get_line_and_extra_data    (
             GwrFastTextBuffer       *       _buffer         ,
             guint32                         _line_index     ,
             GwrFastTextBufferLine   *       _line           );
@@ -124,12 +127,12 @@ extern          void                    gwr_fast_text_buffer_add_line_with_extra
             gpointer                        _extra_data     ,
             guint16                         _extra_data_len );
 
-extern      void                        gwr_fast_text_buffer_dump(
-            GwrFastTextBuffer       *       _buffer    );
-
 extern          void                    gwr_fast_text_buffer_get_stats          (
             GwrFastTextBuffer       *       _buffer ,
             GwrFastTextBufferStat   *       _s      );
+
+extern          void                    gwr_fast_text_buffer_dump_mem           (
+            GwrFastTextBuffer       *       _buffer );
 
 #if ( __cplusplus )
 }

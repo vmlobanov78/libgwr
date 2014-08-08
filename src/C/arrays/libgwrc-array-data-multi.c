@@ -48,20 +48,35 @@ _OPTIM_01_ :
 //  ****************************************************************************
 //  STATIC
 //  ****************************************************************************
+//  ----------------------------------------------------------------------------
+//  Gwr_array_data_multi_ensure_first_block_exists_and_is_used()
+//  ----------------------------------------------------------------------------
+//! \fn     Gwr_array_data_multi_ensure_first_block_exists_and_is_used()
+//!
+//! \brief  IMPORTANT : Called _ONLY_ after gwr_array_data_multi_new() or
+//!     gwr_array_data_multi_reset(). It does _NOT_ make sense to call this
+//!     function from anyware else.
 static
 void
 Gwr_array_data_multi_ensure_first_block_exists(
         GwrCArrayDataMulti          *   _adm            )
 {
-    GwrCADBlock24           b;
+    GwrCADBlock24           dbk24;
     //  ........................................................................
-    //  if blocks are in use, at least one block exist : nothing to do
-    if ( _adm->d_blocks->a_data_card )
+    //  slot(s) are in use : the first slot exist
+    if ( _adm->d_data_blocks->a_slots_used )
         return;
 
-    //  else create first block and add it
-    gwr_array_dbk24_alloc   ( &b            , _adm->a_blocks_size );
-    gwr_array_equal_add_data( _adm->d_blocks, &b );
+    //  no slot in use, but first block exist : mark as used
+    if ( _adm->d_data_blocks->a_slots_card )
+    {
+        _adm->d_data_blocks->a_slots_used = 1;
+        return;
+    }
+
+    //  no block exists : create one block and add it
+    gwr_array_dbk24_alloc           ( &dbk24                , _adm->a_data_block_size );
+    gwr_array_equal_simple_add_data ( _adm->d_data_blocks   , &dbk24 );
 }
 //  ============================================================================
 //  DataInfo
@@ -111,54 +126,56 @@ guint32     GwrCADMDataInfo_SSIZE   =   sizeof(GwrCADMDataInfo);
 //  ----------------------------------------------------------------------------
 GwrCArrayDataMulti*
 gwr_array_data_multi_new(
-            guint32                         _blocks_size                ,
-            guint32                         _blocks_storage_capacity    ,
-            guint32                         _blocks_storage_realloc     ,
-            guint32                         _infos_storage_capacity     ,
-            guint32                         _infos_storage_realloc      )
+    const   gchar           *               _name                           ,
+            guint32                         _data_block_size                ,
+            guint32                         _data_blocks_storage_realloc    ,
+            guint32                         _info_blocks_storage_realloc    )
 {
-    GwrCArrayDataMulti      *   a   =   NULL;
+    GwrCArrayDataMulti      *   adm =   NULL;
     //  ........................................................................
     //  create  GwrCArrayDataMulti structure
-    a                   =   (GwrCArrayDataMulti*)g_new0( GwrCArrayDataMulti , 1 );
+    adm                 =   (GwrCArrayDataMulti*)g_new0( GwrCArrayDataMulti , 1 );
 
-    a->d_blocks         =   NULL;
-    a->d_infos          =   NULL;
+    adm->d_name         =   g_strdup(_name);
 
-    a->a_blocks_size    =   _blocks_size;
-    a->a_data_size      =   0;
+    adm->a_data_block_size  =   _data_block_size;
+
+    adm->a_data_size    =   0;
     //  ........................................................................
     //  create  array of GwrCADBlock s and GwrCADMDataInfo
-    a->d_blocks         =   gwr_array_equal_new( "GwrCArrayDataMulti::data"     , GwrCADBlock24_SSIZE   , _blocks_storage_capacity , _blocks_storage_realloc    );
-    a->d_infos          =   gwr_array_equal_new( "GwrCArrayDataMulti::infos"    , GwrCADMDataInfo_SSIZE ,  _infos_storage_capacity , _infos_storage_realloc     );
+    adm->d_data_blocks  =   gwr_array_equal_simple_new( "GwrCArrayDataMulti::datas" , GwrCADBlock24_SSIZE   , _data_blocks_storage_realloc );
+    adm->d_info_blocks  =   gwr_array_equal_simple_new( "GwrCArrayDataMulti::infos" , GwrCADMDataInfo_SSIZE , _info_blocks_storage_realloc );
 
-    Gwr_array_data_multi_ensure_first_block_exists(a);
+    Gwr_array_data_multi_ensure_first_block_exists(adm);
 
-    return a;
+    return adm;
 }
 void
 gwr_array_data_multi_delete(
         GwrCArrayDataMulti          *   _adm            )
 {
-    guint32             i   =   0;
-    GwrCADBlock24   *   b   =   NULL;
+    guint32             i       =   0;
+    GwrCADBlock24   *   dbk24   =   NULL;
     //  ........................................................................
     //  the GwrCADBlock24 structures themseleves are not allocated, but the data
     //  areas they point to are.
-    for ( i = 0 ; i != _adm->d_blocks->a_data_card ; i++ )                      //  _GWR_TODO_ inline this with a function
+    for ( i = 0 ; i != _adm->d_data_blocks->a_slots_used ; i++ )
     {
-        b = gwr_array_equal_get_data( _adm->d_blocks, i );
-        if ( ! b )
+        dbk24 = gwr_array_equal_simple_get_data( _adm->d_data_blocks, i );
+        if ( ! dbk24 )
         {
-            printf("ERR:Block [%i] could not be obtained\n", i);
+            printf("***ERR *** gwr_array_data_multi_delete():Block [%i] could not be obtained\n", i);
             continue;
         }
 
-        gwr_array_dbk24_dealloc( b );
+        gwr_array_dbk24_dealloc( dbk24 );
     }
 
-    gwr_array_equal_delete( _adm->d_blocks );
-    gwr_array_equal_delete( _adm->d_infos  );
+    gwr_array_equal_simple_delete( _adm->d_data_blocks );
+    gwr_array_equal_simple_delete( _adm->d_info_blocks );
+
+    g_free(_adm->d_name);
+
     g_free( _adm );
 }
 //  ----------------------------------------------------------------------------
@@ -168,23 +185,23 @@ void
 gwr_array_data_multi_reset(
         GwrCArrayDataMulti      *       _adm        )
 {
-    guint32             i   =   0;
-    GwrCADBlock24   *   b   =   NULL;
+    guint32             i       =   0;
+    GwrCADBlock24   *   dbk24   =   NULL;
     //  ........................................................................
-    for ( i = 0 ; i != _adm->d_blocks->a_data_card ; i++ )
+    for ( i = 0 ; i != _adm->d_data_blocks->a_slots_used ; i++ )
     {
-        b = gwr_array_equal_get_data( _adm->d_blocks, i );
-        if ( ! b )
+        dbk24 = gwr_array_equal_simple_get_data( _adm->d_data_blocks, i );
+        if ( ! dbk24 )
         {
-            printf("ERR:Block [%i] could not be obtained\n", i);
+            printf("***ERR *** gwr_array_data_multi_reset():Block [%i] could not be obtained\n", i);
             continue;
         }
 
-        gwr_array_dbk24_reset( b );
+        gwr_array_dbk24_reset( dbk24 );
     }
     //  ........................................................................
-    gwr_array_equal_reset( _adm->d_blocks );
-    gwr_array_equal_reset( _adm->d_infos  );
+    gwr_array_equal_simple_reset( _adm->d_data_blocks );
+    gwr_array_equal_simple_reset( _adm->d_info_blocks );
 
     _adm->a_data_size   =   0;
 

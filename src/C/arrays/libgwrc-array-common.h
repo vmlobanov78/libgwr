@@ -40,6 +40,38 @@
 
 #include    <string.h>
 #include    <stdio.h>
+//  ............................................................................
+typedef struct  _GwrCArrayMemoryFootPrint   GwrCAMFP;
+//! \struct _GwrCArrayMemoryFootPrint
+//!
+//! \brief  Memory FootPrint for array structs.
+struct  _GwrCArrayMemoryFootPrint
+{
+    guint32     a_ss;                                                           //!< Struct itself
+    guint32     a_sa;                                                           //!< Internal allocated memory
+    guint32     a_su;                                                           //!< Recursive allocated memory
+};
+
+typedef struct  _GwrCData16 GwrCData16;
+//! \struct _GwrCData16
+//!
+//! \brief  Data, maximum 16 bits len.
+struct  _GwrCData16
+{
+    gpointer    a_mem;                                                          //!< Address of data in memory
+    guint16     a_size;                                                         //!< Size of data
+};
+
+#if ( __cplusplus )
+extern "C" {
+#endif
+
+void    gwr_array_mfp_reset (GwrCAMFP*);
+void    gwr_array_mfp_add   (GwrCAMFP* _mfp_dst, GwrCAMFP* _mfp_src);
+
+#if ( __cplusplus )
+}
+#endif
 
 
 #endif                                                                          //  __LIBGWRC_ARRAY_COMMON_H__

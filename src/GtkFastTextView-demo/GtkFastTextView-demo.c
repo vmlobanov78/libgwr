@@ -39,6 +39,9 @@
 #include    "C/gtk/GtkFastTextView/gtkfasttextview.h"
 
 //  ............................................................................
+FILE    *   Fd;
+gchar       FileData    [128];
+//  ............................................................................
 gchar           SampleText  [1024];
 gchar           SampleData  [1024];
 guint32         Iterations          =   1;
@@ -80,7 +83,6 @@ gchar           Str_ns  [1024];
 //  ############################################################################
 //  main DEMO
 //  ############################################################################
-
 //  ............................................................................
 void Format_ns(long _ns)
 {
@@ -97,10 +99,6 @@ void Format_ns(long _ns)
     strcat  ( Str_ns, Temp );
 }
 //  ............................................................................
-void    Dump_fast_buffer()
-{
-    gwr_fast_text_buffer_dump(tb1);
-}
 void    Get_user_settings()
 {
     Iterations  =   (guint32)( gtk_spin_button_get_value( GTK_SPIN_BUTTON(w_frm_spin_nlines) ) );
@@ -134,7 +132,8 @@ void    Chrono_stop()
 //  ............................................................................
 void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
 {
-    guint32     i   =   0;
+                guint32     i       =   0;
+    static      guint32     Count   =   0;
     //  ........................................................................
     Get_user_settings();
 
@@ -164,6 +163,9 @@ void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
         else
         {
             gwr_fast_text_buffer_add_line(tb1, SampleText, 0, 0, 0);
+
+            //fwrite( FileData, 34, 1, Fd );
+            //printf("%i\n",x);
         }
     }
 
@@ -174,6 +176,9 @@ void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
     Delta1  =   Delta;
 
     gtk_label_set_text( GTK_LABEL(w_label1), Str );
+
+    Count++;
+    gtk_fast_text_view_refresh( GTK_FAST_TEXT_VIEW(w_tv1) );
 }
 void    Signal_button2_clicked(GtkWidget* _w, gpointer _data)
 {
@@ -220,17 +225,73 @@ void    Signal_button2_clicked(GtkWidget* _w, gpointer _data)
 
     gtk_label_set_text( GTK_LABEL(w_label2), Str );
 }
+void    Signal_destroy(GtkWidget* _w)
+{
+    fflush(Fd);
+}
+//  ............................................................................
+void    GftvXdataCallback(gpointer _data,guint16 _len)
+{
+    GtkWidget   *   dialog;
+    gchar           str1        [256];
+    gchar           str2        [128];
+    //  ........................................................................
+    if ( _len < 128 )
+    {
+        memcpy( str2, _data, _len );
+        str2[ _len ] = 0;
+    }
+    else
+    {
+        strncpy( str2, _data, 127 );
+        str2[128] = 0;
+    }
+
+    sprintf(str1, "The extra data is [%i] bytes long :\n", _len);
+    strcat( str1, str2);
+
+    dialog  =   gtk_message_dialog_new(
+                    NULL,
+                    GTK_DIALOG_DESTROY_WITH_PARENT,
+                    GTK_MESSAGE_QUESTION,
+                    GTK_BUTTONS_OK,
+                    str1);
+
+    gtk_window_set_title(GTK_WINDOW(dialog), "Extra data dialog");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
 //  ............................................................................
 int main( int argc, char *argv[])
 {
 
     //  ........................................................................
-
     gtk_init(&argc, &argv);
-    tb1 =   gwr_fast_text_buffer_new               (
-                                            100, 1, 1, 1, 1            ,
-                                            1, 1                        ,
-                                            100, 1, 1, 1, 1             );
+    //  ........................................................................
+    Fd  =   fopen("test.data", "w");
+    //  ........................................................................
+    //I extern          GwrFastTextBuffer   *   gwr_fast_text_buffer_new                (
+    //I       guint32                         _lines_text_data_block_size                 ,
+    //I       guint32                         _lines_text_data_blocks_storage_realloc     ,
+    //I       guint32                         _lines_text_info_block_size                 ,
+    //I       guint32                         _lines_text_info_blocks_storage_realloc     ,
+
+    //I       guint32                         _lines_desc_info_blocks_storage_capacity    ,
+    //I       guint32                         _lines_desc_infos_blocks_storage_realloc    ,
+
+    //I       guint32                         _extra_data_data_block_size                 ,
+    //I       guint32                         _extra_data_data_blocks_storage_realloc     ,
+    //I       guint32                         _extra_data_info_block_size                 ,
+    //I       guint32                         _extra_data_info_blocks_storage_realloc     );
+
+    tb1 =   gwr_fast_text_buffer_new(
+                70000 , 8 ,
+                        8 ,
+
+                1024 , 4 ,
+
+                32768, 4   ,
+                8192 , 4   );
     //  ........................................................................
     tb2_tag_r   =   gtk_text_tag_new("CR");
     tb2_tag_g   =   gtk_text_tag_new("CG");
@@ -273,6 +334,8 @@ int main( int argc, char *argv[])
     gtk_fast_text_view_set_color( GTK_FAST_TEXT_VIEW(w_tv1), 1, 255, 0, 0);
     gtk_fast_text_view_set_color( GTK_FAST_TEXT_VIEW(w_tv1), 2, 0, 255, 0);
     gtk_fast_text_view_set_color( GTK_FAST_TEXT_VIEW(w_tv1), 3, 0, 0, 255);
+    gtk_fast_text_view_set_xd_callback( GTK_FAST_TEXT_VIEW(w_tv1), GftvXdataCallback );
+    gtk_fast_text_view_set_font_size( GTK_FAST_TEXT_VIEW(w_tv1), 10 );
 
     g_object_set( G_OBJECT(tb2_tag_r), "foreground", "#FF0000", NULL );
     g_object_set( G_OBJECT(tb2_tag_g), "foreground", "#00FF00", NULL );
@@ -297,18 +360,20 @@ int main( int argc, char *argv[])
     gtk_box_pack_start      ( GTK_BOX(w_hbox)   , w_vbox2   , TRUE , TRUE , 0 );
 
     gtk_box_pack_start      ( GTK_BOX(w_vbox)   , w_frame   , FALSE, FALSE, 0 );
-    gtk_box_pack_start      ( GTK_BOX(w_vbox)   , w_hbox    , FALSE, FALSE, 0 );
+    gtk_box_pack_start      ( GTK_BOX(w_vbox)   , w_hbox    , TRUE , TRUE , 0 );
 
     gtk_container_add( GTK_CONTAINER(w_win), w_vbox );
 
     g_signal_connect( w_button1, "clicked", G_CALLBACK(Signal_button1_clicked), NULL );
     g_signal_connect( w_button2, "clicked", G_CALLBACK(Signal_button2_clicked), NULL );
-
+    g_signal_connect( w_win    , "destroy", G_CALLBACK(Signal_destroy), NULL);
     gtk_widget_show_all(w_vbox);
 
     gtk_widget_show(w_win);
 
     gtk_main();
+
+    fclose(Fd);
 
     return 0;
 }

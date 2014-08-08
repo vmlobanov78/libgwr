@@ -65,7 +65,8 @@ gwr_array_equal_ensure_first_block_exists(
 
     //  else create first block and add it
     gwr_array_dbk24_alloc( &b, _ae->a_dbk_size );
-    gwr_array_equal_simple_add( _ae->d_blocks , &b );
+    _ae->a_stat_realloc =   _ae->a_stat_realloc + 1;
+    gwr_array_equal_simple_add_data( _ae->d_blocks , &b );
 }
 //  ****************************************************************************
 //  PUBLIC
@@ -86,17 +87,15 @@ gwr_array_equal_new(
 
     a->d_name               =   g_strdup(_name);
 
-    a->d_blocks             =   gwr_array_equal_simple_new( GwrCADBlock24_SSIZE, _block_realloc );
+    a->d_blocks             =   gwr_array_equal_simple_new( "GwrCArrayEqual", GwrCADBlock24_SSIZE, _block_realloc );
 
     a->a_data_size          =   _data_size;
     a->a_dbk_capacity       =   _block_capacity;
     a->a_dbk_size           =   _block_capacity * _data_size;
     a->a_dbk_realloc        =   _block_realloc;
     a->a_data_card          =   0;
-    //a->a_blocks_card        =   0;
-    //a->a_blocks_used        =   0;
 
-    //a->a_stat_realloc       =   0;
+    a->a_stat_realloc       =   0;
 
     gwr_array_equal_ensure_first_block_exists( a );
 
@@ -106,22 +105,36 @@ void
 gwr_array_equal_delete(
         GwrCArrayEqual          *       _ae             )
 {
+    guint32             i;
+    GwrCADBlock24   *   dbk24   =   NULL;
+    //  ........................................................................
+    for ( i = 0 ; i != _ae->d_blocks->a_slots_used ; i++ )
+    {
+        dbk24 = gwr_array_equal_simple_get_data( _ae->d_blocks, i );
+        gwr_array_dbk24_dealloc(dbk24);
+    }
+
     gwr_array_equal_simple_delete( _ae->d_blocks );
 
     g_free( _ae->d_name );
 
-    //gwr_array_equal_dealloc(_ae);
     g_free( _ae );
 }
 void
 gwr_array_equal_reset(
             GwrCArrayEqual      *       _ae             )
 {
+    guint32             i;
+    GwrCADBlock24   *   dbk24   =   NULL;
+    //  ........................................................................
+    for ( i = 0 ; i != _ae->d_blocks->a_slots_used ; i++ )
+    {
+        dbk24 = gwr_array_equal_simple_get_data( _ae->d_blocks, i );
+        gwr_array_dbk24_reset(dbk24);
+    }
+
     gwr_array_equal_simple_reset( _ae->d_blocks );
 
-    //_ae->a_blocks_card      =   0;
-    //_ae->a_blocks_used      =   0;
-    //_ae->a_stat_realloc     =   0;
     gwr_array_equal_ensure_first_block_exists(_ae);
 
     _ae->a_data_card        =   0;
@@ -134,25 +147,34 @@ gwr_array_equal_add_data(
         GwrCArrayEqual          *       _ae     ,
         gpointer                        _data   )
 {
-    GwrCADBlock24   *   dbk24_candidate;
-    GwrCADBlock24       dbk24_new;
+    GwrCADBlock24   *   dbk24_c;
+    GwrCADBlock24       dbk24_n;
     //  ........................................................................
-    dbk24_candidate =                                                           //  get current working block
-        gwr_array_equal_simple_get( _ae->d_blocks, _ae->d_blocks->a_slots_used - 1 );
+    dbk24_c =                                                                   //  get current working block
+        gwr_array_equal_simple_get_data( _ae->d_blocks, _ae->d_blocks->a_slots_used - 1 );
 
     //  enough size to add data in the working block
-    if ( gwr_array_dbk24_available_bytes( dbk24_candidate ) >=  _ae->a_data_size )
+    if ( gwr_array_dbk24_available_bytes( dbk24_c ) >=  _ae->a_data_size )
     {
-        gwr_array_dbk24_add( dbk24_candidate, _data, _ae->a_data_size );        //  add the data
+        //D printf("> gwr_array_equal_add_data():[%p] + [%5i] = [%p]\n",
+        //D    dbk24_c->d_mem                      ,
+        //D    gwr_array_dbk24_used_bytes(dbk24_c) ,
+        //D    dbk24_c->d_mem                      +
+        //D    gwr_array_dbk24_used_bytes(dbk24_c) );
+
+
+        gwr_array_dbk24_add( dbk24_c, _data, _ae->a_data_size );                //  add the data
         _ae->a_data_card    =   _ae->a_data_card + 1;
 
         return;
     }
 
     //  not enough size to add data in the working block
-    gwr_array_dbk24_alloc   ( &dbk24_new , _ae->a_dbk_size );                   //  alloc a new GwrCADBlock24
-    gwr_array_dbk24_add     ( &dbk24_new , _data, _ae->a_data_size );           //  add data to GwrCADBlock24
-    gwr_array_equal_simple_add( _ae->d_blocks, &dbk24_new );                    //  copy the GwrCADBlock24 struct in a GwrCArrayEqualSimple slot
+    gwr_array_dbk24_alloc   ( &dbk24_n , _ae->a_dbk_size );                     //  alloc a new GwrCADBlock24
+    _ae->a_stat_realloc =   _ae->a_stat_realloc + 1;
+
+    gwr_array_dbk24_add     ( &dbk24_n , _data, _ae->a_data_size );             //  add data to GwrCADBlock24
+    gwr_array_equal_simple_add_data( _ae->d_blocks, &dbk24_n );                 //  copy the GwrCADBlock24 struct in a GwrCArrayEqualSimple slot
 
     _ae->a_data_card    =   _ae->a_data_card + 1;
 }
@@ -201,9 +223,11 @@ gwr_array_equal_get_data(
 
     g_return_val_if_fail( data_block_index      <  _ae->d_blocks->a_slots_used, NULL        );   //  index verification
 
-    blk24 = gwr_array_equal_simple_get( _ae->d_blocks, data_block_index );
+    blk24 = gwr_array_equal_simple_get_data( _ae->d_blocks, data_block_index );
 
     g_return_val_if_fail( data_offset_in_block  <= gwr_array_dbk24_used_bytes(blk24), NULL  );   //  index verification
+
+    //D printf("> gwr_array_equal_get_data():[%p]\n", blk24->d_mem + data_offset_in_block);
 
     return blk24->d_mem + data_offset_in_block;
 }
@@ -236,10 +260,10 @@ gwr_array_equal_dump(
         _ae->a_dbk_size     ,
         _ae->a_dbk_realloc  );
 
-    gwr_array_equal_simple_dump( _ae->d_blocks );
+    gwr_array_equal_simple_dump( _ae->d_blocks, FALSE );
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_data_multi_get_stats()
+//  gwr_array_equal_get_stats()
 //  ----------------------------------------------------------------------------
 void
 gwr_array_equal_get_stats(
@@ -247,4 +271,34 @@ gwr_array_equal_get_stats(
         GwrCArrayEqualStat  *       _ae_stat        )
 {
     gwr_array_equal_simple_get_stats( _ae->d_blocks, &(_ae_stat->a_simple_stat) );
+
+    _ae_stat->a_dbk_capacity=   _ae->a_dbk_capacity;
+    _ae_stat->a_dbk_size    =   _ae->a_dbk_size;
+
+    _ae_stat->a_realloc     =   _ae->a_stat_realloc;
+
+    gwr_array_equal_get_mfp( _ae, &( _ae_stat->a_mfp ) );
 }
+//  ----------------------------------------------------------------------------
+//  gwr_array_equal_get_mfp()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_equal_get_mfp(
+        GwrCArrayEqual          *       _ae             ,
+        GwrCAMFP                *       _out            )
+{
+    guint32             i;
+    GwrCADBlock24   *   dbk24   =   NULL;
+    //  ........................................................................
+    gwr_array_equal_simple_get_mfp( _ae->d_blocks, _out );
+
+    _out->a_ss  =   _out->a_ss  +   sizeof( GwrCArrayEqual );
+    _out->a_sa  =   _out->a_sa  +   _ae->d_blocks->a_slots_used *
+                                    _ae->a_dbk_size;
+    for ( i = 0 ; i != _ae->d_blocks->a_slots_used ; i++ )
+    {
+        dbk24 = gwr_array_equal_simple_get_data( _ae->d_blocks, i );
+        _out->a_su  =   _out->a_su  +   gwr_array_dbk24_used_bytes(dbk24);
+    }
+}
+

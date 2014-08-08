@@ -55,6 +55,8 @@ struct  _GwrCArrayEqual
     guint32                         a_dbk_size;                                 //!< Size ( in bytes ) of a GwrCADBlock24
     guint32                         a_dbk_realloc;                              //!< # of GwrCADBlock24 to realloc when all are full
     guint32                         a_data_card;                                //!< # of data stored in the GwrCArrayEqual
+
+    guint32                         a_stat_realloc;
 };
 //  ............................................................................
 typedef struct  _GwrCArrayEqualStat GwrCArrayEqualStat;
@@ -64,6 +66,13 @@ typedef struct  _GwrCArrayEqualStat GwrCArrayEqualStat;
 struct  _GwrCArrayEqualStat
 {
     GwrCArrayEqualSimpleStat        a_simple_stat;
+
+    guint32                         a_dbk_capacity;
+    guint32                         a_dbk_size;
+
+    guint32                         a_realloc;
+
+    GwrCAMFP                        a_mfp;
 };
 //  ============================================================================
 #if ( __cplusplus )
@@ -109,6 +118,10 @@ extern          void                    gwr_array_equal_dump                    
 extern          void                    gwr_array_equal_get_stats(
             GwrCArrayEqual          *       _ae             ,
             GwrCArrayEqualStat      *       _ae_stat        );
+
+extern          void                    gwr_array_equal_get_mfp(
+            GwrCArrayEqual          *       _ae             ,
+            GwrCAMFP                *       _out            );
 
 #if ( __cplusplus )
 }

@@ -52,37 +52,50 @@ struct  _GwrCADBlock32
 }  __attribute__(( packed ));
 
 extern  guint32     GwrCADBlock32_SSIZE;                                          //!< sizeof( GwrCADBlock16 )
-//  ............................................................................
-GwrCADBlock32*  gwr_array_dbk32_new(
+//  ============================================================================
+#if ( __cplusplus )
+extern "C" {
+#endif
+
+extern          GwrCADBlock32*  gwr_array_dbk32_new(
                     guint32                         _block_size         );
 
-void            gwr_array_dbk32_alloc(
+extern          void            gwr_array_dbk32_alloc(
                     GwrCADBlock32               *   _block              ,
                     guint32                         _block_size         );
 
-void            gwr_array_dbk32_dealloc(
+extern          void            gwr_array_dbk32_dealloc(
                     GwrCADBlock32               *   _block              );
 
-void            gwr_array_dbk32_reset(
+extern          void            gwr_array_dbk32_reset(
                     GwrCADBlock32               *   _block              );
 
-inline guint32  gwr_array_dbk32_available_bytes(
+extern          inline guint32  gwr_array_dbk32_available_bytes(
                     GwrCADBlock32               *   _block              );
 
-void            gwr_array_dbk32_add(
+extern          void            gwr_array_dbk32_add(
                     GwrCADBlock32               *   _block              ,
                     gpointer                        _data               ,
                     guint32                         _data_size          );
 
-void            gwr_array_dbk32_add_with_extra_data_index(
+extern          void            gwr_array_dbk32_add_with_extra_data_index(
                     GwrCADBlock32               *   _block              ,
                     gpointer                        _data               ,
                     guint32                         _data_size          ,
                     guint32                         _extra_data_index   ,
                     guint8                      *   _xdi_len            );
 
-void            gwr_array_dbk32_dump(
+extern          void            gwr_array_dbk32_dump(
                     GwrCADBlock32               *   _block              );
+
+extern          void            gwr_array_dbk32_get_mfp(
+                    GwrCADBlock32           *       _dbk32          ,
+                    GwrCAMFP                *       _out            );
+
+#if ( __cplusplus )
+}
+#endif
+
 
 
 #endif                                                                          //  __LIBGWRC_ARRAY_DATA_BLOCK_32_H__

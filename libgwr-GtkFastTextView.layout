@@ -1,126 +1,127 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="D-demo" />
-	<File name="src/C/arrays/libgwrc-array-data-multi.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-equal-simple.c" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="8193" topLine="58" />
-		</Cursor>
-	</File>
-	<File name="src/C/gtk/GtkFastTextView/gtkfasttextview.c" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="25508" topLine="416" />
+			<Cursor1 position="9466" topLine="80" />
 		</Cursor>
 		<Folding>
+			<Collapse line="47" />
+			<Collapse line="78" />
+			<Collapse line="101" />
+			<Collapse line="110" />
+			<Collapse line="119" />
+			<Collapse line="130" />
+			<Collapse line="132" />
+			<Collapse line="150" />
+			<Collapse line="152" />
+			<Collapse line="172" />
+			<Collapse line="185" />
+			<Collapse line="216" />
+			<Collapse line="233" />
+			<Collapse line="247" />
+		</Folding>
+	</File>
+	<File name="src/C/gtk/GtkFastTextView/gtkfasttextview.c" open="1" top="1" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="29524" topLine="201" />
+		</Cursor>
+		<Folding>
+			<Collapse line="76" />
 			<Collapse line="105" />
-			<Collapse line="187" />
+			<Collapse line="169" />
+			<Collapse line="188" />
+			<Collapse line="227" />
+			<Collapse line="243" />
+			<Collapse line="256" />
+			<Collapse line="272" />
+			<Collapse line="279" />
+			<Collapse line="283" />
+			<Collapse line="332" />
+			<Collapse line="348" />
+			<Collapse line="376" />
+			<Collapse line="424" />
+			<Collapse line="485" />
+			<Collapse line="539" />
+			<Collapse line="625" />
+			<Collapse line="681" />
+			<Collapse line="712" />
+			<Collapse line="722" />
+			<Collapse line="745" />
+			<Collapse line="755" />
+			<Collapse line="767" />
+			<Collapse line="789" />
+			<Collapse line="829" />
+			<Collapse line="843" />
+			<Collapse line="849" />
+			<Collapse line="855" />
+			<Collapse line="861" />
+			<Collapse line="876" />
+			<Collapse line="899" />
+			<Collapse line="919" />
+			<Collapse line="930" />
+			<Collapse line="946" />
+			<Collapse line="960" />
+			<Collapse line="982" />
+			<Collapse line="1006" />
+			<Collapse line="1010" />
+			<Collapse line="1014" />
+			<Collapse line="1019" />
 		</Folding>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-data-multi-core.cci" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/buffers/libgwrc-fast-text-buffer.h" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7505" topLine="47" />
+			<Cursor1 position="7068" topLine="25" />
 		</Cursor>
 		<Folding>
-			<Collapse line="42" />
-			<Collapse line="53" />
-			<Collapse line="104" />
-			<Collapse line="156" />
+			<Collapse line="84" />
 		</Folding>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-data-multi-infos.cci" open="1" top="1" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-data-block32.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3666" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="src/C/buffers/libgwrc-fast-text-buffer-private.h" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="4767" topLine="16" />
+			<Cursor1 position="3718" topLine="0" />
 		</Cursor>
 		<Folding>
-			<Collapse line="49" />
+			<Collapse line="47" />
+			<Collapse line="56" />
 		</Folding>
-	</File>
-	<File name="src/GtkFastTextView-demo/GtkFastTextView-demo.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="6783" topLine="152" />
-		</Cursor>
 	</File>
 	<File name="src/C/arrays/libgwrc-array-data-block.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="2181" topLine="0" />
 		</Cursor>
 	</File>
+	<File name="src/C/buffers/libgwrc-fast-text-buffer.c" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5156" topLine="59" />
+		</Cursor>
+		<Folding>
+			<Collapse line="105" />
+			<Collapse line="119" />
+			<Collapse line="151" />
+			<Collapse line="193" />
+			<Collapse line="232" />
+			<Collapse line="243" />
+			<Collapse line="255" />
+		</Folding>
+	</File>
 	<File name="src/C/gtk/GtkFastTextView/gtkfasttextview.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="4157" topLine="25" />
 		</Cursor>
 	</File>
-	<File name="src/C/buffers/libgwrc-fast-text-buffer.h" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-data-multi-core.cci" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="6976" topLine="54" />
-		</Cursor>
-		<Folding>
-			<Collapse line="44" />
-			<Collapse line="54" />
-			<Collapse line="69" />
-			<Collapse line="76" />
-		</Folding>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-data-block24.c" open="1" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="8657" topLine="157" />
-		</Cursor>
-		<Folding>
-			<Collapse line="164" />
-		</Folding>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-data-multi.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="9116" topLine="79" />
-		</Cursor>
-		<Folding>
-			<Collapse line="54" />
-			<Collapse line="78" />
-			<Collapse line="90" />
-			<Collapse line="141" />
-			<Collapse line="148" />
-			<Collapse line="174" />
-		</Folding>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-equal.c" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3923" topLine="17" />
-		</Cursor>
-		<Folding>
-			<Collapse line="60" />
-			<Collapse line="81" />
-			<Collapse line="107" />
-			<Collapse line="118" />
-			<Collapse line="135" />
-			<Collapse line="143" />
-			<Collapse line="169" />
-			<Collapse line="197" />
-			<Collapse line="221" />
-			<Collapse line="230" />
-			<Collapse line="248" />
-		</Folding>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-data-block16.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3483" topLine="22" />
+			<Cursor1 position="8161" topLine="39" />
 		</Cursor>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-data-block16.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-data-block24.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5287" topLine="43" />
+			<Cursor1 position="3294" topLine="0" />
 		</Cursor>
 		<Folding>
-			<Collapse line="46" />
-			<Collapse line="63" />
-			<Collapse line="75" />
-			<Collapse line="86" />
-			<Collapse line="97" />
-			<Collapse line="108" />
-			<Collapse line="124" />
+			<Collapse line="47" />
+			<Collapse line="55" />
 		</Folding>
 	</File>
 	<File name="src/C/arrays/libgwrc-array-common.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -128,46 +129,131 @@
 			<Cursor1 position="2858" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-equal.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-data-block24.c" open="1" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5560" topLine="42" />
-		</Cursor>
-	</File>
-	<File name="src/C/buffers/libgwrc-fast-text-buffer.c" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="8077" topLine="107" />
+			<Cursor1 position="5734" topLine="0" />
 		</Cursor>
 		<Folding>
-			<Collapse line="44" />
-			<Collapse line="53" />
+			<Collapse line="57" />
+			<Collapse line="67" />
+			<Collapse line="76" />
+			<Collapse line="88" />
+			<Collapse line="100" />
+			<Collapse line="117" />
+			<Collapse line="130" />
+			<Collapse line="141" />
+			<Collapse line="151" />
+			<Collapse line="220" />
+			<Collapse line="236" />
 		</Folding>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-data-block24.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-data-multi.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3294" topLine="24" />
-		</Cursor>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-equal-simple.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3572" topLine="49" />
-		</Cursor>
-	</File>
-	<File name="src/C/arrays/libgwrc-array-equal-simple.c" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="9096" topLine="105" />
+			<Cursor1 position="6238" topLine="21" />
 		</Cursor>
 		<Folding>
 			<Collapse line="47" />
-			<Collapse line="96" />
-			<Collapse line="104" />
-			<Collapse line="143" />
-			<Collapse line="145" />
-			<Collapse line="178" />
+			<Collapse line="57" />
+			<Collapse line="86" />
+			<Collapse line="97" />
 		</Folding>
 	</File>
-	<File name="src/C/arrays/libgwrc-array-data-block32.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/C/arrays/libgwrc-array-equal.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3718" topLine="22" />
+			<Cursor1 position="4642" topLine="5" />
 		</Cursor>
+		<Folding>
+			<Collapse line="47" />
+			<Collapse line="78" />
+		</Folding>
+	</File>
+	<File name="src/C/buffers/libgwrc-fast-text-buffer-private.h" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4606" topLine="22" />
+		</Cursor>
+		<Folding>
+			<Collapse line="73" />
+		</Folding>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-equal-simple.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3968" topLine="11" />
+		</Cursor>
+		<Folding>
+			<Collapse line="72" />
+		</Folding>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-data-block16.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6680" topLine="60" />
+		</Cursor>
+		<Folding>
+			<Collapse line="139" />
+			<Collapse line="152" />
+		</Folding>
+	</File>
+	<File name="src/GtkFastTextView-demo/GtkFastTextView-demo.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="8824" topLine="99" />
+		</Cursor>
+		<Folding>
+			<Collapse line="88" />
+			<Collapse line="90" />
+			<Collapse line="103" />
+			<Collapse line="107" />
+			<Collapse line="113" />
+			<Collapse line="117" />
+			<Collapse line="121" />
+			<Collapse line="126" />
+			<Collapse line="138" />
+			<Collapse line="150" />
+			<Collapse line="201" />
+			<Collapse line="235" />
+			<Collapse line="240" />
+		</Folding>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-data-block16.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3483" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="47" />
+			<Collapse line="56" />
+		</Folding>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-data-multi.c" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4217" topLine="43" />
+		</Cursor>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-data-multi-infos.cci" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4503" topLine="20" />
+		</Cursor>
+		<Folding>
+			<Collapse line="139" />
+			<Collapse line="150" />
+			<Collapse line="160" />
+		</Folding>
+	</File>
+	<File name="src/C/arrays/libgwrc-array-equal.c" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6810" topLine="88" />
+		</Cursor>
+		<Folding>
+			<Collapse line="82" />
+			<Collapse line="106" />
+			<Collapse line="111" />
+			<Collapse line="125" />
+			<Collapse line="130" />
+			<Collapse line="148" />
+			<Collapse line="157" />
+			<Collapse line="187" />
+			<Collapse line="241" />
+			<Collapse line="250" />
+			<Collapse line="271" />
+			<Collapse line="288" />
+			<Collapse line="298" />
+		</Folding>
 	</File>
 </CodeBlocks_layout_file>
