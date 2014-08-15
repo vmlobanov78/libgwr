@@ -1,9 +1,11 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   gtkfasttextview.h                                                       *
+    *   libgwrc-array-common.h                                                  *
     *                                                                           *
     *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Part of libwgwr                                                         *
     *                                                                           *
     *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
     *                                                                           *
@@ -26,78 +28,50 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose : Simple and fast gtk compatible textview widget                *
+    *   Purpose :   Array of constant-size data                                 *
     *                                                                           *
     *****************************************************************************
 */
-#ifndef __GTK_FAST_TEXT_VIEW_H__
-#define __GTK_FAST_TEXT_VIEW_H__
 
+#ifndef     __LIBGWRC_ARRAY_COMMON_H__
+#define     __LIBGWRC_ARRAY_COMMON_H__
 //  ............................................................................
-#include <glib-object.h>
-#include <gtk/gtk.h>
+#include    <glib.h>
 
-#include "C/buffers/libgwrc-fast-text-buffer.h"
+#include    <string.h>
+#include    <stdio.h>
 //  ............................................................................
-G_BEGIN_DECLS
-
-#define GTK_FAST_TEXT_VIEW_TYPE             ( gtk_fast_text_view_get_type   ()                                                          )
-#define GTK_FAST_TEXT_VIEW(obj)             ( G_TYPE_CHECK_INSTANCE_CAST    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE, GtkFastTextView      )   )
-#define GTK_FAST_TEXT_VIEW_CLASS(klass)     ( G_TYPE_CHECK_CLASS_CAST       ( (klass)   , GTK_FAST_TEXT_VIEW_CLASS_TYPE, GtkFastTextViewClass )   )
-#define GTK_IS_FAST_TEXT_VIEW(obj)          ( G_TYPE_CHECK_INSTANCE_TYPE    ( (obj)     , GTK_FAST_TEXT_VIEW_TYPE                       )   )
-#define GTK_IS_FAST_TEXT_VIEW_CLASS(klass)  ( G_TYPE_CHECK_CLASS_TYPE       ( (klass)   , GTK_FAST_TEXT_VIEW_TYPE                       )   )
-
-typedef struct _GtkFastTextView          GtkFastTextView;
-typedef struct _GtkFastTextViewClass     GtkFastTextViewClass;
-
-struct _GtkFastTextView
+typedef struct  _GwrCArrayMemoryFootPrint   GwrCAMFP;
+//! \struct _GwrCArrayMemoryFootPrint
+//!
+//! \brief  Memory FootPrint for array structs.
+struct  _GwrCArrayMemoryFootPrint
 {
-    GtkWidgetClass  parent_instance;
+    guint32     a_ss;                                                           //!< Struct itself
+    guint32     a_sa;                                                           //!< Internal allocated memory
+    guint32     a_su;                                                           //!< Recursive allocated memory
 };
 
-struct _GtkFastTextViewClass
+typedef struct  _GwrCData16 GwrCData16;
+//! \struct _GwrCData16
+//!
+//! \brief  Data, maximum 16 bits len.
+struct  _GwrCData16
 {
-    GtkWidgetClass      parent_class;
-
-    struct
-    {
-        GdkPixbuf       *   xd_pixbuf;
-        GdkCursor       *   normal;
-        GdkCursor       *   data;
-        GdkCursor       *   url;
-    } cursors;
+    gpointer    a_mem;                                                          //!< Address of data in memory
+    guint16     a_size;                                                         //!< Size of data
 };
-
-GType           gtk_fast_text_view_get_type (void) G_GNUC_CONST;
-GtkWidget   *   gtk_fast_text_view_new      (GwrFastTextBuffer*);
-
-G_END_DECLS
-
-typedef void(*GtkFastTextViewXdCallback)(gpointer, guint16, guint16, guint8);
 
 #if ( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct  _GwrFastTextBuffer           GwrFastTextBuffer;
-
-extern  void                gtk_fast_text_view_set_buffer           (GtkFastTextView*, GwrFastTextBuffer*);
-extern  GwrFastTextBuffer*  gtk_fast_text_view_get_buffer           (GtkFastTextView*);
-
-extern  void                gtk_fast_text_view_set_font_size        (GtkFastTextView*, guint32);
-extern  void                gtk_fast_text_view_set_color            (GtkFastTextView*, guint32 _color_index, guint8 _r, guint8 _g, guint8 _b);
-
-extern  void                gtk_fast_text_view_set_xd_callback      (GtkFastTextView*, GtkFastTextViewXdCallback);
-
-extern  void                gtk_fast_text_view_refresh              (GtkFastTextView*);
+void    gwr_array_mfp_reset (GwrCAMFP*);
+void    gwr_array_mfp_add   (GwrCAMFP* _mfp_dst, GwrCAMFP* _mfp_src);
 
 #if ( __cplusplus )
 }
 #endif
 
 
-
-
-
-
-#endif                                                                          // __GWRGTK_TEXT_VIEW_H__
+#endif                                                                          //  __LIBGWRC_ARRAY_COMMON_H__

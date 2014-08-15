@@ -36,7 +36,8 @@
 #ifndef     __LIBGWRC_ARRAY_EQUAL_H__
 #define     __LIBGWRC_ARRAY_EQUAL_H__
 //  ............................................................................
-#include    <glib.h>
+#include    "libgwrc-array-data-block24.h"
+#include    "libgwrc-array-equal-simple.h"
 //  ............................................................................
 typedef struct  _GwrCArrayEqual     GwrCArrayEqual;
 
@@ -45,14 +46,17 @@ typedef struct  _GwrCArrayEqual     GwrCArrayEqual;
 //! \brief  Array of constant size datas.
 struct  _GwrCArrayEqual
 {
-    gpointer    d_mem;                                                          //!< Location of array in memory
-    guint32     a_block_size;                                                   //!< Size ( in bytes ) of a block
-    guint32     a_realloc_size;                                                 //!< # of blocks to realloc when array is full
+    GwrCArrayEqualSimple        *   d_blocks;                                   //!< Array of GwrCADBlock24 structs
 
-    guint32     a_blocks_card;                                                  //!< # of data blocks in the array
-    guint32     a_blocks_used;                                                  //!< # of data blocks used in the array
+    gchar                       *   d_name;
 
-    guint32     a_stat_realloc;                                                 //!< # of reallocations since creation / last reset
+    guint32                         a_data_size;                                //!< Size ( in bytes ) of a data
+    guint32                         a_dbk_capacity;                             //!< Size ( in data unit ) of a GwrCADBlock24
+    guint32                         a_dbk_size;                                 //!< Size ( in bytes ) of a GwrCADBlock24
+    guint32                         a_dbk_realloc;                              //!< # of GwrCADBlock24 to realloc when all are full
+    guint32                         a_data_card;                                //!< # of data stored in the GwrCArrayEqual
+
+    guint32                         a_stat_realloc;
 };
 //  ............................................................................
 typedef struct  _GwrCArrayEqualStat GwrCArrayEqualStat;
@@ -61,22 +65,25 @@ typedef struct  _GwrCArrayEqualStat GwrCArrayEqualStat;
 //! \brief  Convenience struct for memory statistics.
 struct  _GwrCArrayEqualStat
 {
-    guint32             a_size_bytes;
-    guint32             a_blocks_card;
-    guint32             a_blocks_used;
-    guint32             a_blocks_alloc;
+    GwrCArrayEqualSimpleStat        a_simple_stat;
+
+    guint32                         a_dbk_capacity;
+    guint32                         a_dbk_size;
+
+    guint32                         a_realloc;
+
+    GwrCAMFP                        a_mfp;
 };
 //  ============================================================================
 #if ( __cplusplus )
 extern "C" {
 #endif
 
-extern          void                    gwr_array_equal_dump                    (
-            GwrCArrayEqual          *       _ae             );
-
 extern          GwrCArrayEqual      *   gwr_array_equal_new                     (
-            guint32                         _block_size     ,
-            guint32                         _realloc_size   );
+    const   gchar                   *       _name           ,
+            guint32                         _data_size      ,
+            guint32                         _block_capacity ,
+            guint32                         _block_realloc  );
 
 extern          void                    gwr_array_equal_delete                  (
             GwrCArrayEqual          *       _ae             );
@@ -84,25 +91,37 @@ extern          void                    gwr_array_equal_delete                  
 extern          void                    gwr_array_equal_reset                   (
             GwrCArrayEqual          *       _ae             );
 
-extern          void                    gwr_array_equal_dealloc                 (
-            GwrCArrayEqual          *       _ae             );
-
-extern          gboolean                gwr_array_equal_add                     (
+extern          void                    gwr_array_equal_add_data                (
             GwrCArrayEqual          *       _ae     ,
             gpointer                        _data           );
 
-extern          gpointer                gwr_array_equal_get                     (
+extern          gboolean                gwr_array_equal_addb_data               (
             GwrCArrayEqual          *       _ae     ,
-            guint32                         _block_index    );
-
-extern          gboolean                gwr_array_equal_getb                    (
+            gpointer                        _data           );
+/*
+extern          GwrCADBlock24       *   gwr_array_equal_get_block               (
             GwrCArrayEqual          *       _ae             ,
-            guint32                         _block_index    ,
-            gpointer                        _dest           );
+            guint32                         _block_index     );
+*/
+extern          gpointer                gwr_array_equal_get_data                (
+            GwrCArrayEqual          *       _ae             ,
+            guint32                         _data_index     );
+
+extern          gboolean                gwr_array_equal_getb_data               (
+            GwrCArrayEqual          *       _ae             ,
+            guint32                         _data_index     ,
+            gpointer                *       _dest           );
+
+extern          void                    gwr_array_equal_dump                    (
+            GwrCArrayEqual          *       _ae             );
 
 extern          void                    gwr_array_equal_get_stats(
             GwrCArrayEqual          *       _ae             ,
             GwrCArrayEqualStat      *       _ae_stat        );
+
+extern          void                    gwr_array_equal_get_mfp(
+            GwrCArrayEqual          *       _ae             ,
+            GwrCAMFP                *       _out            );
 
 #if ( __cplusplus )
 }

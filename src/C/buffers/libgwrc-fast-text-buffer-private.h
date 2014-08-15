@@ -26,7 +26,7 @@
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
-    *   Purpose : Private data for GwrFastTextBuffer                             *
+    *   Purpose : Private data for GwrFastTextBuffer                            *
     *                                                                           *
     *****************************************************************************
 */
@@ -36,47 +36,93 @@
 //  ............................................................................
 #include    "C/arrays/libgwrc-array-data-multi.h"
 //  ............................................................................
-
-//  f   =   foreground
-//  b   =   background
-//  s   =   style
-//  l   =   length  max = 2^9 - 1 = 511
-//
-//  76543210 76543210 76543210 76543210
-//  00000000 00000000 00000000 00000000
-//  00000000 0lllllll llssssbb bbbfffff
-//  0sssssss ssssslll llllllbb bbbfffff
 enum
 {
+    //  GwrFastTextBufferLineDesc
+    //
+    //  f   =   foreground  ( max 32 colors )
+    //  b   =   background  ( max 32 colros )
+    //  s   =   style       ( max 4 flags )
+    //  x   =   extra data    : index size
+    //  g   =   segments data : index size
+    //
+    //  76543210 76543210 76543210 76543210
+    //  00000000 00000000 00000000 00000000
+    //  xxxggg00 00000000 00ssssbb bbbfffff
     eGFTB_LD_FG_MASK    =   (guint32)   0x0000001f      ,
     eGFTB_LD_FG_OFFSET  =   (guint32)   0               ,
 
     eGFTB_LD_BG_MASK    =   (guint32)   0x000003e0      ,
     eGFTB_LD_BG_OFFSET  =   (guint32)   5               ,
 
-    eGFTB_LD_ST_MASK    =   (guint32)   0x00003c00      ,
+    eGFTB_LD_ST_MASK    =   (guint32)   0x0000c000      ,
     eGFTB_LD_ST_OFFSET  =   (guint32)   10              ,
 
-    eGFTB_LD_LN_MASK    =   (guint32)   0x0007fc00      ,
-    eGFTB_LD_LN_OFFSET  =   (guint32)   10
-};
+    eGFTB_LD_DS_MASK    =   (guint32)   0xe0000000      ,
+    eGFTB_LD_DS_OFFSET  =   (guint32)   29              ,
 
-typedef struct  _GwrFastTextBufferLineDesc   GwrFastTextBufferLineDesc;
+    eGFTB_LD_US_MASK    =   (guint32)   0x1c000000      ,
+    eGFTB_LD_US_OFFSET  =   (guint32)   26              ,
+    //  ........................................................................
+    //  GwrFastTextBufferXduDesc
+    //
+    //  o   =   offset  ( max 512 )
+    //  l   =   len     ( max 128 chars )
+    //
+    //  76543210 76543210
+    //  00000000 00000000
+    //  lllllllo oooooooo
+    eGFTB_XDU_OF_MASK   =   (guint16)   0x01ff          ,
+    eGFTB_XDU_OF_OFFSET =   (guint32)   0               ,
+
+    eGFTB_XDU_LN_MASK   =   (guint16)   0xfe00          ,
+    eGFTB_XDU_LN_OFFSET =   (guint32)   9
+};
+//  ............................................................................
+typedef struct  _GwrFastTextBufferLineDesc      GwrFastTextBufferLineDesc;
 
 struct  _GwrFastTextBufferLineDesc
 {
     guint32     a_data1;
 }   __attribute__ ((packed));
+//  ............................................................................
+typedef struct  _GwrFastTextBufferSegmentDesc   GwrFastTextBufferSegmentDesc;
 
-typedef struct  _GwrFastTextBufferPrivate    GwrFastTextBufferPrivate;
+struct  _GwrFastTextBufferSegmentDesc
+{
+    guint32     a_data1;
+}   __attribute__ ((packed));
+//  ............................................................................
+typedef struct  _GwrFastTextBufferXduDesc       GwrFastTextBufferXduDesc;
+
+struct  _GwrFastTextBufferXduDesc
+{
+    guint16     a_data1;
+}   __attribute__ ((packed));
+//  ............................................................................
+typedef struct  _GwrFastTextBufferPrivate       GwrFastTextBufferPrivate;
 
 struct  _GwrFastTextBufferPrivate
 {
     GwrCArrayDataMulti  *   d_lines_text;                                       //!< Contain all lines text
-    GwrCArrayEqual      *   d_lines_desc;                                       //!< Contain all lines metadata
+    GwrCArrayEqualSimple*   d_lines_desc;                                       //!< Contain all lines lines metadata
+    GwrCArrayDataMulti  *   d_extra_data;                                       //!< Contain all lines extra datas
+    GwrCArrayEqual      *   d_xdu_offsets;                                      //!< Contain all lines urls offsets
 
     guint32                 lines_card;
     guint32                 lines_max_len;                                      //!< Longest line length ( in char ) in buffer
+
+    //GwrCArrayDataMulti  *   d_segments_data;                                    //!< Contain all lines segments metadatas
+    //struct
+    //{
+    //    gchar                   a_line          [512];                          //!< Segmented line beeing constructed
+    //    guint32                 a_line_len;                                     //!< Length of a_line
+
+    //    guint32                 a_descs[8];                                     //!< Maximum 8 segments in one line
+
+    //    guint32                 a_state;
+    //}
+    //                        segments;
 };
 
 #endif                                                                          //  __LIBGWRC_FAST_TEXT_BUFFER_PRIVATE_H__

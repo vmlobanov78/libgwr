@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="libgwr" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="src/;src/bash/;src/CC/;src/CC/treestore/;src/CC/logger/;src/CC/gen-log/;src/CC/gen-log/lexer/;src/CC/gen-log/parser/;src/CC/widget/;src/CC/headers/;src/C/;doc/;src/C/arrays/;src/C/gtk/;src/C/gtk/GtkFastTextView/;src/buffers/;" />
+		<Option virtualFolders="src/;src/bash/;src/CC/;src/CC/treestore/;src/CC/logger/;src/CC/gen-log/;src/CC/gen-log/lexer/;src/CC/gen-log/parser/;src/CC/widget/;src/CC/headers/;src/C/;src/C/buffers/;doc/;src/C/arrays/;src/C/gtk/;src/C/gtk/GtkFastTextView/;" />
 		<Build>
 			<Target title="D-gen-log">
 				<Option output="bin/Debug/libgwr-gen-log" prefix_auto="1" extension_auto="1" />
@@ -96,6 +96,79 @@
 			<Option virtualFolder="doc/" />
 			<Option target="D-gen-log" />
 		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-common.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block16.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block16.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block24.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block24.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block32.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-block32.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi-core.cci">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-data-multi-infos.cci">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-multi.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/C/arrays/" />
@@ -105,6 +178,21 @@
 			<Option target="R-libgwrc" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-multi.h">
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal-simple.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/C/arrays/" />
+			<Option target="D-libgwr" />
+			<Option target="D-libgwrc" />
+			<Option target="R-libgwr" />
+			<Option target="R-libgwrc" />
+		</Unit>
+		<Unit filename="src/C/arrays/libgwrc-array-equal-simple.h">
 			<Option virtualFolder="src/C/arrays/" />
 			<Option target="D-libgwr" />
 			<Option target="D-libgwrc" />
@@ -127,7 +215,7 @@
 			<Option target="R-libgwrc" />
 		</Unit>
 		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer-private.h">
-			<Option virtualFolder="src/buffers/" />
+			<Option virtualFolder="src/C/buffers/" />
 			<Option target="D-libgwr" />
 			<Option target="D-libgwrc" />
 			<Option target="R-libgwr" />
@@ -135,14 +223,14 @@
 		</Unit>
 		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.c">
 			<Option compilerVar="CC" />
-			<Option virtualFolder="src/buffers/" />
+			<Option virtualFolder="src/C/buffers/" />
 			<Option target="D-libgwr" />
 			<Option target="D-libgwrc" />
 			<Option target="R-libgwr" />
 			<Option target="R-libgwrc" />
 		</Unit>
 		<Unit filename="src/C/buffers/libgwrc-fast-text-buffer.h">
-			<Option virtualFolder="src/buffers/" />
+			<Option virtualFolder="src/C/buffers/" />
 			<Option target="D-libgwr" />
 			<Option target="D-libgwrc" />
 			<Option target="R-libgwr" />

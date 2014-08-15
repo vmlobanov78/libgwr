@@ -40,29 +40,6 @@
 //  ............................................................................
 #include    "libgwrc-array-equal.h"
 //  ............................................................................
-typedef struct  _GwrCADMData            GwrCADMData;
-//! \struct _GwrCADMData
-//!
-//! \brief  Convenience struct referencing a data in memory.
-struct  _GwrCADMData
-{
-    gpointer    a_mem;                                                          //!< Data location
-    guint16     a_size;                                                         //!< Data size
-};
-//  ............................................................................
-typedef struct  _GwrCADMBlock           GwrCADMBlock;
-//! \struct _GwrCADMBlock
-//!
-//! \brief  Block of data that maintain the count of used bytes in it.
-struct  _GwrCADMBlock
-{
-    gpointer    d_mem;                                                          //!< Base memory
-    guint32     a_size;                                                         //!< Size ( in bytes )
-    guint32     a_used_bytes;                                                   //!< Size ( in bytes ) of used bytes
-};
-
-extern  guint32     GwrCADMBlock_S;                                             //!< Sizeof struct GwrCADMBlock
-//  ............................................................................
 typedef struct  _GwrCADMDataInfo        GwrCADMDataInfo;
 //! \struct _GwrCADMDataInfo
 //!
@@ -74,7 +51,7 @@ struct  _GwrCADMDataInfo
     guint16     a_len;                                                          //!< Len    of data in the GwrCADMBlock
 };
 
-extern  guint32     GwrCADMDataInfo_S;                                          //!< Sizeof struct GwrCADMDataInfo
+extern  guint32     GwrCADMDataInfo_SSIZE;                                      //!< Sizeof struct GwrCADMDataInfo
 //  ............................................................................
 typedef struct  _GwrCArrayDataMulti     GwrCArrayDataMulti;
 //! \struct _GwrCArrayDataMulti
@@ -82,11 +59,13 @@ typedef struct  _GwrCArrayDataMulti     GwrCArrayDataMulti;
 //! \brief  Array containing datas of any sizes.
 struct  _GwrCArrayDataMulti
 {
-    GwrCArrayEqual  *   d_blocks;                                               //!< Array of GwrCADMBlocks
-    GwrCArrayEqual  *   d_infos;                                                //!< Array of GwrCADMDataInfos
+    gchar                   *   d_name;
 
-    guint32             a_block_size;                                           //!< Size ( in bytes ) that GwrCADMBlock can contain
-    guint32             a_data_size;                                            //!< Size ( in bytes ) of all the datas contained in the GwrCADMBlocks
+    GwrCArrayEqualSimple    *   d_data_blocks;                                  //!< Array of GwrCADMBlock24 structs
+    GwrCArrayEqualSimple    *   d_info_blocks;                                  //!< Array of GwrCADMDataInfo structs
+
+    guint32                     a_data_block_size;                              //!< Size ( in bytes ) of data GwrCADMBlock24
+    guint32                     a_data_size;                                    //!< Size ( in bytes ) of all the datas contained in the GwrCADMBlocks
 };
 //  ............................................................................
 typedef struct  _GwrCArrayDataMultiStat GwrCArrayDataMultiStat;
@@ -95,29 +74,23 @@ typedef struct  _GwrCArrayDataMultiStat GwrCArrayDataMultiStat;
 //! \brief  Convenience struct for memory statistics.
 struct  _GwrCArrayDataMultiStat
 {
-    guint32             a_data_card;                                            //!< # of data stored
-    guint32             a_data_size;                                            //!< Total size of data stored
+    GwrCArrayEqualSimpleStat    a_data_stat;
+    GwrCArrayEqualSimpleStat    a_info_stat;
 
-    guint32             a_blocks_card;
-    guint32             a_blocks_used;
-    guint32             a_blocks_alloc;
+    guint32                     a_data_block_size;
 
-    guint32             a_descs_card;
-    guint32             a_descs_used;
-    guint32             a_descs_alloc;
+    GwrCAMFP                    a_mfp;
 };
 //  ============================================================================
 #if ( __cplusplus )
 extern "C" {
 #endif
 
-extern          void                    gwr_array_data_multi_dump               (
-            GwrCArrayDataMulti      *       _adm            );
-
 extern          GwrCArrayDataMulti  *   gwr_array_data_multi_new                (
-            guint32                         _data_block_size    ,
-            guint32                         _blocks_realloc     ,
-            guint32                         _infos_realloc      );
+    const   gchar           *               _name                           ,
+            guint32                         _data_block_size                ,
+            guint32                         _data_blocks_storage_realloc    ,
+            guint32                         _info_blocks_storage_realloc    );
 
 extern          void                    gwr_array_data_multi_delete             (
             GwrCArrayDataMulti      *       _adm            );
@@ -125,19 +98,33 @@ extern          void                    gwr_array_data_multi_delete             
 extern          void                    gwr_array_data_multi_reset              (
             GwrCArrayDataMulti      *       _adm            );
 
-extern          gboolean                gwr_array_data_multi_add_data           (
+extern          void                    gwr_array_data_multi_add_data           (
             GwrCArrayDataMulti      *       _adm            ,
             gpointer                        _data           ,
-            guint16                         _len            );
+            guint16                         _data_len       );
 
-extern          gboolean                gwr_array_data_multi_get_data           (
+extern          void                    gwr_array_data_multi_add_data_and_extra_data(
+            GwrCArrayDataMulti      *       _adm                ,
+            gpointer                        _data               ,
+            guint16                         _len                ,
+            gpointer                        _extra_data         ,
+            guint8                          _extra_data_len     );
+
+extern          void                    gwr_array_data_multi_get_data                   (
             GwrCArrayDataMulti      *       _adm            ,
             guint32                         _data_index     ,
-            GwrCADMData             *       _data           );
+            GwrCData16              *       _data           );
+
+extern          void                    gwr_array_data_multi_dump_data          (
+            GwrCArrayDataMulti      *       _adm            );
 
 extern          void                    gwr_array_data_multi_get_stats          (
             GwrCArrayDataMulti      *       _adm                        ,
             GwrCArrayDataMultiStat  *       _adm_stat                   );
+
+extern          void                    gwr_array_data_multi_get_mfp(
+            GwrCArrayDataMulti      *       _aem            ,
+            GwrCAMFP                *       _out            );
 
 #if ( __cplusplus )
 }

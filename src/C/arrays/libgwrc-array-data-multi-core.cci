@@ -1,0 +1,148 @@
+/*
+    *****************************************************************************
+    *                                                                           *
+    *   libgwrc-array-data-multi-core.cci                                       *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Part of libwgwr                                                         *
+    *                                                                           *
+    *   Copyright (C) 2011-2014 Guillaume Wardavoir                             *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   This program is free software; you can redistribute it and/or modify    *
+    *   it under the terms of the GNU General Public License as published by    *
+    *   the Free Software Foundation; either version 2 of the License, or       *
+    *   (at your option) any later version.                                     *
+    *                                                                           *
+    *   This program is distributed in the hope that it will be useful,         *
+    *   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+    *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+    *   GNU General Public License for more details.                            *
+    *                                                                           *
+    *   You should have received a copy of the GNU General Public License       *
+    *   along with this program; if not, write to the Free Software             *
+    *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,   *
+    *   USA.                                                                    *
+    *                                                                           *
+    *   --------------------------------------------------------------------    *
+    *                                                                           *
+    *   Purpose :   Array containing datas of any sizes.                        *
+    *                                                                           *
+    *****************************************************************************
+*/
+
+//  ----------------------------------------------------------------------------
+//  Gwr_array_data_multi_get_last_block_for_adding_data()
+//  ----------------------------------------------------------------------------
+GwrCADBlock24*
+Gwr_array_data_multi_get_last_block_for_adding_data(
+        GwrCArrayDataMulti          *   _adm        ,
+        guint32                         _data_len   )
+{
+    GwrCADBlock24   *   dbk24_c;                                                //  last GwrCADBlock24 in use
+    GwrCADBlock24       dbk24_n;                                                //  new GwrCADBlock24
+    //  ........................................................................
+    dbk24_c =   gwr_array_equal_simple_get_data(                                //  get last block in use
+                    _adm->d_data_blocks                     ,
+                    _adm->d_data_blocks->a_slots_used - 1   );                  //  cf _OPTIM_01_
+
+    //  most probably case : block has enough free space to store the data
+    if ( gwr_array_dbk24_available_bytes(dbk24_c) >= _data_len )
+        return dbk24_c;
+
+    //  block full : create another
+    gwr_array_dbk24_alloc           ( &dbk24_n, _adm->a_data_block_size );
+    gwr_array_equal_simple_add_data ( _adm->d_data_blocks, &dbk24_n );
+
+    dbk24_c =   gwr_array_equal_simple_get_data(                                //  re-get last block in use
+                    _adm->d_data_blocks                     ,
+                    _adm->d_data_blocks->a_slots_used - 1   );                  //  cf _OPTIM_01_
+
+    return dbk24_c;
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_add_data()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_add_data(
+        GwrCArrayDataMulti          *   _adm        ,
+        gpointer                        _data       ,
+        guint16                         _data_len   )
+{
+    GwrCADBlock24       *   dbk24_c;
+    GwrCADMDataInfo         di_n;
+    //  ........................................................................
+    //  choose block to add data
+    dbk24_c =   Gwr_array_data_multi_get_last_block_for_adding_data(_adm, _data_len);
+    //  ........................................................................
+    //  create new data info & store it
+    gwr_array_data_multi_data_info_set(
+        &di_n                                   ,
+        _adm->d_data_blocks->a_slots_used - 1   ,                               //  cf _OPTIM_01_
+        gwr_array_dbk24_used_bytes(dbk24_c)     ,                               //  used bytes = offset
+        _data_len                               );
+
+    gwr_array_equal_simple_add_data( _adm->d_info_blocks, &di_n );
+    //  ........................................................................
+    //  add data to the block
+    gwr_array_dbk24_add( dbk24_c, _data, _data_len );
+    //  ........................................................................
+    //  update infos
+    _adm->a_data_size   =   _adm->a_data_size   +   _data_len;
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_add_data_and_extra_data()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_add_data_and_extra_data(
+        GwrCArrayDataMulti      *       _adm                ,
+        gpointer                        _data               ,
+        guint16                         _data_len           ,
+        gpointer                        _extra_data         ,
+        guint8                          _extra_data_len     )
+{
+    GwrCADBlock24       *   dbk24_c;
+    GwrCADMDataInfo         di_n;
+    //  ........................................................................
+    //  choose block to add data
+    dbk24_c =   Gwr_array_data_multi_get_last_block_for_adding_data(
+            _adm                            ,
+            _data_len + _extra_data_len     );
+    //  ........................................................................
+    //  create new data info & store it
+    gwr_array_data_multi_data_info_set(
+        &di_n                                   ,
+        _adm->d_data_blocks->a_slots_used - 1   ,                               //  cf _OPTIM_01_
+        gwr_array_dbk24_used_bytes(dbk24_c)     ,                               //  used bytes = offset
+        _data_len                               );
+
+    gwr_array_equal_simple_add_data( _adm->d_info_blocks, &di_n );
+    //  ........................................................................
+    //  add data to the block
+    gwr_array_dbk24_add_with_extra_data( dbk24_c, _data, _data_len , _extra_data, _extra_data_len );
+    //  ........................................................................
+    //  update infos
+    _adm->a_data_size   =   _adm->a_data_size   +   _data_len;
+}
+//  ----------------------------------------------------------------------------
+//  gwr_array_data_multi_get_data()
+//  ----------------------------------------------------------------------------
+void
+gwr_array_data_multi_get_data(
+        GwrCArrayDataMulti      *       _adm            ,
+        guint32                         _data_index     ,
+        GwrCData16              *       _data           )
+{
+    GwrCADMDataInfo         *   di      =   NULL;
+    GwrCADBlock24           *   dbk24   =   NULL;
+    //  ........................................................................
+    di = gwr_array_equal_simple_get_data( _adm->d_info_blocks, _data_index );
+
+    _data->a_size   =   di->a_len;
+
+    dbk24 = gwr_array_equal_simple_get_data( _adm->d_data_blocks, di->a_block_index );
+
+    _data->a_mem    =   dbk24->d_mem    +   di->a_offset;
+}
