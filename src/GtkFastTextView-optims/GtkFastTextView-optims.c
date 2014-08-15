@@ -1,7 +1,7 @@
 /*
     *****************************************************************************
     *                                                                           *
-    *   GtkFastTextView-demo.c                                                  *
+    *   GtkFastTextView-optims.c                                                *
     *                                                                           *
     *   --------------------------------------------------------------------    *
     *                                                                           *
@@ -51,12 +51,6 @@ gboolean        Use_colors          =   FALSE;
 //  ............................................................................
 GwrFastTextBuffer   *   tb1     =   NULL;
 //  ............................................................................
-GtkTextBuffer       *   tb2         =   NULL;
-GtkTextTagTable     *   tb2_table   =   NULL;
-GtkTextTag          *   tb2_tag_r   =   NULL;
-GtkTextTag          *   tb2_tag_g   =   NULL;
-GtkTextTag          *   tb2_tag_b   =   NULL;
-//  ............................................................................
 GtkWidget   *   w_win;
 GtkWidget   *       w_vbox;
 GtkWidget   *           w_frame;
@@ -68,11 +62,6 @@ GtkWidget   *               w_vbox1;
 GtkWidget   *                   w_button1;
 GtkWidget   *                   w_tv1;
 GtkWidget   *                   w_label1;
-GtkWidget   *               w_vbox2;
-GtkWidget   *                   w_button2;
-GtkWidget   *                   w_sw2;
-GtkWidget   *                       w_tv2;
-GtkWidget   *                   w_label2;
 //  ............................................................................
 struct timespec T1;
 struct timespec T2;
@@ -162,9 +151,9 @@ void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
 
             case    1   :   gwr_fast_text_buffer_add_line_with_data         (tb1, SampleText2, 2, 0, 0, SampleData, 12       );     break;
 
-            case    2   :   gwr_fast_text_buffer_add_line_with_data_and_url (tb1, SampleText3, 3, 0, 0, SampleData, 12, 40, 4 );    break;
+            //case    2   :   gwr_fast_text_buffer_add_line_with_data_and_url (tb1, SampleText3, 3, 0, 0, SampleData, 12, 40, 4 );    break;
             //case    2   :   gwr_fast_text_buffer_add_line(tb1, SampleText1, 3, 0, 0);    break;
-            //case    2   :   gwr_fast_text_buffer_add_line_with_data         (tb1, SampleText3, 3, 0, 0, SampleData, 12       );     break;
+            case    2   :   gwr_fast_text_buffer_add_line_with_data         (tb1, SampleText3, 3, 0, 0, SampleData, 12       );     break;
 
             }
         }
@@ -189,58 +178,11 @@ void    Signal_button1_clicked(GtkWidget* _w, gpointer _data)
     gwr_fast_text_buffer_dump_mem( tb1 );
     gtk_fast_text_view_refresh( GTK_FAST_TEXT_VIEW(w_tv1) );
 }
-void    Signal_button2_clicked(GtkWidget* _w, gpointer _data)
-{
-    guint32     i   =   0;
-    GtkTextIter iter;
-    //  ........................................................................
-    Get_user_settings();
-
-    Chrono_start();
-
-    gtk_text_buffer_set_text(tb2, "", -1);
-
-    for ( i = 0 ; i != Iterations ; i++ )
-    {
-        sprintf(SampleText1, "Line [%5i]:This is a sample text\n", i);
-        sprintf(SampleText2, "Line [%5i]:This is a sample text with data\n", i);
-        sprintf(SampleText3, "Line [%5i]:This is a sample text with data and url\n", i);
-
-        gtk_text_buffer_get_end_iter(tb2, &iter);
-
-        if ( Use_colors )
-        {
-
-            sprintf(SampleData, "http://%05i", i);
-
-            switch ( i % 3 )
-            {
-
-            case    0   :   gtk_text_buffer_insert_with_tags(tb2, &iter, SampleText1, -1, tb2_tag_r, NULL);  break;
-            case    1   :   gtk_text_buffer_insert_with_tags(tb2, &iter, SampleText2, -1, tb2_tag_g, NULL);  break;
-            case    2   :   gtk_text_buffer_insert_with_tags(tb2, &iter, SampleText3, -1, tb2_tag_b, NULL);  break;
-
-            }
-        }
-        else
-        {
-            gtk_text_buffer_insert(tb2, &iter, SampleText1, -1);
-        }
-    }
-
-    gtk_fast_text_view_refresh( GTK_FAST_TEXT_VIEW(w_tv1) );
-
-    Chrono_stop();
-
-    Delta2  =   Delta;
-
-    gtk_label_set_text( GTK_LABEL(w_label2), Str );
-}
 void    Signal_destroy(GtkWidget* _w)
 {
     //F fflush(Fd);
 
-   gtk_main_quit();
+    gtk_main_quit();
 }
 //  ............................................................................
 void    GftvXdataCallback(gpointer _data,guint16 _len, guint16 ho, guint8 hl)
@@ -290,23 +232,12 @@ int main( int argc, char *argv[])
                 70000 , 8 ,
                         8 ,
 
-                       4 ,
+                        4 ,
 
                 32768, 4   ,
                        4   ,
 
                 1024 , 4    );
-    //  ........................................................................
-    tb2_tag_r   =   gtk_text_tag_new("CR");
-    tb2_tag_g   =   gtk_text_tag_new("CG");
-    tb2_tag_b   =   gtk_text_tag_new("CB");
-
-    tb2_table   =   gtk_text_tag_table_new();
-    gtk_text_tag_table_add( tb2_table, tb2_tag_r);
-    gtk_text_tag_table_add( tb2_table, tb2_tag_g);
-    gtk_text_tag_table_add( tb2_table, tb2_tag_b);
-
-    tb2 =   gtk_text_buffer_new(tb2_table);
     //  ........................................................................
     w_win                       =   gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -325,14 +256,7 @@ int main( int argc, char *argv[])
                     w_button1   =   gtk_button_new_with_label("Write to GtkFastTextView");
                     w_tv1       =   gtk_fast_text_view_new(tb1);
                     w_label1    =   gtk_label_new("");
-
-                w_vbox2         =   gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-                    w_button2   =   gtk_button_new_with_label("Write to GtkTextView");
-                    w_sw2       =   gtk_scrolled_window_new(NULL, NULL);
-                    w_tv2       =   gtk_text_view_new();
-                    w_label2    =   gtk_label_new("");
     //  ........................................................................
-    gtk_text_view_set_buffer( GTK_TEXT_VIEW(w_tv2), tb2 );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(w_frm_spin_nlines), (gdouble)Iterations);
 
     gtk_fast_text_view_set_color( GTK_FAST_TEXT_VIEW(w_tv1), 1, 255, 0, 0);
@@ -340,10 +264,6 @@ int main( int argc, char *argv[])
     gtk_fast_text_view_set_color( GTK_FAST_TEXT_VIEW(w_tv1), 3, 200, 200, 0);
     gtk_fast_text_view_set_xd_callback( GTK_FAST_TEXT_VIEW(w_tv1), GftvXdataCallback );
     gtk_fast_text_view_set_font_size( GTK_FAST_TEXT_VIEW(w_tv1), 10 );
-
-    g_object_set( G_OBJECT(tb2_tag_r), "foreground", "#FF0000", NULL );
-    g_object_set( G_OBJECT(tb2_tag_g), "foreground", "#00FF00", NULL );
-    g_object_set( G_OBJECT(tb2_tag_b), "foreground", "#0000FF", NULL );
     //  ........................................................................
     gtk_grid_attach( GTK_GRID(w_frm_grid), w_frm_chk_colors     , 0,0,1,1);
     gtk_grid_attach( GTK_GRID(w_frm_grid), w_frm_spin_nlines    , 1,0,1,1);
@@ -353,15 +273,8 @@ int main( int argc, char *argv[])
     gtk_box_pack_start( GTK_BOX(w_vbox1)    , w_tv1     , TRUE , TRUE , 0 );
     gtk_box_pack_start( GTK_BOX(w_vbox1)    , w_label1  , FALSE, FALSE, 0 );
 
-    gtk_container_add( GTK_CONTAINER(w_sw2), w_tv2 );
-
-    gtk_box_pack_start( GTK_BOX(w_vbox2)    , w_button2 , FALSE, FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX(w_vbox2)    , w_sw2     , TRUE , TRUE , 0 );
-    gtk_box_pack_start( GTK_BOX(w_vbox2)    , w_label2  , FALSE, FALSE, 0 );
-
     gtk_box_set_homogeneous ( GTK_BOX(w_hbox)   , TRUE);
     gtk_box_pack_start      ( GTK_BOX(w_hbox)   , w_vbox1   , TRUE , TRUE , 0 );
-    gtk_box_pack_start      ( GTK_BOX(w_hbox)   , w_vbox2   , TRUE , TRUE , 0 );
 
     gtk_box_pack_start      ( GTK_BOX(w_vbox)   , w_frame   , FALSE, FALSE, 0 );
     gtk_box_pack_start      ( GTK_BOX(w_vbox)   , w_hbox    , TRUE , TRUE , 0 );
@@ -369,7 +282,6 @@ int main( int argc, char *argv[])
     gtk_container_add( GTK_CONTAINER(w_win), w_vbox );
 
     g_signal_connect( w_button1, "clicked", G_CALLBACK(Signal_button1_clicked), NULL );
-    g_signal_connect( w_button2, "clicked", G_CALLBACK(Signal_button2_clicked), NULL );
     g_signal_connect( w_win    , "destroy", G_CALLBACK(Signal_destroy), NULL);
     gtk_widget_show_all(w_vbox);
 
@@ -383,38 +295,4 @@ int main( int argc, char *argv[])
 }
 
 
-//  ############################################################################
-//  GwrCArrayEqual TEST
-//  ############################################################################
-/*
-int main( int argc, char *argv[])
-{
-    //  ........................................................................
-    guint32             i       =   0;
-    gchar               tmp[256]  ;
-    gchar               str[4]  ;
-    gchar           *   ttr  ;
-    GwrCADBlock24   *   dbk24   =   NULL;
-
-    GwrCArrayEqual  *   aeq     =   NULL;
-    //  ........................................................................
-    aeq = gwr_array_equal_new("test", 4, 2, 2);
-
-    for ( i = 0 ; i != 10 ; i ++ )
-    {
-        sprintf( tmp, "%04i", i);
-        memcpy(str, tmp, 4 );
-        gwr_array_equal_add_data( aeq, str );
-        gwr_array_equal_dump( aeq );
-    }
-
-    for ( i = 0 ; i != 10 ; i ++ )
-    {
-        ttr = (gchar*)gwr_array_equal_get_data( aeq, i );
-
-        printf("i[%03i]:%c%c%c%c\n", i, ttr[0], ttr[1], ttr[2], ttr[3] );
-    }
-    return 0;
-}
-*/
 

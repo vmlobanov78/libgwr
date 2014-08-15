@@ -1,0 +1,20 @@
+================================================================================
+Releases
+================================================================================
+R001:
+R002:
+
+================================================================================
+GwrFastTextBuffer
+================================================================================
+
+(1) In the GwrFastTextBufferPrivate struct, d_lines_text is separated from other
+informations because if you store the text and some metadata side by side,
+you need an extra strcopy at storage time.
+
+(2) ??.08.14
+    Adding segments concept was too slow.
+
+(3) 15.08.14
+    Reverting GwrFastTextBufferPrivate->d_lines_desc to GwrCArrayEqualSimple
+for speed.

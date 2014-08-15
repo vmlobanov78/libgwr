@@ -154,8 +154,7 @@ gwr_array_data_multi_get_mfp(
     //  info
     gwr_array_equal_simple_get_mfp( _aem->d_info_blocks, &mfp2 );
     //  mfp2.a_sa remain unchanged
-    mfp2.a_su=   mfp2.a_su  +   _aem->d_info_blocks->a_slots_used *
-                                GwrCADMDataInfo_SSIZE;
+    //  mfp2.a_su remain unchanged
     _out->a_ss  =   mfp1.a_ss   +   mfp2.a_ss   +   sizeof( GwrCArrayDataMulti );
     _out->a_sa  =   mfp1.a_sa   +   mfp2.a_sa;
     _out->a_su  =   mfp1.a_su   +   mfp2.a_su;

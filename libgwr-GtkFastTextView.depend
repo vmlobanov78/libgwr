@@ -2493,7 +2493,7 @@
 1386191034 /usr/include/gtk-3.0/gtk/deprecated/gtkvseparator.h
 	<gtk/gtkseparator.h>
 
-1407477864 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer.h
+1407527124 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/buffers/libgwrc-fast-text-buffer.h
 	<glib.h>
 	"C/arrays/libgwrc-array-equal.h"
 	"C/arrays/libgwrc-array-data-multi.h"
@@ -2583,4 +2583,124 @@
 
 1407079124 /home/gwr/Src/C-C++/libgwr/libgwr-1.0/C/arrays/libgwrc-array-data-block32.h
 	"libgwrc-array-common.h"
+
+1407526934 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block16.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block16.h"
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-common.h
+	<glib.h>
+	<string.h>
+	<stdio.h>
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block16.h
+	"libgwrc-array-common.h"
+
+1408081774 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block24.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block24.h"
+
+1407659063 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block24.h
+	"libgwrc-array-common.h"
+
+1407526934 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block32.c
+	"libgwrc-array-common.h"
+	"libgwrc-array-data-block32.h"
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block32.h
+	"libgwrc-array-common.h"
+
+1407526934 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-multi.c
+	<stdio.h>
+	<string.h>
+	"libgwrc-array-data-block.h"
+	"libgwrc-array-data-multi.h"
+	"libgwrc-array-data-multi-infos.cci"
+	"libgwrc-array-data-multi-core.cci"
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-block.h
+	<glib.h>
+	"libgwrc-array-data-block16.h"
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-data-block32.h"
+
+1407660007 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-multi.h
+	<glib.h>
+	"libgwrc-array-equal.h"
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-equal.h
+	"libgwrc-array-data-block24.h"
+	"libgwrc-array-equal-simple.h"
+
+1407526934 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-equal-simple.h
+	"libgwrc-array-common.h"
+
+1408084128 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-multi-infos.cci
+
+1407954961 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-data-multi-core.cci
+
+1407526934 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-equal-simple.c
+	<stdio.h>
+	<string.h>
+	"libgwrc-array-equal-simple.h"
+
+1408030574 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/arrays/libgwrc-array-equal.c
+	<stdio.h>
+	<string.h>
+	"libgwrc-array-data-block.h"
+	"libgwrc-array-equal.h"
+
+1408085025 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer.c
+	<string.h>
+	"libgwrc-fast-text-buffer-private.h"
+	"libgwrc-fast-text-buffer.h"
+
+1408084655 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer-private.h
+	"C/arrays/libgwrc-array-data-multi.h"
+
+1408084716 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer.h
+	<glib.h>
+	"C/arrays/libgwrc-array-equal.h"
+	"C/arrays/libgwrc-array-data-multi.h"
+
+1407943466 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.c
+	"string.h"
+	"math.h"
+	"gtkfasttextview.h"
+	"C/buffers/libgwrc-fast-text-buffer-private.h"
+
+1407943061 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/gtk/GtkFastTextView/gtkfasttextview.h
+	<glib-object.h>
+	<gtk/gtk.h>
+	"C/buffers/libgwrc-fast-text-buffer.h"
+
+1408084636 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/GtkFastTextView-demo/GtkFastTextView-demo.c
+	<gtk/gtk.h>
+	<stdlib.h>
+	<string.h>
+	<sys/times.h>
+	"C/arrays/libgwrc-array-data-block.h"
+	"C/gtk/GtkFastTextView/gtkfasttextview.h"
+
+1407597421 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer-defines.h
+	"libgwrc-fast-text-buffer-defines-D.hhi"
+	"libgwrc-fast-text-buffer-defines-R.hhi"
+
+1407601850 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer-defines-D.hhi
+
+1407585699 /home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/C/buffers/libgwrc-fast-text-buffer-defines-R.hhi
+
+1408037059 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/optims/o.gftb.c
+	<gtk/gtk.h>
+	<string.h>
+	<sys/times.h>
+	"C/arrays/libgwrc-array-data-block.h"
+	"C/gtk/GtkFastTextView/gtkfasttextview.h"
+
+1408085668 source:/home/gwr/Src/C-C++/libgwr.GtkFastTextView/libgwr/src/GtkFastTextView-optims/GtkFastTextView-optims.c
+	<gtk/gtk.h>
+	<string.h>
+	<sys/times.h>
+	"C/arrays/libgwrc-array-data-block.h"
+	"C/gtk/GtkFastTextView/gtkfasttextview.h"
 

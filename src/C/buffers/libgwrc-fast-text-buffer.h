@@ -39,16 +39,28 @@
 #include "C/arrays/libgwrc-array-equal.h"
 #include "C/arrays/libgwrc-array-data-multi.h"
 //  ............................................................................
-typedef struct  _GwrFastTextBufferLineAttr   GwrFastTextBufferLineAttr;
+typedef struct  _GwrFastTextBufferLineAttr      GwrFastTextBufferLineAttr;
 
 struct  _GwrFastTextBufferLineAttr
 {
     guint8          a_fg;                                                       //!< Foreground color
     guint8          a_bg;                                                       //!< Background color
     guint8          a_st;                                                       //!< Style infos
-    guint8          a_xdis;
+    guint8          a_dis;
+    guint8          a_uis;
 };
+//  ----------------------------------------------------------------------------
+typedef struct  _GwrFastTextBufferSegmentAttr   GwrFastTextBufferSegmentAttr;
 
+struct  _GwrFastTextBufferSegmentAttr
+{
+    guint16         a_of;                                                       //!< Offset
+    guint16         a_ln;                                                       //!< Length
+    guint8          a_fg;                                                       //!< Foreground color
+    guint8          a_bg;                                                       //!< Backgrounf color
+    guint8          a_st;                                                       //!< Style
+};
+//  ----------------------------------------------------------------------------
 typedef struct  _GwrFastTextBufferLine       GwrFastTextBufferLine;
 
 struct  _GwrFastTextBufferLine
@@ -60,9 +72,16 @@ struct  _GwrFastTextBufferLine
 
     gpointer                        a_extra_data;
     guint16                         a_extra_data_len;
+
+    guint16                         a_ho;
+    guint8                          a_hl;
 };
 
 extern      guint32     GwrFastTextBufferLine_S;
+
+
+extern  inline      gboolean    gwr_fast_text_buffer_line_has_data(GwrFastTextBufferLine* _line);
+extern  inline      gboolean    gwr_fast_text_buffer_line_has_html(GwrFastTextBufferLine* _line);
 //  ----------------------------------------------------------------------------
 typedef struct  _GwrFastTextBuffer           GwrFastTextBuffer;
 
@@ -75,9 +94,10 @@ typedef struct  _GwrFastTextBufferStat       GwrFastTextBufferStat;
 
 struct  _GwrFastTextBufferStat
 {
-    GwrCArrayDataMultiStat  ld;
-    GwrCArrayEqualStat      li;
-    GwrCArrayDataMultiStat  lx;
+    GwrCArrayDataMultiStat      ld;
+    GwrCArrayEqualSimpleStat    li;
+    GwrCArrayDataMultiStat      lx;
+    GwrCArrayEqualStat          lu;
 };
 
 //  ============================================================================
@@ -90,23 +110,28 @@ extern          GwrFastTextBuffer   *   gwr_fast_text_buffer_new                
             guint32                         _lines_text_data_blocks_storage_realloc     ,
             guint32                         _lines_text_info_blocks_storage_realloc     ,
 
-            guint32                         _lines_desc_info_blocks_storage_capacity    ,
-            guint32                         _lines_desc_infos_blocks_storage_realloc    ,
+            guint32                         _lines_desc_info_blocks_storage_realloc     ,
 
             guint32                         _extra_data_data_block_size                 ,
             guint32                         _extra_data_data_blocks_storage_realloc     ,
-            guint32                         _extra_data_info_block_size                 ,
-            guint32                         _extra_data_info_blocks_storage_realloc     );
+            guint32                         _extra_data_info_blocks_storage_realloc     ,
+
+            guint32                         _data_url_info_blocks_storage_capacity     ,
+            guint32                         _data_url_info_blocks_storage_realloc      );
 
 extern          void                    gwr_fast_text_buffer_reset              (
             GwrFastTextBuffer       *       _buffer         );
+
+extern          gboolean                gwr_fast_text_buffer_line_exist_and_has_data    (
+            GwrFastTextBuffer       *       _buffer         ,
+            guint32                         _line_index     );
 
 extern          gboolean                gwr_fast_text_buffer_get_line           (
             GwrFastTextBuffer       *       _buffer         ,
             guint32                         _line_index     ,
             GwrFastTextBufferLine   *       _line           );
 
-extern          gboolean                gwr_fast_text_buffer_get_line_and_extra_data    (
+extern          gboolean                gwr_fast_text_buffer_get_line_and_data  (
             GwrFastTextBuffer       *       _buffer         ,
             guint32                         _line_index     ,
             GwrFastTextBufferLine   *       _line           );
@@ -118,14 +143,25 @@ extern          void                    gwr_fast_text_buffer_add_line           
             guint8                          _bg             ,
             guint16                         _st             );
 
-extern          void                    gwr_fast_text_buffer_add_line_with_extra_data   (
+extern          void                    gwr_fast_text_buffer_add_line_with_data (
             GwrFastTextBuffer       *       _buffer         ,
     const   gchar                   *       _text           ,
             guint8                          _fg             ,
             guint8                          _bg             ,
             guint16                         _st             ,
-            gpointer                        _extra_data     ,
-            guint16                         _extra_data_len );
+            gpointer                        _data           ,
+            guint16                         _data_len       );
+
+extern          void                    gwr_fast_text_buffer_add_line_with_data_and_url (
+            GwrFastTextBuffer       *       _buffer         ,
+    const   gchar                   *       _text           ,
+            guint8                          _fg             ,
+            guint8                          _bg             ,
+            guint16                         _st             ,
+            gpointer                        _data           ,
+            guint16                         _data_len       ,
+            guint16                         _url_offset     ,
+            guint8                          _url_len        );
 
 extern          void                    gwr_fast_text_buffer_get_stats          (
             GwrFastTextBuffer       *       _buffer ,
@@ -133,6 +169,34 @@ extern          void                    gwr_fast_text_buffer_get_stats          
 
 extern          void                    gwr_fast_text_buffer_dump_mem           (
             GwrFastTextBuffer       *       _buffer );
+
+
+
+/*
+extern          void                    gwr_fast_text_buffer_segmented_line_start   (
+            GwrFastTextBuffer       *       _buffer         ,
+            guint8                          _fg             ,
+            guint8                          _bg             ,
+            guint16                         _st             ,
+    const   gchar*                          _text           );
+
+extern          void                    gwr_fast_text_buffer_segmented_line_add     (
+            GwrFastTextBuffer       *       _buffer         ,
+            guint8                          _fg             ,
+            guint8                          _bg             ,
+            guint16                         _st             ,
+    const   gchar*                          _text           );
+
+extern          void                    gwr_fast_text_buffer_segmented_line_end     (
+            GwrFastTextBuffer       *       _buffer         ,
+            gpointer                        _extra_data     ,
+            guint16                         _extra_data_len ,
+            guint8                          _fg             ,
+            guint8                          _bg             ,
+            guint16                         _st             ,
+    const   gchar*                          _text           );
+*/
+
 
 #if ( __cplusplus )
 }

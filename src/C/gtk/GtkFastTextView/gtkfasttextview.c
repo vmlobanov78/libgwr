@@ -80,6 +80,20 @@
         GtkFastTextViewPrivate                                                  \
     )
 
+typedef struct  _GftvGfxLine    GftvGfxLine;
+
+struct  _GftvGfxLine
+{
+    guint8      a_has_data;
+    guint8      a_has_url;
+
+    guint16     a_url_x;
+    guint16     a_url_y;
+    guint16     a_url_w;
+    guint16     a_url_h;
+}  __attribute__((packed));
+
+
 typedef struct _GftvHandleProps         GftvHandleProps;
 
 struct  _GftvHandleProps
@@ -134,6 +148,9 @@ struct _GtkFastTextViewPrivate
     gboolean                font_size_changed;                                  //!< Flag
     guint32                 font_width;                                         //!< Font width  in pixels
     guint32                 font_height;                                        //!< Font height in pixels
+    guint32                 font_uw;                                            //!< Withdrawal for html underline
+
+    GwrCArrayEqualSimple*   d_gfx_lines;                                        //!< Memorized graphical lines infos
 
     guint16                 width_char_x;                                       //!< # of chars the widget can display
     guint16                 width_char_y;                                       //!< # of lines the widget can display
@@ -162,10 +179,9 @@ static  void        gtk_fast_text_view_compute_1_chars_capacity     (GtkFastText
 static  void        gtk_fast_text_view_compute_2_check_offsets      (GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*);
 static  void        gtk_fast_text_view_compute_3_scrollbars         (GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*);
 
-inline static gboolean  gtk_fast_text_view_get_line_index_at_pointer(GtkFastTextViewPrivate*, GwrFastTextBufferPrivate*, gdouble _y, guint32* _index);
-
-static  void        gtk_fast_text_view_show_cursor_extra_data       (GtkWidget*, GtkFastTextViewPrivate*);
 static  void        gtk_fast_text_view_show_cursor_normal           (GtkWidget*, GtkFastTextViewPrivate*);
+static  void        gtk_fast_text_view_show_cursor_data             (GtkWidget*, GtkFastTextViewPrivate*);
+static  void        gtk_fast_text_view_show_cursor_url              (GtkWidget*, GtkFastTextViewPrivate*);
 
 static  void        gtk_fast_text_view_scroll_vertical_up           (GtkFastTextView*, guint32 _ymove);
 static  void        gtk_fast_text_view_scroll_vertical_down         (GtkFastTextView*, guint32 _ymove);
@@ -209,12 +225,15 @@ gtk_fast_text_view_class_init(GtkFastTextViewClass* _klass)
     _klass->cursors.xd_pixbuf   =   gdk_pixbuf_new_from_file("raw/img/hand2.png", &ge );
     if ( ! ge )
     {
-        _klass->cursors.xd      =   gdk_cursor_new_from_pixbuf(display, _klass->cursors.xd_pixbuf,0,0);
+        _klass->cursors.url     =   gdk_cursor_new_from_pixbuf(display, _klass->cursors.xd_pixbuf,0,0);
     }
     else
     {
-        _klass->cursors.xd      =   gdk_cursor_new(GDK_HAND2);
+        _klass->cursors.url     =   gdk_cursor_new( GDK_HAND2 );
     }
+    _klass->cursors.data        =   gdk_cursor_new( GDK_CENTER_PTR );
+
+
     //  Override GtkContainer methods : empty
 
     //  Add private indirection member
@@ -261,6 +280,11 @@ gtk_fast_text_view_init(GtkFastTextView *_textview)
     priv->a_cursor_current  =   0;
 
     priv->a_xd_callback     =   NULL;
+
+    priv->d_gfx_lines       =   gwr_array_equal_simple_new(
+                                    "GtkFastTextViewPrivate:url zones"  ,
+                                    sizeof(GftvGfxLine)                 ,
+                                    10                                  );
 
     gtk_widget_set_can_focus( GTK_WIDGET(_textview), TRUE );
 
@@ -441,6 +465,13 @@ void            gtk_fast_text_view_dispose(GObject* _obj)
 //! \brief
 void            gtk_fast_text_view_finalize(GObject* _obj)
 {
+    GtkFastTextView         *   v   =   NULL;
+    GtkFastTextViewPrivate  *   vp  =   NULL;
+    //  ........................................................................
+    v   =   GTK_FAST_TEXT_VIEW(_obj);
+    vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(v);
+    gwr_array_equal_simple_delete( vp->d_gfx_lines );
+
     G_OBJECT_CLASS(gtk_fast_text_view_parent_class)->finalize(_obj);
 }
 //  ----------------------------------------------------------------------------
@@ -475,6 +506,8 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
     static  double                      sb_area_y   =   0.0;                    //  horizontal scrollbar delimiter
 
     static  double                      dashes[]    =   { 3.0, 3.0 };
+
+    static  GftvGfxLine                 gfx_line;
     //  ........................................................................
     vp  =   GTK_FAST_TEXT_VIEW_PRIVATE(widget);
     //printf("gtk_fast_text_view_draw():sx=%f sy=%f\n", vp->scroll_pos_x, vp->scroll_pos_y);
@@ -558,11 +591,12 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
     y0  =   (guint32)vhp->offset;                                               //  compute y0 = first line to be displayed
     //  ........................................................................
     //  text draw
+    gwr_array_equal_simple_reset( vp->d_gfx_lines );
+
     for ( i = 0 ; i != vp->width_char_y ; i++ )
     {
-        if ( ! gwr_fast_text_buffer_get_line( b, y0 + i, &line ) )              //  no more lines
+        if ( ! gwr_fast_text_buffer_get_line_and_data( b, y0 + i, &line ) )     //  no more lines
             break;
-
 
         ll = line.a_str_len;
 
@@ -585,8 +619,71 @@ gboolean        gtk_fast_text_view_draw(GtkWidget *widget, cairo_t *cr)
             (gdouble)vp->cG[ line.a_attr.a_fg ] / 256.0     ,
             (gdouble)vp->cB[ line.a_attr.a_fg ] / 256.0     );
 
-        cairo_move_to           (cr, 1.0, 8.0 + i * vp->font_height);
+        cairo_move_to           (cr, 1.0, vp->font_height + i * vp->font_height);
         cairo_show_text         (cr, text);
+        //  ....................................................................
+        //  gfx_line initialization : data ?
+        gfx_line.a_has_data = 0;
+        gfx_line.a_has_url  = 0;
+
+        if ( ! gwr_fast_text_buffer_line_has_data( &line ) )
+            goto lab_draw_add_gfx_line;
+
+        gfx_line.a_has_data = 1;
+        //  ....................................................................
+        //  recolorize in html style ?
+        if ( gwr_fast_text_buffer_line_has_html( &line ) )
+        {
+            guint16 h1  =   line.a_ho;
+            guint16 h2  =   line.a_ho + line.a_hl - 1;
+            guint16 x1,x2;
+
+            //if ( ! ( ( h2 <  x0 ) || ( h1 >  x0 + w3 ) ) )
+            if   (     ( h2 >= x0 ) && ( h1 <= x0 + w3 )   )                    //  html text intersect cairo clip
+            {
+                //D printf("html offset intersect:x0[%3i] h1[%3i] h2[%3i]\n", x0, h1, h2);
+
+                x1  =   MAX( x0     , h1 );                                     //  compute intersection bounds
+                x2  =   MIN( x0 + w3, h2 );
+                //D printf("           clamped to:        x1[%3i] x2[%3i]\n", x1, x2);
+
+                text[ x2 - x0 + 1 ] = 0;                                        //  just poke 0x00 at the good place, text is already copied
+                //D printf("                 text:'%s'\n", text + x1 - x0);
+
+                gfx_line.a_has_url  =   1;
+                gfx_line.a_url_x    =   1.0 + vp->font_width * ( x1 - x0 );
+                gfx_line.a_url_y    =   i * vp->font_height;
+                gfx_line.a_url_w    =   vp->font_width * ( x2 - x1 + 1 );
+                gfx_line.a_url_h    =   vp->font_height;
+
+                cairo_set_source_rgb(                                           //  redraw text with html standard color
+                    cr      ,
+                    0.0     ,
+                    0.0     ,
+                    1.0     );
+                cairo_move_to           (cr, 1.0 + vp->font_width * ( x1 - x0),vp->font_height + i * vp->font_height);
+                cairo_show_text         (cr, text + x1 - x0);
+
+                //D url zones
+                //D cairo_set_dash          ( cr, NULL, 0, 0.0 );               //  draw the url zone
+                //D cairo_rectangle         ( cr, ux, uy, uw, uh );
+                //D cairo_stroke(cr);
+
+                cairo_set_dash          ( cr, NULL, 0, 0.0 );                   //  draw the underline
+                cairo_move_to           (
+                    cr                                                          ,
+                    1.0 + vp->font_width * ( x1 - x0    )                       ,
+                    vp->font_height + i * vp->font_height + vp->font_uw + 0.5   );
+                cairo_line_to           (
+                    cr                                                          ,
+                    1.0 + vp->font_width * ( x2 - x0 + 1 )                      ,
+                    vp->font_height + i * vp->font_height + vp->font_uw + 0.5   );
+                cairo_stroke(cr);
+            }
+        }
+
+lab_draw_add_gfx_line:
+        gwr_array_equal_simple_add_data( vp->d_gfx_lines, &gfx_line );
     }
 
     return TRUE;
@@ -647,6 +744,7 @@ static  void    gtk_fast_text_view_compute_0_font_dimensions(
 
     _vp->font_height        =   (guint32)( extents.height          );
     _vp->font_width         =   (guint32)( extents.max_x_advance   );
+    _vp->font_uw            =   (guint32)( extents.descent         );
 
     //printf("gtk_fast_text_view_compute_font_dimensions():fw=%i\n", _vp->font_width);
 }
@@ -868,21 +966,17 @@ static  void    gtk_fast_text_view_compute_3_scrollbars(
 //!
 //! \return TRUE if a line exists at that index in the GwrFastTextBuffer ;
 //!     FALSE else.
-inline
-static gboolean gtk_fast_text_view_get_line_index_at_pointer(
+inline static
+guint32         gtk_fast_text_view_get_line_index_at_pointer(
     GtkFastTextViewPrivate      *   _vp     ,
-    GwrFastTextBufferPrivate    *   _bp     ,
-    gdouble                         _y      ,
-    guint32                     *   _index  )
+    gdouble                         _y      )
 {
-    *_index =   ( (guint32)_y ) / _vp->font_height;
+    guint32 index   =   ( (guint32)_y ) / _vp->font_height;
+            index   =   index +   _vp->vhp.offset;
 
-    *_index =   *_index +   _vp->vhp.offset;
+    //D printf("Line index at pointer:[%3i]\n", index);
 
-    if ( *_index < _bp->lines_card )
-        return TRUE;
-
-    return FALSE;
+    return index;
 }
 //  ----------------------------------------------------------------------------
 //  gtk_fast_text_view_show_cursor_normal()
@@ -890,7 +984,7 @@ static gboolean gtk_fast_text_view_get_line_index_at_pointer(
 //! \fn     gtk_fast_text_view_show_cursor_normal()
 //!
 //! \brief  Guess.
-static  void    gtk_fast_text_view_show_cursor_normal(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
+static  void        gtk_fast_text_view_show_cursor_normal(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
 {
     GtkFastTextViewClass    *   klass;
     //  ........................................................................
@@ -907,12 +1001,12 @@ static  void    gtk_fast_text_view_show_cursor_normal(GtkWidget* _w, GtkFastText
     _vp->a_cursor_current = 0;
 }
 //  ----------------------------------------------------------------------------
-//  gtk_fast_text_view_show_cursor_extra_data()
+//  gtk_fast_text_view_show_cursor_url()
 //  ----------------------------------------------------------------------------
-//! \fn     gtk_fast_text_view_show_cursor_extra_data()
+//! \fn     gtk_fast_text_view_show_cursor_url()
 //!
 //! \brief  Guess.
-static  void        gtk_fast_text_view_show_cursor_extra_data(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
+static  void        gtk_fast_text_view_show_cursor_url(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
 {
     GtkFastTextViewClass    *   klass;
     //  ........................................................................
@@ -924,9 +1018,31 @@ static  void        gtk_fast_text_view_show_cursor_extra_data(GtkWidget* _w, Gtk
                     gtk_fast_text_view_get_type()   ,
                     GtkFastTextViewClass            );
 
-    gdk_window_set_cursor( _vp->a_gdk_window, klass->cursors.xd );
+    gdk_window_set_cursor( _vp->a_gdk_window, klass->cursors.url );
 
     _vp->a_cursor_current = 1;
+}
+//  ----------------------------------------------------------------------------
+//  gtk_fast_text_view_show_cursor_data()
+//  ----------------------------------------------------------------------------
+//! \fn     gtk_fast_text_view_show_cursor_data()
+//!
+//! \brief  Guess.
+static  void        gtk_fast_text_view_show_cursor_data(GtkWidget* _w, GtkFastTextViewPrivate* _vp)
+{
+    GtkFastTextViewClass    *   klass;
+    //  ........................................................................
+    if ( _vp->a_cursor_current == 2 )
+        return;
+
+    klass   =   G_TYPE_INSTANCE_GET_CLASS(
+                    _w                              ,
+                    gtk_fast_text_view_get_type()   ,
+                    GtkFastTextViewClass            );
+
+    gdk_window_set_cursor( _vp->a_gdk_window, klass->cursors.data );
+
+    _vp->a_cursor_current = 2;
 }
 //  ----------------------------------------------------------------------------
 void            gtk_fast_text_view_set_color            (GtkFastTextView* _v, guint32 _color_index, guint8 _r, guint8 _g, guint8 _b)
@@ -1143,34 +1259,35 @@ static  gboolean    gtk_fast_text_view_SIGNAL_button_press_event(
     {
         printf("callback\n");
 
-        if ( gtk_fast_text_view_get_line_index_at_pointer( vp, bp, evb->y, &lix ) )
+        lix = gtk_fast_text_view_get_line_index_at_pointer( vp, evb->y );
+
+        if  (   gwr_fast_text_buffer_line_exist_and_has_data(
+                    vp->buffer  ,
+                    lix         )
+            )
         {
-            gwr_fast_text_buffer_get_line_and_extra_data(vp->buffer, lix, &line);
-            if ( line.a_extra_data )
+            gwr_fast_text_buffer_get_line_and_data(
+                vp->buffer  ,
+                lix         ,
+                &line       );
+            //D printf("Extra data click:[%p][%3i][", line.a_extra_data, line.a_extra_data_len);
+            //D for ( guint32 i = 0 ; i != line.a_extra_data_len ; i++ )
+            //D {
+            //D     printf("%c", *((gchar*)(line.a_extra_data + i)) );
+            //D }
+            //D printf("]\n");
+            if ( vp->a_xd_callback )
             {
-                //D printf("Extra data click:[%p][%3i][", line.a_extra_data, line.a_extra_data_len);
-                //D for ( guint32 i = 0 ; i != line.a_extra_data_len ; i++ )
-                //D {
-                //D     printf("%c", *((gchar*)(line.a_extra_data + i)) );
-                //D }
-                //D printf("]\n");
-                if ( vp->a_xd_callback )
-                {
-                    vp->a_xd_callback( line.a_extra_data, line.a_extra_data_len );
-                }
-                else
-                {
-                    g_warning( "Extra Data click but:no callback defined");
-                }
+                vp->a_xd_callback( line.a_extra_data, line.a_extra_data_len, line.a_ho, line.a_hl );
             }
             else
             {
-                g_warning( "Extra Data click but:no extra data");
+                g_warning( "Extra Data click but:no callback defined");
             }
         }
         else
         {
-            g_warning( "Extra Data click but:no line");
+            g_warning( "Extra Data click but:no line / no line with extra data");
         }
     }
     //  false to propagate
@@ -1188,8 +1305,11 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
     GtkFastTextView             *   v   =   NULL;
     GtkFastTextViewPrivate      *   vp  =   NULL;
     GwrFastTextBufferPrivate    *   bp  =   NULL;
-    GwrFastTextBufferLine           line;
-    guint32                         line_index   =   0;
+
+    guint32                         evx;
+    guint32                         evy;
+    GftvGfxLine                 *   gfx_line;
+    guint32                         gix;
     //  ........................................................................
     //printf("VIEW:motion-notify\n");
     //  ........................................................................
@@ -1248,32 +1368,49 @@ static  gboolean    gtk_fast_text_view_SIGNAL_motion_notify_event(
     }
     //  ........................................................................
     //  we are dragging nothing, test for xtra data
-    if ( gtk_fast_text_view_get_line_index_at_pointer( vp, bp, evm->y, &line_index ) )
-    {
-        gwr_fast_text_buffer_get_line_and_extra_data(vp->buffer, line_index, &line);
+    evx =   (guint32)( evm->x );
+    evy =   (guint32)( evm->y );
 
-        if ( line.a_extra_data )
-        {
-            //D printf("xtra data:%p %i\n", line.a_extra_data, line.a_extra_data_len);
-            if ( evm->x <= vp->text_area_width )
-            {
-                gtk_fast_text_view_show_cursor_extra_data(_w, vp);
-            }
-            else
-            {
-                gtk_fast_text_view_show_cursor_normal(_w, vp);
-            }
-        }
-        else
-        {
-            gtk_fast_text_view_show_cursor_normal(_w, vp);
-        }
-    }
-    else
+    if  (   ( evx <= vp->text_area_width    )  &&                               //  in text area ?
+            ( evy <= vp->text_area_height   )   )
     {
-        gtk_fast_text_view_show_cursor_normal(_w, vp);
+        gix = evy / vp->font_height;                                            //  graphical line index
+
+        //D printf("line gfx index:%i\n", gix);
+
+        if ( gix < vp->d_gfx_lines->a_slots_used )
+        {
+            gfx_line = gwr_array_equal_simple_get_data( vp->d_gfx_lines, gix );
+
+            if ( gfx_line->a_has_url )                                          //  test for url first
+            {
+                if  (
+                        (   (guint32)(evm->x) >=   gfx_line->a_url_x                     )   &&
+                        (   (guint32)(evm->x) <= ( gfx_line->a_url_x + gfx_line->a_url_w )    )
+                    )
+                {
+                    //D printf("Graphical line index:[%3i] - URL -\n", gix);
+                    gtk_fast_text_view_show_cursor_url(_w, vp);
+                    goto    lab_mne_cursor_done;
+                }
+                else
+                {
+                    //D printf("Graphical line index:[%3i] - DATA (url) -\n", gix);
+                    gtk_fast_text_view_show_cursor_data(_w, vp);
+                    goto    lab_mne_cursor_done;
+                }
+            }
+            if ( gfx_line->a_has_data )                                         //  now test for data
+            {
+                //D printf("Graphical line index:[%3i] - DATA -\n", gix);
+                gtk_fast_text_view_show_cursor_data(_w, vp);
+                goto    lab_mne_cursor_done;
+            }
+        }
     }
+    gtk_fast_text_view_show_cursor_normal(_w, vp);
     //  ........................................................................
+lab_mne_cursor_done:
     return FALSE;
 }
 //  ============================================================================

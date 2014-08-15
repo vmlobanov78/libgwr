@@ -63,7 +63,8 @@ struct _GtkFastTextViewClass
     {
         GdkPixbuf       *   xd_pixbuf;
         GdkCursor       *   normal;
-        GdkCursor       *   xd;
+        GdkCursor       *   data;
+        GdkCursor       *   url;
     } cursors;
 };
 
@@ -72,7 +73,7 @@ GtkWidget   *   gtk_fast_text_view_new      (GwrFastTextBuffer*);
 
 G_END_DECLS
 
-typedef void(*GtkFastTextViewXdCallback)(gpointer, guint16) ;
+typedef void(*GtkFastTextViewXdCallback)(gpointer, guint16, guint16, guint8);
 
 #if ( __cplusplus )
 extern "C" {

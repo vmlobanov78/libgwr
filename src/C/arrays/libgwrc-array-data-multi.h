@@ -103,12 +103,12 @@ extern          void                    gwr_array_data_multi_add_data           
             gpointer                        _data           ,
             guint16                         _data_len       );
 
-extern          void                    gwr_array_data_multi_add_data_and_extra_data_index  (
+extern          void                    gwr_array_data_multi_add_data_and_extra_data(
             GwrCArrayDataMulti      *       _adm                ,
             gpointer                        _data               ,
             guint16                         _len                ,
-            guint32                         _extra_data_index   ,
-            guint8                  *       _xdi_len            );
+            gpointer                        _extra_data         ,
+            guint8                          _extra_data_len     );
 
 extern          void                    gwr_array_data_multi_get_data                   (
             GwrCArrayDataMulti      *       _adm            ,

@@ -93,21 +93,23 @@ gwr_array_data_multi_add_data(
     _adm->a_data_size   =   _adm->a_data_size   +   _data_len;
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_data_multi_add_data_and_extra_data_index()
+//  gwr_array_data_multi_add_data_and_extra_data()
 //  ----------------------------------------------------------------------------
 void
-gwr_array_data_multi_add_data_and_extra_data_index(
+gwr_array_data_multi_add_data_and_extra_data(
         GwrCArrayDataMulti      *       _adm                ,
         gpointer                        _data               ,
         guint16                         _data_len           ,
-        guint32                         _extra_data_index   ,
-        guint8                  *       _xdi_len            )
+        gpointer                        _extra_data         ,
+        guint8                          _extra_data_len     )
 {
     GwrCADBlock24       *   dbk24_c;
     GwrCADMDataInfo         di_n;
     //  ........................................................................
     //  choose block to add data
-    dbk24_c =   Gwr_array_data_multi_get_last_block_for_adding_data(_adm, _data_len);
+    dbk24_c =   Gwr_array_data_multi_get_last_block_for_adding_data(
+            _adm                            ,
+            _data_len + _extra_data_len     );
     //  ........................................................................
     //  create new data info & store it
     gwr_array_data_multi_data_info_set(
@@ -119,7 +121,7 @@ gwr_array_data_multi_add_data_and_extra_data_index(
     gwr_array_equal_simple_add_data( _adm->d_info_blocks, &di_n );
     //  ........................................................................
     //  add data to the block
-    gwr_array_dbk24_add_with_extra_data_index( dbk24_c, _data, _data_len , _extra_data_index, _xdi_len );
+    gwr_array_dbk24_add_with_extra_data( dbk24_c, _data, _data_len , _extra_data, _extra_data_len );
     //  ........................................................................
     //  update infos
     _adm->a_data_size   =   _adm->a_data_size   +   _data_len;

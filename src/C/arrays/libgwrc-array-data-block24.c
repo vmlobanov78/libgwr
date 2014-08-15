@@ -36,6 +36,9 @@
 #include    "libgwrc-array-common.h"
 #include    "libgwrc-array-data-block24.h"
 
+#define     GWR_ADB24_GET_SIZE_OFFSET   ( sizeof(gpointer)      )
+#define     GWR_ADB24_GET_USED_OFFSET   ( sizeof(gpointer) + 2  )
+
 guint32     GwrCADBlock24_SSIZE   =   sizeof( GwrCADBlock24 );
 
 //  24-bit value handling :
@@ -77,7 +80,19 @@ Gwr_array_dbk24_get_blob_size(
 {
     guint32     u32 =   0;
     //  ........................................................................
-    memcpy( &u32, _dbk24->a_blob, 3 );
+    //  memory layout at _dbk24->a_blob :
+    //
+    //  offset :     0  1  2  3  4  5  6  7
+    //  bytes  :    s0 s1 s2 u0 u1 u2 ?6 ?7
+    //
+    //  size = s0 + 8 * s1 + 16 * s2
+    //  used = u0 + 8 * u1 + 16 * u2
+    //  ........................................................................
+    //memcpy( &u32, _dbk24->a_blob, 3 );
+
+    u32 =   *( (guint32*)( (gpointer)_dbk24 + GWR_ADB24_GET_SIZE_OFFSET) );     //  u0 s2 s1 s0
+    u32 =   u32 & 0x00ffffff;                                                   //  00 s2 s1 s0
+
     return u32;
 }
 //  ----------------------------------------------------------------------------
@@ -88,8 +103,31 @@ Gwr_array_dbk24_get_blob_used_bytes(
         GwrCADBlock24               *   _dbk24          )
 {
     guint32     u32 =   0;
+    //guint64     u64 =   0;
     //  ........................................................................
-    memcpy( &u32, _dbk24->a_blob + 3, 3 );
+    //  memory layout at _dbk24->a_blob :
+    //
+    //  offset :     0  1  2  3  4  5  6  7
+    //  bytes  :    s0 s1 s2 u0 u1 u2 ?6 ?7
+    //
+    //  size = s0 + 8 * s1 + 16 * s2
+    //  used = u0 + 8 * u1 + 16 * u2
+    //  ........................................................................
+    //memcpy( &u32, _dbk24->a_blob + 3, 3 );                                    //  function call memcpy
+
+    //*( (gchar*)(& u32)        )   =   *( (gchar*)(_dbk24) + 11 );             //  gcc translate all
+    //*( (gchar*)(& u32) + 1    )   =   *( (gchar*)(_dbk24) + 12 );
+    //*( (gchar*)(& u32) + 2    )   =   *( (gchar*)(_dbk24) + 13 );
+
+
+    //u64 =   *( (guint64*)( (gpointer)_dbk24 + 8) );     //  ?7 ?6 u2 u1 u0 s2 s1 s0   //  not 32bits compatible
+    //u64 =   u64 >> 24;                                  //  00 00 00 ?7 ?6 u2 u1 u0
+    //u64 =   u64 &  0x0000000000ffffff;                  //  00 00 00 00 00 u2 u1 00
+    //return (guint32)( u64 );
+
+    u32 =   *( (guint32*)( (gpointer)_dbk24 + GWR_ADB24_GET_USED_OFFSET) );     //  u2 u1 u0 s2
+    u32 =   u32 >> 8;                                                           //  00 u2 u1 u0
+
     return u32;
 }
 //  ----------------------------------------------------------------------------
@@ -187,15 +225,15 @@ gwr_array_dbk24_add(
     //D gwr_array_dbk24_dump( _dbk24 );
 }
 //  ----------------------------------------------------------------------------
-//  gwr_array_dbk24_add_with_extra_data_index()
+//  gwr_array_dbk24_add_with_extra_data()
 //  ----------------------------------------------------------------------------
 void
-gwr_array_dbk24_add_with_extra_data_index(
+gwr_array_dbk24_add_with_extra_data(
         GwrCADBlock24               *   _dbk24              ,
         gpointer                        _data               ,
         guint32                         _data_size          ,
-        guint32                         _extra_data_index   ,
-        guint8                      *   _xdi_len            )
+        gpointer                        _extra_data         ,
+        guint32                         _extra_data_len     )
 {
     //  ........................................................................
     memcpy(
@@ -205,12 +243,10 @@ gwr_array_dbk24_add_with_extra_data_index(
 
     memcpy(
         _dbk24->d_mem + Gwr_array_dbk24_get_blob_used_bytes(_dbk24) + _data_size    ,
-        &(_extra_data_index)                                                        ,
-        sizeof(guint32)                                                             );
+        _extra_data                                                                 ,
+        _extra_data_len                                                             );
 
-    Gwr_array_dbk24_set_blob_used_bytes( _dbk24, Gwr_array_dbk24_get_blob_used_bytes(_dbk24) + _data_size + sizeof(guint32) );
-
-    *_xdi_len               =   sizeof(guint32);
+    Gwr_array_dbk24_set_blob_used_bytes( _dbk24, Gwr_array_dbk24_get_blob_used_bytes(_dbk24) + _data_size + _extra_data_len );
 }
 //  ----------------------------------------------------------------------------
 //  gwr_array_dbk24_dump()

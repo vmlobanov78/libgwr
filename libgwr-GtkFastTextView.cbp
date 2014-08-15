@@ -5,7 +5,7 @@
 		<Option title="libgwr-GtkFastTextView" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="src/;src/demo/;" />
+		<Option virtualFolders="src/;src/demo/;src/optims/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/DGtkFastTextView" prefix_auto="1" extension_auto="1" />
@@ -17,6 +17,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-D__DEBUG__" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -44,6 +45,23 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-ggdb" />
+					<Add option="-D__DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config --libs gtk+-$(CB_GTK_VERSION)`" />
+				</Linker>
+			</Target>
+			<Target title="D-optims">
+				<Option output="bin/Debug/DGtkFastTextView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Debug" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-ggdb" />
+					<Add option="-D__DEBUG__" />
 				</Compiler>
 				<Linker>
 					<Add option="`pkg-config --libs gtk+-$(CB_GTK_VERSION)`" />
@@ -51,26 +69,37 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-std=gnu99" />
-			<Add option="-fno-exceptions" />
 			<Add option="-fno-rtti" />
+			<Add option="-std=gnu99" />
 			<Add option="-Wno-unused-label" />
 			<Add option="-Wno-unused-but-set-variable" />
 			<Add option="`pkg-config --cflags gtk+-$(CB_GTK_VERSION)`" />
-			<Add directory="/home/gwr/Src/C-C++/libgwr/libgwr-1.0" />
+			<Add directory="src" />
 		</Compiler>
+		<Unit filename="Makefile">
+			<Option target="D-demo" />
+		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-common.h">
 			<Option virtualFolder="src/" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-block.h">
 			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-block16.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-block16.h">
 			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-block24.c">
 			<Option compilerVar="CC" />
@@ -82,9 +111,15 @@
 		<Unit filename="src/C/arrays/libgwrc-array-data-block32.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-block32.h">
 			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Unit filename="src/C/arrays/libgwrc-array-data-multi-core.cci">
 			<Option virtualFolder="src/" />
@@ -133,6 +168,20 @@
 		<Unit filename="src/GtkFastTextView-demo/GtkFastTextView-demo.c">
 			<Option compilerVar="CC" />
 			<Option virtualFolder="src/demo/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
+		</Unit>
+		<Unit filename="src/GtkFastTextView-optims/GtkFastTextView-optims.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/optims/" />
+			<Option target="D-optims" />
+		</Unit>
+		<Unit filename="src/notes.txt">
+			<Option virtualFolder="src/" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="D-demo" />
 		</Unit>
 		<Extensions>
 			<envvars />

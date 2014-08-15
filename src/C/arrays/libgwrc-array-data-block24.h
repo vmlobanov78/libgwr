@@ -80,12 +80,12 @@ extern          void            gwr_array_dbk24_add(
                     gpointer                        _data               ,
                     guint32                         _data_size          );
 
-extern          void            gwr_array_dbk24_add_with_extra_data_index(
+extern          void            gwr_array_dbk24_add_with_extra_data     (
                     GwrCADBlock24               *   _block              ,
                     gpointer                        _data               ,
                     guint32                         _data_size          ,
-                    guint32                         _extra_data_index   ,
-                    guint8                      *   _xdi_len            );
+                    gpointer                        _extra_data         ,
+                    guint32                         _extra_data_len     );
 
 extern          void            gwr_array_dbk24_dump(
                     GwrCADBlock24               *   _block              );
